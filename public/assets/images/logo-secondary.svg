@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 222.91 70.99">
+  <defs>
+    <style>
+      .cls-1 {
+        font-family: HelveticaNeue-Bold, 'Helvetica Neue';
+        font-weight: 700;
+      }
+
+      .cls-2 {
+        fill: #ef4223;
+      }
+
+      .cls-2, .cls-3 {
+        font-size: 39.88px;
+      }
+
+      .cls-4 {
+        fill: #fff;
+      }
+
+      .cls-3 {
+        font-family: HelveticaNeue-Light, 'Helvetica Neue';
+        font-weight: 300;
+      }
+
+      .cls-5 {
+        font-family: HelveticaNeue-Medium, 'Helvetica Neue';
+        font-weight: 500;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer_1">
+    <g>
+      <rect class="cls-4" x="75.96" y="-75.96" width="70.99" height="222.91" rx="19.5" ry="19.5" transform="translate(146.95 -75.96) rotate(90)"/>
+      <text class="cls-2" transform="translate(14.45 49.14)"><tspan class="cls-5" x="0" y="0">Bola</tspan><tspan class="cls-1" x="83.5" y="0"> </tspan></text>
+      <text class="cls-3" transform="translate(100.51 49.14)"><tspan x="0" y="0">Buddy</tspan></text>
+    </g>
+  </g>
+</svg>

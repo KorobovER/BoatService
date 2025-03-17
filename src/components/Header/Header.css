@@ -1,0 +1,96 @@
+.header-container {
+    margin: auto;
+    width: 95%;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    margin: 24px 0;
+
+}
+
+.logo {
+    width: 50px;
+    height: 50px;
+}
+
+.nav-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 50px;
+}
+
+.nav-btn {
+    font-size: 14px;
+    font-weight: 500;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 7px;
+    color: #262626;
+}
+
+.nav-btn svg {
+    fill: #262626;
+}
+
+.nav-btn:hover {
+    color: #DD6600;
+    background-color: white;
+    border-radius: 25px;
+    fill: #DD6600;
+}
+
+.nav-btn:hover svg {
+    fill: #DD6600;
+
+}
+
+.dropdownMenus-container {
+    display: flex;
+    align-items: center;
+}
+
+.icon-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    background-color: white;
+}
+
+.dropdownMenus-container {
+    display: flex;
+    gap: 20px;
+}
+
+.place-conatiner {
+    display: flex;
+    align-items: center;
+    background-color: white;
+    border: 1px solid #D2D2D2;
+    padding: 5px;
+    border-radius: 25px;
+    gap: 10px;
+    width: 236px;
+}
+
+.place-img {
+    border-radius: 50%;
+}
+
+.account-icon{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    border-radius: 50%;
+    background-color: #DD6600;
+    width: 42px;
+    height: 42px;
+}

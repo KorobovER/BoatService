@@ -1,5 +1,7 @@
 import { Box, Container, Text } from "@chakra-ui/react"
 import { createFileRoute } from "@tanstack/react-router"
+import Header from '../../components/Header/Header'
+import Panel from "../../components/Panel/Panel"
 
 import useAuth from "../../hooks/useAuth"
 
@@ -17,7 +19,8 @@ function Dashboard() {
           <Text fontSize="2xl">
             Hi, {currentUser?.full_name || currentUser?.email}
           </Text>
-          <Text pb={3}>Welcome to BolaBuddy!</Text>
+          <Header />
+          <Panel />
         </Box>
       </Container>
     </>

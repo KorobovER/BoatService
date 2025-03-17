@@ -1,18 +1,14 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './TableWeek.css';
 import BollaCell from "../../../public/assets/images/bolla-cell.png";
 
 // Интерфейсы для типизации данных
 interface Ship {
-    id: string;
+    id: string; // Используем ball_number как ID
     name: string;
     code: string;
     startDay: string;
     endDay: string;
-}
-
-interface Day {
-    day: string;
 }
 
 interface Row {
@@ -20,72 +16,11 @@ interface Row {
     label: string;
 }
 
-// Данные о кораблях
-const ships: Ship[] = [
-    {
-        id: 'A1',
-        name: 'Babieca',
-        code: 'PA 8132 EG',
-        startDay: 'Mon 3/9',
-        endDay: 'Mon 3/9',
-    },
-    {
-        id: 'A1',
-        name: 'Portside Essentials',
-        code: 'PA 8132 EG',
-        startDay: 'Wed 3/5',
-        endDay: 'Wed 3/5',
-    },
-    {
-        id: 'A1',
-        name: 'Portside Essentials',
-        code: 'PA 8132 EG',
-        startDay: 'Sat 3/8',
-        endDay: 'Sat 3/8',
-    },
-    {
-        id: 'A2',
-        name: 'Ships & Giggles',
-        code: 'TT 2749 WP',
-        startDay: 'Tue 3/4',
-        endDay: 'Fri 3/7',
-    },
-    {
-        id: 'A2',
-        name: 'Seas the Day',
-        code: 'PA 8132 EG',
-        startDay: 'Sat 3/8',
-        endDay: 'Sat 3/8',
-    },
-    {
-        id: 'B1',
-        name: 'Ocean ...',
-        code: 'SA 1234 XY',
-        startDay: 'Tue 3/4',
-        endDay: 'Fri 3/7',
-    },
-];
-
-// Дни недели
-const days: string[] = ['Mon 3/9', 'Tue 3/4', 'Wed 3/5', 'Thu 3/6', 'Fri 3/7', 'Sat 3/8', 'Sun 3/10'];
-
-// Данные о строках (местах для яхт)
-const rows: Row[] = [
-    { id: 'A1', label: 'A1' },
-    { id: 'A2', label: 'A2' },
-    { id: 'A3', label: 'A3' },
-    { id: 'A4', label: 'A4' },
-    { id: 'B1', label: 'B1' },
-    { id: 'B2', label: 'B2' },
-    { id: 'B3', label: 'B3' },
-    { id: 'B4', label: 'B4' },
-    { id: 'C1', label: 'C1' },
-    { id: 'C2', label: 'C2' },
-    { id: 'C3', label: 'C3' },
-    { id: 'C4', label: 'C4' },
-];
-
 const Calendar: React.FC = () => {
+    const [ships, setShips] = useState<Ship[]>([]);
+    const [rows, setRows] = useState<Row[]>([]);
+    const [days, setDays] = useState<string[]>([]);
+
     // Функция для вычисления количества дней, которые занимает корабль
     const getColspan = (startDay: string, endDay: string): number => {
         const startIndex = days.indexOf(startDay);
@@ -100,6 +35,69 @@ const Calendar: React.FC = () => {
         return endIndex - startIndex + 1;
     };
 
+    // Получение данных из API
+    useEffect(() => {
+        const fetchReservations = async () => {
+            try {
+                const accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDI5MDYyNzUsInN1YiI6ImYxYzkxOTY4LTI2MTEtNDMyYi1iODUwLThlODc4YWQ4ZTZlNCJ9.rPHJjlCUn44RsGTXmS3ks7zUEXa12O0Krwc4C_K7wlI'; // Замените на реальный access token
+                const response = await fetch('https://staging.bolabuddy.com/api/v1/reservations/', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Ошибка при получении данных: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Ограничиваем дни диапазоном с 3 по 9 марта
+                const startDate = new Date('2025-02-03').toISOString().split('T')[0];
+                const endDate = new Date('2025-02-09').toISOString().split('T')[0];
+
+                const targetDays = Array.from({ length: 7 }, (_, i) => {
+                    const date = new Date(new Date(startDate).getTime() + i * 24 * 60 * 60 * 1000);
+                    return date.toISOString().split('T')[0];
+                });
+
+                // Получаем все уникальные ball_number из данных
+                const allBallNumbers = Array.from(
+                    new Set(data.data.map((reservation: any) => reservation.mooring_ball.ball_number.toString()))
+                ).sort((a, b) => parseInt(a, 10) - parseInt(b, 10)); // Сортируем по возрастанию
+
+                // Преобразование данных из API в нужный формат
+                const apiShips = data.data
+                    .filter((reservation: any) => {
+                        const reservationStart = new Date(reservation.start_date.split('T')[0]);
+                        const reservationEnd = new Date(reservation.end_date.split('T')[0]);
+                        return reservationStart <= new Date(endDate) && reservationEnd >= new Date(startDate);
+                    })
+                    .map((reservation: any) => ({
+                        id: reservation.mooring_ball.ball_number.toString(), // Используем ball_number как ID
+                        name: `${reservation.boat.boatname}`, // Название лодки
+                        code: reservation.boat.model || 'N/A', // модель лодки
+                        startDay: reservation.start_date.split('T')[0], // Дата начала
+                        endDay: reservation.end_date.split('T')[0], // Дата окончания
+                    }));
+
+                // Создаем строки для всех ball_number
+                const uniqueRows = allBallNumbers.map(id => ({ id, label: id }));
+
+                // Обновление состояния
+                setShips(apiShips);
+                setRows(uniqueRows);
+                setDays(targetDays); // Устанавливаем ограниченный диапазон дней
+            } catch (error) {
+                console.error('Ошибка при получении данных:', error);
+            }
+        };
+
+        fetchReservations();
+    }, []);
+
     return (
         <div className="table-container">
             <table>
@@ -107,7 +105,7 @@ const Calendar: React.FC = () => {
                     <tr>
                         <th></th> {/* Пустой заголовок для первого столбца */}
                         {days.map((day) => (
-                            <th key={day}>{day}</th>
+                            <th key={day}>{new Date(day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</th>
                         ))}
                     </tr>
                 </thead>
@@ -120,7 +118,7 @@ const Calendar: React.FC = () => {
                             <tr key={row.id}>
                                 <td className='column-cell'>
                                     <img src={BollaCell} alt="" />
-                                    <div>{row.label}</div>
+                                    <div>{row.label}</div> {/* Выводим ball_number здесь */}
                                 </td>
                                 {days.map((day, dayIndex) => {
                                     // Проверяем, есть ли яхта, которая начинается в этот день
@@ -155,7 +153,7 @@ const Calendar: React.FC = () => {
                                         if (isPartOfRange) {
                                             return null;
                                         } else {
-                                            return <td key={`${row.id}-${day}`}></td>;
+                                            return <td key={`${row.id}-${day}`}></td>; // Отображаем пустую ячейку
                                         }
                                     }
                                 })}

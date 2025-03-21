@@ -22,12 +22,7 @@ const UserMenu = () => {
   return (
     <>
       {/* Desktop */}
-      <Box
-        display={{ base: "none", md: "block" }}
-        position="fixed"
-        top={4}
-        right={4}
-      >
+      <Box>
         <Menu>
           <MenuButton
             as={IconButton}

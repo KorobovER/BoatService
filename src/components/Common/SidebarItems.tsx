@@ -1,4 +1,4 @@
-import { Flex, Icon, Text, useColorModeValue, IconButton, Box, Image } from "@chakra-ui/react";
+import { Flex, Icon, Text, useColorModeValue, IconButton, Image } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import {
@@ -6,6 +6,7 @@ import {
   FiHome,
   FiUsers,
 } from "react-icons/fi";
+import UserMenu from "../Common/UserMenu";
 import { GiHomeGarage, GiMooringBollard } from "react-icons/gi";
 import type { EmployeePublic } from "../../client";
 import PLACE from '../../../public/assets/images/place.png'
@@ -133,17 +134,7 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
           <Image rounded='full' src={PLACE} />
           <Text>Bitter End Yacht Club</Text>
         </Flex>
-        <Box
-          textAlign='center'
-          bg='#DD6600'
-          color='white'
-          rounded='full'
-          p='10px'
-          w='42px'
-          h='42px'
-        >
-          PS
-        </Box>
+        <UserMenu />
       </Flex>
     </Flex>
   );

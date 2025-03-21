@@ -1,7 +1,6 @@
 import { Flex, Spinner } from "@chakra-ui/react";
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 import Sidebar from "../components/Common/Sidebar";
-import UserMenu from "../components/Common/UserMenu";
 import useAuth, { isLoggedIn } from "../hooks/useAuth";
 
 export const Route = createFileRoute("/_layout")({
@@ -20,11 +19,11 @@ function Layout() {
 
   return (
     <Flex
-      maxW="full" // Изменил на "full", чтобы занимал всю доступную ширину
-      h="100vh" // Установил высоту во весь экран
+      maxW="full"
+      h="100vh"
       position="relative"
-      flexDirection="column" // Горизонтальное расположение
-      gap="4" // Добавил отступ между элементами
+      flexDirection="column" 
+      gap="4" 
     >
       {/* Боковая панель */}
       <Sidebar/>
@@ -32,7 +31,7 @@ function Layout() {
       {/* Главное содержимое */}
       {isLoading ? (
         <Flex
-          flex="3" // Занимает большую часть пространства
+          flex="3"
           justify="center"
           align="center"
           height="100%"
@@ -43,9 +42,6 @@ function Layout() {
       ) : (
         <Outlet /> // Основной контент
       )}
-
-      {/* Пользовательское меню */}
-      <UserMenu />
     </Flex>
   );
 }

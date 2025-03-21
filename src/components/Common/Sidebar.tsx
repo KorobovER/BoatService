@@ -11,28 +11,27 @@ import {
   Text,
   useColorModeValue,
   useDisclosure,
-} from "@chakra-ui/react"
-import { useQueryClient } from "@tanstack/react-query"
-import { FiLogOut, FiMenu } from "react-icons/fi"
+} from "@chakra-ui/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { FiLogOut, FiMenu } from "react-icons/fi";
 
-import LogoPrimary from "/assets/images/logo-primary.svg"
-import LogoSecondary from "/assets/images/logo-secondary.svg"
-import type { EmployeePublic } from "../../client"
-import useAuth from "../../hooks/useAuth"
-import SidebarItems from "./SidebarItems"
+import LogoPrimary from "/assets/images/logo-primary.png";
+import LogoSecondary from "/assets/images/logo-secondary.svg";
+import type { EmployeePublic } from "../../client";
+import useAuth from "../../hooks/useAuth";
+import SidebarItems from "./SidebarItems";
 
 const Sidebar = () => {
-  const queryClient = useQueryClient()
-  const bgColor = useColorModeValue("ui.light", "ui.dark")
-  const textColor = useColorModeValue("ui.light", "ui.light")
-  const secBgColor = useColorModeValue("ui.mainBlue", "ui.darkSlate")
-  const currentUser = queryClient.getQueryData<EmployeePublic>(["currentUser"])
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const { logout } = useAuth()
+  const queryClient = useQueryClient();
+  const bgColor = useColorModeValue("ui.light", "ui.dark");
+  const textColor = useColorModeValue("ui.light", "ui.light");
+  const currentUser = queryClient.getQueryData<EmployeePublic>(["currentUser"]);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { logout } = useAuth();
 
   const handleLogout = async () => {
-    logout()
-  }
+    logout();
+  };
 
   return (
     <>
@@ -51,9 +50,9 @@ const Sidebar = () => {
         <DrawerContent maxW="250px">
           <DrawerCloseButton />
           <DrawerBody py={8}>
-            <Flex flexDir="column" justify="space-between">
+            <Flex justify="space-between">
               <Box>
-                <Image src={useColorModeValue(LogoPrimary, LogoSecondary)} alt="logo" p={6} />
+                <Image src={useColorModeValue(LogoPrimary, LogoSecondary)} alt="logo" p={1} />
                 <SidebarItems onClose={onClose} />
                 <Flex
                   as="button"
@@ -80,38 +79,38 @@ const Sidebar = () => {
       {/* Desktop */}
       <Box
         bg={bgColor}
-        p={3}
-        h="100vh"
-        position="sticky"
-        top="0"
+        w="full"
+        position="relative"
         display={{ base: "none", md: "flex" }}
       >
         <Flex
           flexDir="column"
           justify="space-between"
-          bg={secBgColor}
-          p={4}
+          bg={bgColor}
           borderRadius={12}
+          p={4}
+          w="full"
         >
-          <Box>
-            <Image src={useColorModeValue(LogoPrimary, LogoSecondary)} alt="Logo" w="180px" maxW="2xs" p={6} />
-            <SidebarItems />
-          </Box>
-          {currentUser?.email && (
-            <Text
-              color={textColor}
-              noOfLines={2}
-              fontSize="sm"
-              p={2}
-              maxW="180px"
-            >
-              Logged in as: {currentUser.email}
-            </Text>
-          )}
+          {/* Верхняя часть: Логотип и элементы в строку */}
+          <Flex align="center" justify="space-between" w="full">
+            {/* Логотип */}
+            <Image
+              src={useColorModeValue(LogoPrimary, LogoSecondary)}
+              alt="Logo"
+              w="100px"
+              maxW="full"
+              p={6}
+            />
+
+            {/* Элементы в строку */}
+            <Flex flexDir="row" gap={4} flexGrow={1} justify="flex-end">
+              <SidebarItems />
+            </Flex>
+          </Flex>
         </Flex>
       </Box>
     </>
-  )
-}
+  );
+};
 
-export default Sidebar
+export default Sidebar;

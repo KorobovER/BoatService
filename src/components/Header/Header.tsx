@@ -1,6 +1,6 @@
 import React from "react";
 import './Header.css';
-import LOGO from '../../../public/assets/images/logo_new.png';
+import LOGO from '../../../public/assets/images/logo-primary.png';
 import PLACE from '../../../public/assets/images/place.png'
 
 

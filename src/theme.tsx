@@ -27,7 +27,7 @@ const theme = extendTheme({
           backgroundColor: "ui.main",
           color: "ui.light",
           _hover: {
-            backgroundColor: "#DD6600",
+            backgroundColor: "white",
           },
           _disabled: {
             ...disabledStyles,
@@ -40,7 +40,7 @@ const theme = extendTheme({
           backgroundColor: "ui.danger",
           color: "ui.light",
           _hover: {
-            backgroundColor: "#DD6600",
+            backgroundColor: "white",
           },
         },
       },

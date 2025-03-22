@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './TableWeek.css';
 import BollaCell from "../../../public/assets/images/bolla-cell.png";
+import MooringBallsList from '../TestComponent/TestComponent';
 
 // Интерфейсы для типизации данных
 interface Ship {
@@ -100,6 +101,7 @@ const Calendar: React.FC = () => {
 
     return (
         <div className="table-container">
+            <MooringBallsList/>
             <table>
                 <thead>
                     <tr>

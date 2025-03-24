@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import './TableWeek.css';
 import BollaCell from "../../../public/assets/images/bolla-cell.png";
-import MooringBallsList from '../TestComponent/TestComponent';
+import { ReservationsService } from '../../client';
+import TableSwitch from '../TableSwitch/TableSwitch';
 
-// Интерфейсы для типизации данных
 interface Ship {
-    id: string; // Используем ball_number как ID
+    id: string;
     name: string;
     code: string;
     startDay: string;
@@ -21,149 +22,175 @@ const Calendar: React.FC = () => {
     const [ships, setShips] = useState<Ship[]>([]);
     const [rows, setRows] = useState<Row[]>([]);
     const [days, setDays] = useState<string[]>([]);
+    const [currentWeekStart, setCurrentWeekStart] = useState<string>('2025-03-03');
 
-    // Функция для вычисления количества дней, которые занимает корабль
-    const getColspan = (startDay: string, endDay: string): number => {
-        const startIndex = days.indexOf(startDay);
-        const endIndex = days.indexOf(endDay);
+    const { data: reservations, isLoading, isError } = useQuery({
+        queryKey: ['reservations', currentWeekStart],
+        queryFn: () => ReservationsService.readReservations({
+            limit: 500
+        })
+    });
 
-        // Если startDay или endDay не найдены, возвращаем 1
-        if (startIndex === -1 || endIndex === -1) return 1;
-
-        // Если endDay раньше startDay, возвращаем 1
-        if (endIndex < startIndex) return 1;
-
-        return endIndex - startIndex + 1;
+    const getWeekDates = (startDate: string) => {
+        return Array.from({ length: 7 }, (_, i) => {
+            const date = new Date(new Date(startDate).getTime() + i * 24 * 60 * 60 * 1000);
+            return date.toISOString().split('T')[0];
+        });
     };
 
-    // Получение данных из API
+    const handlePrevWeek = () => {
+        const newStartDate = new Date(new Date(currentWeekStart).getTime() - 7 * 24 * 60 * 60 * 1000);
+        setCurrentWeekStart(new Date(newStartDate).toISOString().split('T')[0]);
+    };
+
+    const handleNextWeek = () => {
+        const newStartDate = new Date(new Date(currentWeekStart).getTime() + 7 * 24 * 60 * 60 * 1000);
+        setCurrentWeekStart(new Date(newStartDate).toISOString().split('T')[0]);
+    };
+
+    const handleToday = () => {
+        const today = new Date();
+        const dayOfWeek = today.getDay();
+        const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust for Sunday
+        const monday = new Date(today.setDate(diff));
+        setCurrentWeekStart(monday.toISOString().split('T')[0]);
+    };
+
     useEffect(() => {
-        const fetchReservations = async () => {
-            try {
-                const accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDI5MDYyNzUsInN1YiI6ImYxYzkxOTY4LTI2MTEtNDMyYi1iODUwLThlODc4YWQ4ZTZlNCJ9.rPHJjlCUn44RsGTXmS3ks7zUEXa12O0Krwc4C_K7wlI'; // Замените на реальный access token
-                const response = await fetch('https://staging.bolabuddy.com/api/v1/reservations/', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
+        if (reservations?.data) {
+            const endDate = new Date(new Date(currentWeekStart).getTime() + 6 * 24 * 60 * 60 * 1000)
+                .toISOString().split('T')[0];
 
-                if (!response.ok) {
-                    throw new Error(`Ошибка при получении данных: ${response.status}`);
-                }
+            // Формируем дни для отображения
+            const targetDays = getWeekDates(currentWeekStart);
 
-                const data = await response.json();
+            // Извлекаем все уникальные швартовки из резерваций
+            const allBallNumbers = Array.from(
+                new Set(reservations.data.map(res => res.mooring_ball.ball_number.toString()))
+            ).sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
 
-                // Ограничиваем дни диапазоном с 3 по 9 марта
-                const startDate = new Date('2025-02-03').toISOString().split('T')[0];
-                const endDate = new Date('2025-02-09').toISOString().split('T')[0];
+            // Создаем строки для всех найденных швартовок
+            const uniqueRows = allBallNumbers.map(id => ({ id, label: id }));
 
-                const targetDays = Array.from({ length: 7 }, (_, i) => {
-                    const date = new Date(new Date(startDate).getTime() + i * 24 * 60 * 60 * 1000);
-                    return date.toISOString().split('T')[0];
-                });
+            // Преобразуем резервации в корабли
+            const apiShips = reservations.data
+                .filter(reservation => {
+                    const resStart = new Date(reservation.start_date.split('T')[0]);
+                    const resEnd = new Date(reservation.end_date.split('T')[0]);
+                    const tableEnd = new Date(endDate);
+                    const tableStart = new Date(currentWeekStart);
+                    return resStart <= tableEnd && resEnd >= tableStart;
+                })
+                .map(reservation => ({
+                    id: reservation.mooring_ball.ball_number.toString(),
+                    name: reservation.boat?.boatname || 'N/A',
+                    code: reservation.boat?.model || 'N/A',
+                    startDay: reservation.start_date.split('T')[0],
+                    endDay: reservation.end_date.split('T')[0],
+                }));
 
-                // Получаем все уникальные ball_number из данных
-                const allBallNumbers = Array.from(
-                    new Set(data.data.map((reservation: any) => reservation.mooring_ball.ball_number.toString()))
-                ).sort((a, b) => parseInt(a, 10) - parseInt(b, 10)); // Сортируем по возрастанию
+            setShips(apiShips);
+            setRows(uniqueRows);
+            setDays(targetDays);
+        }
+    }, [reservations, currentWeekStart]);
 
-                // Преобразование данных из API в нужный формат
-                const apiShips = data.data
-                    .filter((reservation: any) => {
-                        const reservationStart = new Date(reservation.start_date.split('T')[0]);
-                        const reservationEnd = new Date(reservation.end_date.split('T')[0]);
-                        return reservationStart <= new Date(endDate) && reservationEnd >= new Date(startDate);
-                    })
-                    .map((reservation: any) => ({
-                        id: reservation.mooring_ball.ball_number.toString(), // Используем ball_number как ID
-                        name: `${reservation.boat.boatname}`, // Название лодки
-                        code: reservation.boat.model || 'N/A', // модель лодки
-                        startDay: reservation.start_date.split('T')[0], // Дата начала
-                        endDay: reservation.end_date.split('T')[0], // Дата окончания
-                    }));
+    const getShipForDay = (rowId: string, day: string, occupiedDays: boolean[]) => {
+        const dayIndex = days.indexOf(day);
+        if (occupiedDays[dayIndex]) return null;
 
-                // Создаем строки для всех ball_number
-                const uniqueRows = allBallNumbers.map(id => ({ id, label: id }));
+        const ship = ships.find(s => 
+            s.id === rowId && 
+            new Date(day) >= new Date(s.startDay) && 
+            new Date(day) <= new Date(s.endDay)
+        );
 
-                // Обновление состояния
-                setShips(apiShips);
-                setRows(uniqueRows);
-                setDays(targetDays); // Устанавливаем ограниченный диапазон дней
-            } catch (error) {
-                console.error('Ошибка при получении данных:', error);
-            }
+        if (!ship) return null;
+
+        // Вычисляем colspan
+        const startDate = new Date(Math.max(new Date(ship.startDay).getTime(), new Date(days[0]).getTime()));
+        const endDate = new Date(Math.min(new Date(ship.endDay).getTime(), new Date(days[days.length - 1]).getTime()));
+        const dayDiff = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        const colspan = Math.max(1, dayDiff);
+
+        // Помечаем дни как занятые
+        for (let i = dayIndex; i < dayIndex + colspan && i < occupiedDays.length; i++) {
+            occupiedDays[i] = true;
+        }
+
+        return {
+            ship,
+            colspan
         };
+    };
 
-        fetchReservations();
-    }, []);
+    const formatWeekRange = () => {
+        const start = new Date(currentWeekStart);
+        const end = new Date(new Date(currentWeekStart).getTime() + 6 * 24 * 60 * 60 * 1000);
+        return `${start.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
+    };
+
+    if (isLoading) return <div>Loading...</div>;
+    if (isError) return <div>Error loading data</div>;
 
     return (
-        <div className="table-container">
-            <MooringBallsList/>
-            <table>
-                <thead>
-                    <tr>
-                        <th></th> {/* Пустой заголовок для первого столбца */}
-                        {days.map((day) => (
-                            <th key={day}>{new Date(day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {rows.map((row) => {
-                        // Находим яхты, которые должны быть в этой строке
-                        const rowShips = ships.filter((ship) => ship.id === row.id);
+        <div>
+            <TableSwitch 
+                onPrevWeek={handlePrevWeek}
+                onNextWeek={handleNextWeek}
+                onToday={handleToday}
+                weekRange={formatWeekRange()}
+            />
+            <div className="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            {days.map(day => (
+                                <th key={day}>
+                                    {new Date(day).toLocaleDateString('en-US', { 
+                                        month: 'short', 
+                                        day: 'numeric' 
+                                    })}
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {rows.map(row => {
+                            const occupiedDays = new Array(days.length).fill(false);
+                            
+                            return (
+                                <tr key={row.id}>
+                                    <td className='column-cell'>
+                                        <img src={BollaCell} alt="Bolla" />
+                                        <div>{row.label}</div>
+                                    </td>
+                                    {days.map(day => {
+                                        const shipData = getShipForDay(row.id, day, occupiedDays);
+                                        if (!shipData) {
+                                            return occupiedDays[days.indexOf(day)] ? null : <td key={`${row.id}-${day}`} />;
+                                        }
 
-                        return (
-                            <tr key={row.id}>
-                                <td className='column-cell'>
-                                    <img src={BollaCell} alt="" />
-                                    <div>{row.label}</div> {/* Выводим ball_number здесь */}
-                                </td>
-                                {days.map((day, dayIndex) => {
-                                    // Проверяем, есть ли яхта, которая начинается в этот день
-                                    const ship = rowShips.find((ship) => {
-                                        const startIndex = days.indexOf(ship.startDay);
-                                        return startIndex === dayIndex;
-                                    });
-
-                                    if (ship) {
-                                        const colspan = getColspan(ship.startDay, ship.endDay);
                                         return (
                                             <td
                                                 key={`${row.id}-${day}`}
                                                 className='boat-cell'
-                                                colSpan={colspan}
+                                                colSpan={shipData.colspan}
                                             >
                                                 <div>
-                                                    <div className='boat-name'>{ship.name}</div>
-                                                    <div className='boat-code'>{ship.code}</div>
+                                                    <div className='boat-name'>{shipData.ship.name}</div>
+                                                    <div className='boat-code'>{shipData.ship.code}</div>
                                                 </div>
                                             </td>
                                         );
-                                    } else {
-                                        // Проверяем, не является ли этот день частью диапазона другой яхты
-                                        const isPartOfRange = rowShips.some((ship) => {
-                                            const startIndex = days.indexOf(ship.startDay);
-                                            const endIndex = days.indexOf(ship.endDay);
-                                            return dayIndex > startIndex && dayIndex <= endIndex;
-                                        });
-
-                                        // Если день является частью диапазона, пропускаем отрисовку ячейки
-                                        if (isPartOfRange) {
-                                            return null;
-                                        } else {
-                                            return <td key={`${row.id}-${day}`}></td>; // Отображаем пустую ячейку
-                                        }
-                                    }
-                                })}
-                            </tr>
-                        );
-                    })}
-                </tbody>
-            </table>
+                                    })}
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };

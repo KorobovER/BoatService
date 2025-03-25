@@ -7,6 +7,7 @@ import {
   FiUsers,
 } from "react-icons/fi";
 import UserMenu from "../Common/UserMenu";
+import MarinasMenu from "../Common/MarinasMenu";
 import { GiHomeGarage, GiMooringBollard } from "react-icons/gi";
 import type { EmployeePublic } from "../../client";
 import PLACE from '../../../public/assets/images/place.png'
@@ -122,18 +123,7 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
             </svg>
           }
         />
-        <Flex
-          align='center'
-          gap='3'
-          w='236px'
-          bg='white'
-          p='1'
-          rounded='full'
-          border='1px solid #D2D2D2'
-        >
-          <Image rounded='full' src={PLACE} />
-          <Text>Bitter End Yacht Club</Text>
-        </Flex>
+        <MarinasMenu/>
         <UserMenu />
       </Flex>
     </Flex>

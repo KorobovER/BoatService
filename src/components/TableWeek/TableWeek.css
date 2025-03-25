@@ -1,22 +1,21 @@
 .table-container {
-    width: 100%;
+    width: 98%;
     overflow-x: auto;
     margin: auto;
+
 }
 
 table {
     width: 100%;
     border-collapse: separate;
-    /* Важно: border-collapse должен быть separate */
     border-spacing: 10px;
-    /* Отступы между ячейками */
-    table-layout: fixed;
-    /* Фиксированная ширина ячеек */
+
 }
+
 
 th,
 td {
-    padding: 8px;
+
     text-align: center;
     width: 150px;
     /* Фиксированная ширина ячеек */
@@ -42,9 +41,9 @@ th {
     display: flex;
     align-items: center;
     flex-direction: column;
-    width: 100%;
+    width: 90%;
+    margin: auto;
     /* Занимает всю ширину ячейки */
-    padding: 8px;
     /* Отступы внутри ячейки */
     box-sizing: border-box;
 }

@@ -13,7 +13,9 @@ function Dashboard() {
 
   return (
     <>
-      <Container maxW="full">
+      <Container maxW="full"
+       
+      >
         <Box>
           {/* <Text fontSize="2xl">
             Hi, {currentUser?.full_name || currentUser?.email}

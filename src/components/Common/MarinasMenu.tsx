@@ -13,54 +13,44 @@ import {
 import PLACE from '../../../public/assets/images/place.png';
 import { useState, useEffect } from "react";
 import { ReservationsService } from '../../client';
+import { useMarina } from '../../context/MarinaContext';
 
+// Определяем тип Marina
 interface Marina {
+    marina_id: string;
     name: string;
     logo_url: string | null;
-    marina_id: string;
     subregion: string;
 }
 
 const MarinasMenu = () => {
+    const { selectedMarina, setSelectedMarina } = useMarina();
     const [marinas, setMarinas] = useState<Marina[]>([]);
-    const [selectedMarina, setSelectedMarina] = useState<Marina | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
-    const handleMarinaSelect = (marina: Marina) => {
-        setSelectedMarina(marina);
-        console.log("Selected marina:", marina);
-        // Здесь можно добавить логику фильтрации
-    };
 
     useEffect(() => {
         const fetchMarinas = async () => {
             try {
                 setLoading(true);
-
-                // Формируем даты в правильном формате
                 const now = new Date();
                 const startDate = now.toISOString();
                 const endDate = new Date(now.setFullYear(now.getFullYear() + 1)).toISOString();
 
-                // Делаем запрос с обязательными параметрами
                 const response = await ReservationsService.readReservations({
                     limit: 100,
                     skip: 0,
-                    startDate: startDate, // Обратите внимание на нижнее подчеркивание
-                    endDate: endDate    // Как указано в сигнатуре метода
+                    startDate,
+                    endDate
                 });
-
-                console.log("API Response:", response);
 
                 if (!response.data || !Array.isArray(response.data)) {
                     throw new Error("Invalid data format from API");
                 }
 
-                // Собираем уникальные марины
                 const marinaMap = new Map<string, Marina>();
 
-                response.data.forEach((reservation) => {
+                response.data.forEach((reservation: any) => {
                     if (reservation?.marina) {
                         const marina = reservation.marina;
                         marinaMap.set(marina.marina_id, {
@@ -74,7 +64,10 @@ const MarinasMenu = () => {
 
                 const uniqueMarinas = Array.from(marinaMap.values());
                 setMarinas(uniqueMarinas);
-                setSelectedMarina(uniqueMarinas[0] || null);
+
+                if (!selectedMarina && uniqueMarinas.length > 0) {
+                    setSelectedMarina(uniqueMarinas[0]);
+                }
 
             } catch (err) {
                 console.error("Error fetching marinas:", err);
@@ -139,10 +132,18 @@ const MarinasMenu = () => {
                     </Flex>
                 </MenuButton>
                 <MenuList minWidth="240px" boxShadow="md" py={0}>
+                    <MenuItem
+                        onClick={() => setSelectedMarina(null)}
+                        _hover={{ bg: 'gray.100' }}
+                        px={3}
+                        py={2}
+                    >
+                        <Text fontWeight="medium">All marinas</Text>
+                    </MenuItem>
                     {marinas.map((marina) => (
                         <MenuItem
                             key={marina.marina_id}
-                            onClick={() => handleMarinaSelect(marina)}
+                            onClick={() => setSelectedMarina(marina)}
                             _hover={{ bg: 'gray.100' }}
                             px={3}
                             py={2}

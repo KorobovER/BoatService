@@ -10,7 +10,6 @@ import UserMenu from "../Common/UserMenu";
 import MarinasMenu from "../Common/MarinasMenu";
 import { GiHomeGarage, GiMooringBollard } from "react-icons/gi";
 import type { EmployeePublic } from "../../client";
-import PLACE from '../../../public/assets/images/place.png'
 
 const items = [
   { icon: FiHome, title: "Dashboard", path: "/" },
@@ -123,7 +122,7 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
             </svg>
           }
         />
-        <MarinasMenu/>
+        <MarinasMenu />
         <UserMenu />
       </Flex>
     </Flex>

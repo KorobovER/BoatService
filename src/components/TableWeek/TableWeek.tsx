@@ -125,6 +125,16 @@ const Calendar: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
         return { ship, colspan };
     };
 
+    const isToday = (day: string) => {
+        const today = new Date();
+        const date = new Date(day);
+        return (
+            date.getDate() === today.getDate() &&
+            date.getMonth() === today.getMonth() &&
+            date.getFullYear() === today.getFullYear()
+        );
+    };
+
     if (isLoading) return (
         <Flex
             width="98%"
@@ -175,11 +185,25 @@ const Calendar: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
                                 width="150px"
                                 height="44px"
                                 p={1}
+                                position="relative"
                             >
                                 {new Date(day).toLocaleDateString('en-US', {
                                     month: 'short',
                                     day: 'numeric'
                                 })}
+                                {isToday(day) && (
+                                    <Box
+                                        position="absolute"
+                                        top="50%"
+                                        left="50%"
+                                        transform="translate(-50%, -50%)"
+                                        bg="#DD660026"
+                                        borderRadius="full"
+                                        width="150px"
+                                        height="44px"
+                                        zIndex="1"
+                                    />
+                                )}
                             </Th>
                         ))}
                     </Tr>
@@ -213,7 +237,22 @@ const Calendar: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
                                                 width="150px"
                                                 height="44px"
                                                 p={1}
-                                            />
+                                                position="relative"
+                                            >
+                                                {isToday(day) && (
+                                                    <Box
+                                                        position="absolute"
+                                                        top="50%"
+                                                        left="50%"
+                                                        transform="translate(-50%, -50%)"
+                                                        bg="#DD660026"
+                                                        borderRadius="full"
+                                                        width="34px"
+                                                        height="34px"
+                                                        zIndex="-1"
+                                                    />
+                                                )}
+                                            </Td>
                                         );
                                     }
 
@@ -226,7 +265,21 @@ const Calendar: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
                                             width="150px"
                                             height="44px"
                                             p={1}
+                                            position="relative"
                                         >
+                                            {isToday(day) && (
+                                                <Box
+                                                    position="absolute"
+                                                    top="50%"
+                                                    left="50%"
+                                                    transform="translate(-50%, -50%)"
+                                                    bg="#DD660026"
+                                                    borderRadius="full"
+                                                    width="34px"
+                                                    height="34px"
+                                                    zIndex="-1"
+                                                />
+                                            )}
                                             <Box
                                                 display="flex"
                                                 alignItems="center"

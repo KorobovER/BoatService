@@ -16,7 +16,6 @@ import {
 } from '@chakra-ui/react';
 import BollaCell from "../../../public/assets/images/bolla-cell.png";
 import { ReservationsService } from '../../client';
-import TableSwitch from '../TableSwitch/TableSwitch';
 import { useMarina } from '../../context/MarinaContext';
 
 interface Ship {
@@ -33,22 +32,15 @@ interface Row {
     label: string;
 }
 
-const Calendar: React.FC = () => {
+interface TableWeekProps {
+    currentWeekStart: string;
+}
+
+const Calendar: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
     const { selectedMarina } = useMarina();
     const [ships, setShips] = useState<Ship[]>([]);
     const [allRows, setAllRows] = useState<Row[]>([]);
     const [days, setDays] = useState<string[]>([]);
-    const [currentWeekStart, setCurrentWeekStart] = useState<string>('');
-
-    const getCurrentWeekMonday = (date = new Date()) => {
-        const day = date.getDay();
-        const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-        return new Date(date.setDate(diff)).toISOString().split('T')[0];
-    };
-
-    useEffect(() => {
-        setCurrentWeekStart(getCurrentWeekMonday());
-    }, []);
 
     const { data: reservations, isLoading, isError } = useQuery({
         queryKey: ['reservations', currentWeekStart],
@@ -61,20 +53,6 @@ const Calendar: React.FC = () => {
             const date = new Date(new Date(startDate).getTime() + i * 24 * 60 * 60 * 1000);
             return date.toISOString().split('T')[0];
         });
-    };
-
-    const handlePrevWeek = () => {
-        const newStartDate = new Date(new Date(currentWeekStart).getTime() - 7 * 24 * 60 * 60 * 1000);
-        setCurrentWeekStart(newStartDate.toISOString().split('T')[0]);
-    };
-
-    const handleNextWeek = () => {
-        const newStartDate = new Date(new Date(currentWeekStart).getTime() + 7 * 24 * 60 * 60 * 1000);
-        setCurrentWeekStart(newStartDate.toISOString().split('T')[0]);
-    };
-
-    const handleToday = () => {
-        setCurrentWeekStart(getCurrentWeekMonday());
     };
 
     useEffect(() => {
@@ -147,12 +125,6 @@ const Calendar: React.FC = () => {
         return { ship, colspan };
     };
 
-    const formatWeekRange = () => {
-        const start = new Date(currentWeekStart);
-        const end = new Date(new Date(currentWeekStart).getTime() + 6 * 24 * 60 * 60 * 1000);
-        return `${start.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
-    };
-
     if (isLoading) return (
         <Flex
             width="98%"
@@ -183,109 +155,100 @@ const Calendar: React.FC = () => {
     );
 
     return (
-        <Box>
-            <TableSwitch
-                onPrevWeek={handlePrevWeek}
-                onNextWeek={handleNextWeek}
-                onToday={handleToday}
-                weekRange={formatWeekRange()}
-            />
-
-            <Box width="98%" margin="auto" overflowX="auto">
-                <Table
-                    variant="unstyled"
-                    width="100%"
-                    sx={{
-                        borderCollapse: 'separate',
-                        borderSpacing: '40px'
-                    }}
-                >
-                    <Thead>
-                        <Tr>
-                            <Th width="150px"></Th>
-                            {days.map(day => (
-                                <Th
-                                    key={day}
-                                    color="#777777"
-                                    textAlign="center"
+        <Box width="98%" margin="auto" overflowX="auto">
+            <Table
+                variant="unstyled"
+                width="100%"
+                sx={{
+                    borderCollapse: 'separate',
+                    borderSpacing: '40px'
+                }}
+            >
+                <Thead>
+                    <Tr>
+                        <Th width="150px"></Th>
+                        {days.map(day => (
+                            <Th
+                                key={day}
+                                color="#777777"
+                                textAlign="center"
+                                width="150px"
+                                height="44px"
+                                p={1}
+                            >
+                                {new Date(day).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric'
+                                })}
+                            </Th>
+                        ))}
+                    </Tr>
+                </Thead>
+                <Tbody>
+                    {allRows.map(row => {
+                        const occupiedDays = new Array(days.length).fill(false);
+                        return (
+                            <Tr key={row.id}>
+                                <Td
+                                    display="flex"
+                                    gap="20px"
+                                    alignItems="center"
+                                    justifyContent="center"
+                                    bg="transparent"
+                                    border="none"
                                     width="150px"
-                                    height="60px"
-                                    p={2}
+                                    height="44px"
+                                    p={1}
                                 >
-                                    {new Date(day).toLocaleDateString('en-US', {
-                                        month: 'short',
-                                        day: 'numeric'
-                                    })}
-                                </Th>
-                            ))}
-                        </Tr>
-                    </Thead>
-                    <Tbody>
-                        {allRows.map(row => {
-                            const occupiedDays = new Array(days.length).fill(false);
-                            return (
-                                <Tr key={row.id}>
-                                    <Td
-                                        display="flex"
-                                        gap="20px"
-                                        alignItems="center"
-                                        justifyContent="center"
-                                        bg="transparent"
-                                        border="none"
-                                        width="150px"
-                                        height="60px"
-                                        p={2}
-                                    >
-                                        <Image src={BollaCell} alt="Bolla" />
-                                        <Text>{row.label}</Text>
-                                    </Td>
+                                    <Image src={BollaCell} alt="Bolla" />
+                                    <Text>{row.label}</Text>
+                                </Td>
 
-                                    {days.map(day => {
-                                        const shipData = getShipForDay(row.id, day, occupiedDays);
-                                        if (!shipData) {
-                                            return occupiedDays[days.indexOf(day)] ? null : (
-                                                <Td
-                                                    key={`${row.id}-${day}`}
-                                                    width="150px"
-                                                    height="60px"
-                                                    p={2}
-                                                />
-                                            );
-                                        }
-
-                                        return (
+                                {days.map(day => {
+                                    const shipData = getShipForDay(row.id, day, occupiedDays);
+                                    if (!shipData) {
+                                        return occupiedDays[days.indexOf(day)] ? null : (
                                             <Td
                                                 key={`${row.id}-${day}`}
-                                                bg="#007A7B"
-                                                borderRadius="25px"
-                                                colSpan={shipData.colspan}
                                                 width="150px"
-                                                height="60px"
-                                                p={2}
-                                            >
-                                                <Box
-                                                    display="flex"
-                                                    alignItems="center"
-                                                    flexDirection="column"
-                                                    width="90%"
-                                                    margin="auto"
-                                                >
-                                                    <Text color="white" textAlign="left" fontSize="14px" margin="0">
-                                                        {shipData.ship.name}
-                                                    </Text>
-                                                    <Text color="white" textAlign="left" fontSize="12px" margin="0">
-                                                        {shipData.ship.code}
-                                                    </Text>
-                                                </Box>
-                                            </Td>
+                                                height="44px"
+                                                p={1}
+                                            />
                                         );
-                                    })}
-                                </Tr>
-                            );
-                        })}
-                    </Tbody>
-                </Table>
-            </Box>
+                                    }
+
+                                    return (
+                                        <Td
+                                            key={`${row.id}-${day}`}
+                                            bg="#007A7B"
+                                            borderRadius="25px"
+                                            colSpan={shipData.colspan}
+                                            width="150px"
+                                            height="44px"
+                                            p={1}
+                                        >
+                                            <Box
+                                                display="flex"
+                                                alignItems="center"
+                                                flexDirection="column"
+                                                width="90%"
+                                                margin="auto"
+                                            >
+                                                <Text color="white" textAlign="left" fontSize="14px" margin="0">
+                                                    {shipData.ship.name}
+                                                </Text>
+                                                <Text color="white" textAlign="left" fontSize="12px" margin="0">
+                                                    {shipData.ship.code}
+                                                </Text>
+                                            </Box>
+                                        </Td>
+                                    );
+                                })}
+                            </Tr>
+                        );
+                    })}
+                </Tbody>
+            </Table>
         </Box>
     );
 };

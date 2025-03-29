@@ -1,6 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import './TableWeek.css';
+import {
+    Box,
+    Table,
+    Thead,
+    Tbody,
+    Tr,
+    Th,
+    Td,
+    Text,
+    Image,
+    Spinner,
+    Flex,
+    Center
+} from '@chakra-ui/react';
 import BollaCell from "../../../public/assets/images/bolla-cell.png";
 import { ReservationsService } from '../../client';
 import TableSwitch from '../TableSwitch/TableSwitch';
@@ -37,7 +50,6 @@ const Calendar: React.FC = () => {
         setCurrentWeekStart(getCurrentWeekMonday());
     }, []);
 
-    // Получаем все бронирования, из которых извлечем швартовочные места
     const { data: reservations, isLoading, isError } = useQuery({
         queryKey: ['reservations', currentWeekStart],
         queryFn: () => ReservationsService.readReservations({ limit: 500 }),
@@ -51,7 +63,6 @@ const Calendar: React.FC = () => {
         });
     };
 
-    // Обработчики навигации по неделям
     const handlePrevWeek = () => {
         const newStartDate = new Date(new Date(currentWeekStart).getTime() - 7 * 24 * 60 * 60 * 1000);
         setCurrentWeekStart(newStartDate.toISOString().split('T')[0]);
@@ -68,7 +79,6 @@ const Calendar: React.FC = () => {
 
     useEffect(() => {
         if (reservations?.data) {
-            // Извлекаем все уникальные швартовочные места из бронирований
             const uniqueBalls = new Set<string>();
             reservations.data.forEach(res => {
                 if (res.mooring_ball?.ball_number) {
@@ -76,12 +86,10 @@ const Calendar: React.FC = () => {
                 }
             });
 
-            // Создаем список всех швартовочных мест
             const ballsArray = Array.from(uniqueBalls).sort((a, b) => parseInt(a) - parseInt(b));
             const rows = ballsArray.map(id => ({ id, label: id }));
             setAllRows(rows);
 
-            // Если есть выбранная бухта, фильтруем бронирования
             if (currentWeekStart) {
                 const endDate = new Date(new Date(currentWeekStart).getTime() + 6 * 24 * 60 * 60 * 1000)
                     .toISOString().split('T')[0];
@@ -145,12 +153,37 @@ const Calendar: React.FC = () => {
         return `${start.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
     };
 
-    if (isLoading) return <div>Loading...</div>;
-    if (isError) return <div>Error loading data</div>;
-    if (!currentWeekStart) return <div>Initializing calendar...</div>;
+    if (isLoading) return (
+        <Flex
+            width="98%"
+            m="auto"
+            height="100vh"
+            alignItems="center"
+            justifyContent="center"
+            bg="white"
+            rounded='25px'
+        >
+            <Spinner
+                size="xl"
+                color="ui.main"
+            />
+        </Flex>
+    );
+
+    if (isError) return (
+        <Center width="100vw" height="100vh" bg="white">
+            <Text color="red.500" fontSize="xl">Error loading data</Text>
+        </Center>
+    );
+
+    if (!currentWeekStart) return (
+        <Center width="100vw" height="100vh" bg="white">
+            <Text fontSize="xl">Initializing calendar...</Text>
+        </Center>
+    );
 
     return (
-        <div>
+        <Box>
             <TableSwitch
                 onPrevWeek={handlePrevWeek}
                 onNextWeek={handleNextWeek}
@@ -158,57 +191,102 @@ const Calendar: React.FC = () => {
                 weekRange={formatWeekRange()}
             />
 
-            <div className="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th></th>
+            <Box width="98%" margin="auto" overflowX="auto">
+                <Table
+                    variant="unstyled"
+                    width="100%"
+                    sx={{
+                        borderCollapse: 'separate',
+                        borderSpacing: '40px'
+                    }}
+                >
+                    <Thead>
+                        <Tr>
+                            <Th width="150px"></Th>
                             {days.map(day => (
-                                <th key={day}>
+                                <Th
+                                    key={day}
+                                    color="#777777"
+                                    textAlign="center"
+                                    width="150px"
+                                    height="60px"
+                                    p={2}
+                                >
                                     {new Date(day).toLocaleDateString('en-US', {
                                         month: 'short',
                                         day: 'numeric'
                                     })}
-                                </th>
+                                </Th>
                             ))}
-                        </tr>
-                    </thead>
-                    <tbody>
+                        </Tr>
+                    </Thead>
+                    <Tbody>
                         {allRows.map(row => {
                             const occupiedDays = new Array(days.length).fill(false);
                             return (
-                                <tr key={row.id}>
-                                    <td className='column-cell'>
-                                        <img src={BollaCell} alt="Bolla" />
-                                        <div>{row.label}</div>
-                                    </td>
+                                <Tr key={row.id}>
+                                    <Td
+                                        display="flex"
+                                        gap="20px"
+                                        alignItems="center"
+                                        justifyContent="center"
+                                        bg="transparent"
+                                        border="none"
+                                        width="150px"
+                                        height="60px"
+                                        p={2}
+                                    >
+                                        <Image src={BollaCell} alt="Bolla" />
+                                        <Text>{row.label}</Text>
+                                    </Td>
 
                                     {days.map(day => {
                                         const shipData = getShipForDay(row.id, day, occupiedDays);
                                         if (!shipData) {
-                                            return occupiedDays[days.indexOf(day)] ? null : <td key={`${row.id}-${day}`} />;
+                                            return occupiedDays[days.indexOf(day)] ? null : (
+                                                <Td
+                                                    key={`${row.id}-${day}`}
+                                                    width="150px"
+                                                    height="60px"
+                                                    p={2}
+                                                />
+                                            );
                                         }
 
                                         return (
-                                            <td
+                                            <Td
                                                 key={`${row.id}-${day}`}
-                                                className='boat-cell'
+                                                bg="#007A7B"
+                                                borderRadius="25px"
                                                 colSpan={shipData.colspan}
+                                                width="150px"
+                                                height="60px"
+                                                p={2}
                                             >
-                                                <div>
-                                                    <div className='boat-name'>{shipData.ship.name}</div>
-                                                    <div className='boat-code'>{shipData.ship.code}</div>
-                                                </div>
-                                            </td>
+                                                <Box
+                                                    display="flex"
+                                                    alignItems="center"
+                                                    flexDirection="column"
+                                                    width="90%"
+                                                    margin="auto"
+                                                >
+                                                    <Text color="white" textAlign="left" fontSize="14px" margin="0">
+                                                        {shipData.ship.name}
+                                                    </Text>
+                                                    <Text color="white" textAlign="left" fontSize="12px" margin="0">
+                                                        {shipData.ship.code}
+                                                    </Text>
+                                                </Box>
+                                            </Td>
                                         );
                                     })}
-                                </tr>
+                                </Tr>
                             );
                         })}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                    </Tbody>
+                </Table>
+            </Box>
+        </Box>
     );
 };
 

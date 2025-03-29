@@ -1,13 +1,13 @@
 import TableWeek from '../TableWeek/TableWeek';
-import "./Panel.css";
+import { Box } from '@chakra-ui/react';
 
 
 const Panel: React.FC = () => {
     return (
         <>
-            <div className='panel-container'>
+            <Box m='auto' w='98%' bg='white' rounded='25px'>
                 <TableWeek />
-            </div>
+            </Box>
         </>
     )
 }

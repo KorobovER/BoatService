@@ -83,7 +83,7 @@ const MarinasMenu = () => {
     if (loading) {
         return (
             <Flex align="center" justify="center" w="300px">
-                <Spinner size="sm" />
+                <Spinner size="sm" color="ui.main" />
             </Flex>
         );
     }

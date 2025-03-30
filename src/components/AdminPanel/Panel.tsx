@@ -1,6 +1,6 @@
 import { Box } from '@chakra-ui/react';
-import TableWeek from '../TableWeek/TableWeek';
-import TableSwitch from '../TableSwitch/TableSwitch';
+import TableWeek from './TableWeek';
+import TableSwitch from './TableSwitch';
 import { useEffect } from 'react';
 import { useState } from 'react';
 

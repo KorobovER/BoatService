@@ -18,7 +18,7 @@ import BollaCell from "../../../public/assets/images/bolla-cell.png";
 import { ReservationsService } from '../../client';
 import { useMarina } from '../../context/MarinaContext';
 
-interface Ship {
+interface Boat {
     id: string;
     name: string;
     code: string;
@@ -36,9 +36,9 @@ interface TableWeekProps {
     currentWeekStart: string;
 }
 
-const Calendar: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
+const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
     const { selectedMarina } = useMarina();
-    const [ships, setShips] = useState<Ship[]>([]);
+    const [boats, setBoats] = useState<Boat[]>([]);
     const [allRows, setAllRows] = useState<Row[]>([]);
     const [days, setDays] = useState<string[]>([]);
 
@@ -79,7 +79,7 @@ const Calendar: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
                     ? reservations.data.filter(res => res.marina?.marina_id === selectedMarina.marina_id)
                     : reservations.data;
 
-                const apiShips = filteredReservations
+                const apiBoats = filteredReservations
                     .filter(reservation => {
                         const resStart = new Date(reservation.start_date.split('T')[0]);
                         const resEnd = new Date(reservation.end_date.split('T')[0]);
@@ -96,25 +96,25 @@ const Calendar: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
                         marina_id: reservation.marina?.marina_id
                     }));
 
-                setShips(apiShips);
+                setBoats(apiBoats);
             }
         }
     }, [reservations, currentWeekStart, selectedMarina]);
 
-    const getShipForDay = (rowId: string, day: string, occupiedDays: boolean[]) => {
+    const getBoatForDay = (rowId: string, day: string, occupiedDays: boolean[]) => {
         const dayIndex = days.indexOf(day);
         if (occupiedDays[dayIndex]) return null;
 
-        const ship = ships.find(s =>
-            s.id === rowId &&
-            new Date(day) >= new Date(s.startDay) &&
-            new Date(day) <= new Date(s.endDay)
+        const boat = boats.find(b =>
+            b.id === rowId &&
+            new Date(day) >= new Date(b.startDay) &&
+            new Date(day) <= new Date(b.endDay)
         );
 
-        if (!ship) return null;
+        if (!boat) return null;
 
-        const startDate = new Date(Math.max(new Date(ship.startDay).getTime(), new Date(days[0]).getTime()));
-        const endDate = new Date(Math.min(new Date(ship.endDay).getTime(), new Date(days[days.length - 1]).getTime()));
+        const startDate = new Date(Math.max(new Date(boat.startDay).getTime(), new Date(days[0]).getTime()));
+        const endDate = new Date(Math.min(new Date(boat.endDay).getTime(), new Date(days[days.length - 1]).getTime()));
         const dayDiff = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
         const colspan = Math.max(1, dayDiff);
 
@@ -122,7 +122,7 @@ const Calendar: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
             occupiedDays[i] = true;
         }
 
-        return { ship, colspan };
+        return { boat, colspan };
     };
 
     const isToday = (day: string) => {
@@ -229,8 +229,8 @@ const Calendar: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
                                 </Td>
 
                                 {days.map(day => {
-                                    const shipData = getShipForDay(row.id, day, occupiedDays);
-                                    if (!shipData) {
+                                    const boatData = getBoatForDay(row.id, day, occupiedDays);
+                                    if (!boatData) {
                                         return occupiedDays[days.indexOf(day)] ? null : (
                                             <Td
                                                 key={`${row.id}-${day}`}
@@ -261,7 +261,7 @@ const Calendar: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
                                             key={`${row.id}-${day}`}
                                             bg="#007A7B"
                                             borderRadius="25px"
-                                            colSpan={shipData.colspan}
+                                            colSpan={boatData.colspan}
                                             width="150px"
                                             height="44px"
                                             p={1}
@@ -288,10 +288,10 @@ const Calendar: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
                                                 margin="auto"
                                             >
                                                 <Text color="white" textAlign="left" fontSize="14px" margin="0">
-                                                    {shipData.ship.name}
+                                                    {boatData.boat.name}
                                                 </Text>
                                                 <Text color="white" textAlign="left" fontSize="12px" margin="0">
-                                                    {shipData.ship.code}
+                                                    {boatData.boat.code}
                                                 </Text>
                                             </Box>
                                         </Td>
@@ -306,4 +306,4 @@ const Calendar: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
     );
 };
 
-export default Calendar;
+export default TableWeek;

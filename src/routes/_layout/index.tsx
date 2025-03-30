@@ -1,6 +1,6 @@
 import { Box, Container, Text } from "@chakra-ui/react"
 import { createFileRoute } from "@tanstack/react-router"
-import Panel from "../../components/Panel/Panel"
+import Panel from "../../components/AdminPanel/Panel"
 
 import useAuth from "../../hooks/useAuth"
 

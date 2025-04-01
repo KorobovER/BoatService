@@ -25,6 +25,7 @@ interface Boat {
     startDay: string;
     endDay: string;
     marina_id?: string;
+    registration_image_url?: string;
 }
 
 interface Row {
@@ -93,7 +94,8 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
                         code: reservation.boat?.model || 'N/A',
                         startDay: reservation.start_date.split('T')[0],
                         endDay: reservation.end_date.split('T')[0],
-                        marina_id: reservation.marina?.marina_id
+                        marina_id: reservation.marina?.marina_id,
+                        registration_image_url: (reservation.boat as any)?.registration_image_url
                     }));
 
                 setBoats(apiBoats);
@@ -264,7 +266,7 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
                                             colSpan={boatData.colspan}
                                             width="150px"
                                             height="44px"
-                                            p={1}
+                                            p={2}
                                             position="relative"
                                         >
                                             {isToday(day) && (
@@ -281,18 +283,49 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
                                                 />
                                             )}
                                             <Box
+                                                borderRadius="5px"
+                                                p="5px"
+                                                width="fit-content"
+                                                height="100%"
                                                 display="flex"
+                                                gap="8px"
                                                 alignItems="center"
-                                                flexDirection="column"
-                                                width="90%"
-                                                margin="auto"
+                                                margin="0 auto"
                                             >
-                                                <Text color="white" textAlign="left" fontSize="14px" margin="0">
-                                                    {boatData.boat.name}
-                                                </Text>
-                                                <Text color="white" textAlign="left" fontSize="12px" margin="0">
-                                                    {boatData.boat.code}
-                                                </Text>
+                                                <Box flexShrink={0}>
+                                                    {boatData.boat.registration_image_url ? (
+                                                        <Image 
+                                                            src={boatData.boat.registration_image_url} 
+                                                            alt={boatData.boat.name}
+                                                            width="24px"
+                                                            height="24px"
+                                                            objectFit="cover"
+                                                            borderRadius="4px"
+                                                        />
+                                                    ) : (
+                                                        <Box
+                                                            width="24px"
+                                                            height="24px"
+                                                            borderRadius="4px"
+                                                            bg="white"
+                                                            display="flex"
+                                                            alignItems="center"
+                                                            justifyContent="center"
+                                                        >
+                                                            <Text color="#007A7B" fontSize="12px">
+                                                                {boatData.boat.name[0]}
+                                                            </Text>
+                                                        </Box>
+                                                    )}
+                                                </Box>
+                                                <Box>
+                                                    <Text color="white" textAlign="left" fontSize="14px" fontWeight="500" margin="0">
+                                                        {boatData.boat.name}
+                                                    </Text>
+                                                    <Text color="white" textAlign="left" fontSize="12px" margin="0" opacity="0.8">
+                                                        {boatData.boat.code}
+                                                    </Text>
+                                                </Box>
                                             </Box>
                                         </Td>
                                     );

@@ -1,10 +1,14 @@
 import { Button, Flex, Text } from "@chakra-ui/react";
 
+type TableView = 'month' | 'week' | 'day';
+
 interface TableSwitchProps {
     onPrevWeek: () => void;
     onNextWeek: () => void;
     onToday: () => void;
     weekRange: string;
+    currentView: TableView;
+    onViewChange: (view: TableView) => void;
 }
 
 const TableSwitch: React.FC<TableSwitchProps> = ({
@@ -12,6 +16,8 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
     onNextWeek,
     onToday,
     weekRange,
+    currentView,
+    onViewChange,
 }) => {
     return (
         <Flex
@@ -105,7 +111,8 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
                     border="1px solid #B7B7B7"
                     borderRadius="25px"
                     padding="10px 25px"
-                    bg="white"
+                    bg={currentView === 'month' ? '#F6F6F6' : 'white'}
+                    onClick={() => onViewChange('month')}
                 >
                     Month
                 </Button>
@@ -115,7 +122,8 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
                     border="1px solid #B7B7B7"
                     borderRadius="25px"
                     padding="10px 25px"
-                    bg="white"
+                    bg={currentView === 'week' ? '#F6F6F6' : 'white'}
+                    onClick={() => onViewChange('week')}
                 >
                     Week
                 </Button>
@@ -125,7 +133,8 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
                     border="1px solid #B7B7B7"
                     borderRadius="25px"
                     padding="10px 25px"
-                    bg="white"
+                    bg={currentView === 'day' ? '#F6F6F6' : 'white'}
+                    onClick={() => onViewChange('day')}
                 >
                     Day
                 </Button>

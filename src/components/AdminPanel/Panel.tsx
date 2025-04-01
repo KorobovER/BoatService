@@ -3,9 +3,14 @@ import TableWeek from './TableWeek';
 import TableSwitch from './TableSwitch';
 import { useEffect } from 'react';
 import { useState } from 'react';
+import TableDay from './TableDay';
+import TableMonth from './TableMonth';
+
+type TableView = 'month' | 'week' | 'day';
 
 const Panel: React.FC = () => {
     const [currentWeekStart, setCurrentWeekStart] = useState<string>('');
+    const [currentView, setCurrentView] = useState<TableView>('week');
 
     const getCurrentWeekMonday = (date = new Date()) => {
         const day = date.getDay();
@@ -46,8 +51,12 @@ const Panel: React.FC = () => {
                     onNextWeek={handleNextWeek}
                     onToday={handleToday}
                     weekRange={formatWeekRange()}
+                    currentView={currentView}
+                    onViewChange={setCurrentView}
                 />
-                <TableWeek currentWeekStart={currentWeekStart} />
+                {currentView === 'week' && <TableWeek currentWeekStart={currentWeekStart} />}
+                {currentView === 'month' && <TableMonth />}
+                {currentView === 'day' && <TableDay />}
             </Box>
         </>
     );

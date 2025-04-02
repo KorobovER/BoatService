@@ -14,6 +14,7 @@ import type {
   BoatPublic,
   BoatsPublic,
   BoatUpdate,
+  Body_boats_update_boat_docs,
   VesselTypesPublic,
   EmployeeCreate,
   EmployeeRegister,
@@ -44,12 +45,15 @@ import type {
   ReservationsPublic,
   ReservationUpdate,
   ServiceRequest,
+  UserReservationsPublic,
   Body_users_create_profile_pic_me,
   UserRegister,
   UsersPublic,
   UserUpdate,
   UserUpdateMe,
-  RegionData,
+  UserWithPaymentPublic,
+  Coordinate,
+  RegionStateData,
 } from "./models"
 
 export type TDataLoginAccessToken = {
@@ -287,6 +291,10 @@ export type TDataReadBoats = {
 export type TDataCreateBoat = {
   requestBody: BoatCreate
 }
+export type TDataUpdateBoatDocs = {
+  formData?: Body_boats_update_boat_docs
+  id: string
+}
 export type TDataReadBoat = {
   id: string
 }
@@ -357,6 +365,30 @@ export class BoatsService {
   }
 
   /**
+   * Update Boat Docs
+   * Update a boat's documents.
+   * @returns BoatPublic Successful Response
+   * @throws ApiError
+   */
+  public static updateBoatDocs(
+    data: TDataUpdateBoatDocs,
+  ): CancelablePromise<BoatPublic> {
+    const { formData, id } = data
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/boats/docs/{id}",
+      path: {
+        id,
+      },
+      formData: formData,
+      mediaType: "multipart/form-data",
+      errors: {
+        422: `Validation Error`,
+      },
+    })
+  }
+
+  /**
    * Read Boat
    * Get boat by ID.
    * @returns BoatPublic Successful Response
@@ -378,7 +410,7 @@ export class BoatsService {
 
   /**
    * Update Boat
-   * Update an boat.
+   * Update a boat.
    * @returns BoatPublic Successful Response
    * @throws ApiError
    */
@@ -779,10 +811,6 @@ export class ItemsService {
   }
 }
 
-export type TDataReadAmenities = {
-  limit?: number
-  skip?: number
-}
 export type TDataReadServices = {
   limit?: number
   skip?: number
@@ -816,20 +844,10 @@ export class MarinasService {
    * @returns AmenitiesPublic Successful Response
    * @throws ApiError
    */
-  public static readAmenities(
-    data: TDataReadAmenities = {},
-  ): CancelablePromise<AmenitiesPublic> {
-    const { limit = 100, skip = 0 } = data
+  public static readAmenities(): CancelablePromise<AmenitiesPublic> {
     return __request(OpenAPI, {
       method: "GET",
       url: "/api/v1/marinas/amenities",
-      query: {
-        skip,
-        limit,
-      },
-      errors: {
-        422: `Validation Error`,
-      },
     })
   }
 
@@ -992,7 +1010,7 @@ export class MarinasService {
   }
 }
 
-export type TDataEluminateMooringBall = {
+export type TDataIlluminateMooringBall = {
   mooringBallId: string
   requestBody: Record<string, string>
 }
@@ -1011,9 +1029,6 @@ export type TDataReadMooringBalls = {
 export type TDataCreateMooringBall = {
   requestBody: MooringBallCreate
 }
-export type TDataFindMooringBall = {
-  id: string
-}
 export type TDataReadMooringBall = {
   id: string
 }
@@ -1027,14 +1042,14 @@ export type TDataDeleteMooringBall = {
 
 export class MooringBallsService {
   /**
-   * Eluminate Sequence Options
+   * Illuminate Sequence Options
    * @returns string Successful Response
    * @throws ApiError
    */
-  public static eluminateSequenceOptions(): CancelablePromise<Array<string>> {
+  public static illuminateSequenceOptions(): CancelablePromise<Array<string>> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/api/v1/mooring-balls/eluminate",
+      url: "/api/v1/mooring-balls/illuminate",
     })
   }
 
@@ -1051,17 +1066,17 @@ export class MooringBallsService {
   }
 
   /**
-   * Eluminate Mooring Ball
+   * Illuminate Mooring Ball
    * @returns Message Successful Response
    * @throws ApiError
    */
-  public static eluminateMooringBall(
-    data: TDataEluminateMooringBall,
+  public static illuminateMooringBall(
+    data: TDataIlluminateMooringBall,
   ): CancelablePromise<Message> {
     const { mooringBallId, requestBody } = data
     return __request(OpenAPI, {
       method: "POST",
-      url: "/api/v1/mooring-balls/eluminate/{mooring_ball_id}}",
+      url: "/api/v1/mooring-balls/illuminate/{mooring_ball_id}}",
       path: {
         mooring_ball_id: mooringBallId,
       },
@@ -1147,28 +1162,6 @@ export class MooringBallsService {
       url: "/api/v1/mooring-balls/",
       body: requestBody,
       mediaType: "application/json",
-      errors: {
-        422: `Validation Error`,
-      },
-    })
-  }
-
-  /**
-   * Find Mooring Ball
-   * Eluminate sequence for find my mooring_ball.
-   * @returns Message Successful Response
-   * @throws ApiError
-   */
-  public static findMooringBall(
-    data: TDataFindMooringBall,
-  ): CancelablePromise<Message> {
-    const { id } = data
-    return __request(OpenAPI, {
-      method: "GET",
-      url: "/api/v1/mooring-balls/find/{id}",
-      path: {
-        id,
-      },
       errors: {
         422: `Validation Error`,
       },
@@ -1344,12 +1337,12 @@ export class ReservationsService {
   /**
    * Read Reservations Me
    * Retrieve reservations for the current user.
-   * @returns ReservationsPublic Successful Response
+   * @returns UserReservationsPublic Successful Response
    * @throws ApiError
    */
   public static readReservationsMe(
     data: TDataReadReservationsMe = {},
-  ): CancelablePromise<ReservationsPublic> {
+  ): CancelablePromise<UserReservationsPublic> {
     const { limit = 100, skip = 0 } = data
     return __request(OpenAPI, {
       method: "GET",
@@ -1501,11 +1494,14 @@ export class ReservationsService {
 export type TDataVerifySignUpCode = {
   code: string
 }
-export type TDataVerifyEmail = {
+export type TDataGetVerifyEmail = {
   emailIn: string
 }
 export type TDataValidatePhoneNumber = {
   phone: string
+}
+export type TDataModifyCustomerPaymentMethod = {
+  paymentMethodId: string
 }
 export type TDataDeleteCustomerPaymentMethod = {
   paymentMethodId: string
@@ -1565,13 +1561,13 @@ export class UsersService {
   }
 
   /**
-   * Verify Email
+   * Get Verify Email
    * Check if user with this email exists in the system
    * @returns Message Successful Response
    * @throws ApiError
    */
-  public static verifyEmail(
-    data: TDataVerifyEmail,
+  public static getVerifyEmail(
+    data: TDataGetVerifyEmail,
   ): CancelablePromise<Message> {
     const { emailIn } = data
     return __request(OpenAPI, {
@@ -1635,6 +1631,28 @@ export class UsersService {
   }
 
   /**
+   * Modify Customer Payment Method
+   * Modify a card for current user stripe payment info (set default).
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static modifyCustomerPaymentMethod(
+    data: TDataModifyCustomerPaymentMethod,
+  ): CancelablePromise<unknown> {
+    const { paymentMethodId } = data
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/users/payment-method/{payment_method_id}",
+      path: {
+        payment_method_id: paymentMethodId,
+      },
+      errors: {
+        422: `Validation Error`,
+      },
+    })
+  }
+
+  /**
    * Delete Customer Payment Method
    * Delete payment method for for current user.
    * @returns unknown Successful Response
@@ -1682,10 +1700,10 @@ export class UsersService {
   /**
    * Read User Me
    * Get current user.
-   * @returns UserPublic Successful Response
+   * @returns UserWithPaymentPublic Successful Response
    * @throws ApiError
    */
-  public static readUserMe(): CancelablePromise<UserPublic> {
+  public static readUserMe(): CancelablePromise<UserWithPaymentPublic> {
     return __request(OpenAPI, {
       method: "GET",
       url: "/api/v1/users/me",
@@ -1918,6 +1936,9 @@ export class UsersService {
   }
 }
 
+export type TDataGetRegionStateInitWithCoordinates = {
+  requestBody?: Coordinate | null
+}
 export type TDataTestEmail = {
   emailTo: string
 }
@@ -1926,13 +1947,35 @@ export class UtilsService {
   /**
    * Get Region State Init
    * Show region and subregions for mobile app alongside map and zoom presets for regions
-   * @returns RegionData Successful Response
+   * @returns unknown Successful Response
    * @throws ApiError
    */
-  public static getRegionStateInit(): CancelablePromise<Array<RegionData>> {
+  public static getRegionStateInit(): CancelablePromise<unknown> {
     return __request(OpenAPI, {
       method: "GET",
       url: "/api/v1/utils/map-region-init/",
+    })
+  }
+
+  /**
+   * Get Region State Init With Coordinates
+   * Show region and subregions for mobile app alongside map and zoom presets for regions.
+   * Optionally show the closest subregion to the given coordinates.
+   * @returns RegionStateData Successful Response
+   * @throws ApiError
+   */
+  public static getRegionStateInitWithCoordinates(
+    data: TDataGetRegionStateInitWithCoordinates = {},
+  ): CancelablePromise<RegionStateData> {
+    const { requestBody } = data
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/utils/map-region-init/",
+      body: requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: `Validation Error`,
+      },
     })
   }
 

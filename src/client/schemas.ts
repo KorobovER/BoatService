@@ -22,6 +22,12 @@ export const $AmenityBase = {
       maxLength: 64,
       minLength: 3,
     },
+    ranking: {
+      type: "number",
+      default: 1,
+      maximum: 100,
+      minimum: 0,
+    },
   },
 } as const
 
@@ -32,6 +38,12 @@ export const $AmenityPublic = {
       isRequired: true,
       maxLength: 64,
       minLength: 3,
+    },
+    ranking: {
+      type: "number",
+      default: 1,
+      maximum: 100,
+      minimum: 0,
     },
     amenity_id: {
       type: "string",
@@ -87,6 +99,32 @@ export const $Boat = {
     },
     vessel_type: {
       type: "VesselType",
+      isRequired: true,
+    },
+    registration_image_url: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 256,
+        },
+        {
+          type: "null",
+        },
+      ],
+      isRequired: true,
+    },
+    insurance_image_url: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 256,
+        },
+        {
+          type: "null",
+        },
+      ],
       isRequired: true,
     },
     boat_id: {
@@ -158,6 +196,32 @@ export const $BoatBase = {
       type: "VesselType",
       isRequired: true,
     },
+    registration_image_url: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 256,
+        },
+        {
+          type: "null",
+        },
+      ],
+      isRequired: true,
+    },
+    insurance_image_url: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 256,
+        },
+        {
+          type: "null",
+        },
+      ],
+      isRequired: true,
+    },
   },
 } as const
 
@@ -209,6 +273,32 @@ export const $BoatCreate = {
       type: "VesselType",
       isRequired: true,
     },
+    registration_image_url: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 256,
+        },
+        {
+          type: "null",
+        },
+      ],
+      isRequired: true,
+    },
+    insurance_image_url: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 256,
+        },
+        {
+          type: "null",
+        },
+      ],
+      isRequired: true,
+    },
   },
 } as const
 
@@ -258,6 +348,32 @@ export const $BoatPublic = {
     },
     vessel_type: {
       type: "VesselType",
+      isRequired: true,
+    },
+    registration_image_url: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 256,
+        },
+        {
+          type: "null",
+        },
+      ],
+      isRequired: true,
+    },
+    insurance_image_url: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 256,
+        },
+        {
+          type: "null",
+        },
+      ],
       isRequired: true,
     },
     boat_id: {
@@ -387,10 +503,31 @@ export const $BoatUpdate = {
       ],
       isRequired: true,
     },
-    boat_id: {
-      type: "string",
+    registration_image_url: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 256,
+        },
+        {
+          type: "null",
+        },
+      ],
       isRequired: true,
-      format: "uuid",
+    },
+    insurance_image_url: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 256,
+        },
+        {
+          type: "null",
+        },
+      ],
+      isRequired: true,
     },
   },
 } as const
@@ -407,6 +544,35 @@ export const $BoatsPublic = {
     count: {
       type: "number",
       isRequired: true,
+    },
+  },
+} as const
+
+export const $Body_boats_update_boat_docs = {
+  properties: {
+    file_registration: {
+      type: "any-of",
+      contains: [
+        {
+          type: "binary",
+          format: "binary",
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    file_insurance: {
+      type: "any-of",
+      contains: [
+        {
+          type: "binary",
+          format: "binary",
+        },
+        {
+          type: "null",
+        },
+      ],
     },
   },
 } as const
@@ -519,6 +685,23 @@ export const $Body_users_create_profile_pic_me = {
       type: "binary",
       isRequired: true,
       format: "binary",
+    },
+  },
+} as const
+
+export const $Coordinate = {
+  properties: {
+    latitude: {
+      type: "number",
+      isRequired: true,
+      maximum: 90,
+      minimum: -90,
+    },
+    longitude: {
+      type: "number",
+      isRequired: true,
+      maximum: 180,
+      minimum: -180,
     },
   },
 } as const
@@ -2023,6 +2206,23 @@ export const $PaymentDetailsSimple = {
   },
 } as const
 
+export const $PaymentMethodPublic = {
+  properties: {
+    id: {
+      type: "string",
+      isRequired: true,
+    },
+    is_default: {
+      type: "boolean",
+      isRequired: true,
+    },
+    card: {
+      type: "StripeCardPublic",
+      isRequired: true,
+    },
+  },
+} as const
+
 export const $RegionData = {
   properties: {
     name: {
@@ -2034,6 +2234,30 @@ export const $RegionData = {
       contains: {
         type: "SubRegionData",
       },
+      isRequired: true,
+    },
+  },
+} as const
+
+export const $RegionStateData = {
+  properties: {
+    region_data: {
+      type: "array",
+      contains: {
+        type: "RegionData",
+      },
+      isRequired: true,
+    },
+    closest_subregion: {
+      type: "any-of",
+      contains: [
+        {
+          type: "SubRegionData",
+        },
+        {
+          type: "null",
+        },
+      ],
       isRequired: true,
     },
   },
@@ -2554,6 +2778,31 @@ export const $ServicesPublic = {
   },
 } as const
 
+export const $StripeCardPublic = {
+  properties: {
+    country: {
+      type: "string",
+      isRequired: true,
+    },
+    display_brand: {
+      type: "string",
+      isRequired: true,
+    },
+    exp_month: {
+      type: "number",
+      isRequired: true,
+    },
+    exp_year: {
+      type: "number",
+      isRequired: true,
+    },
+    last4: {
+      type: "string",
+      isRequired: true,
+    },
+  },
+} as const
+
 export const $SubRegion = {
   type: "Enum",
   enum: [
@@ -2587,9 +2836,7 @@ export const $SubRegionData = {
       type: "any-of",
       contains: [
         {
-          type: "unknown[]",
-          maxItems: 2,
-          minItems: 2,
+          type: "Coordinate",
         },
         {
           type: "null",
@@ -2694,6 +2941,11 @@ export const $UserBase = {
       maximum: 999,
       minimum: 1,
     },
+    country_code_name: {
+      type: "string",
+      isRequired: true,
+      maxLength: 3,
+    },
     phone_number: {
       type: "string",
       isRequired: true,
@@ -2718,6 +2970,18 @@ export const $UserBase = {
           type: "number",
           maximum: 999,
           minimum: 1,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    emergency_contact_country_code_name: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 3,
         },
         {
           type: "null",
@@ -2863,6 +3127,11 @@ export const $UserPublic = {
       maximum: 999,
       minimum: 1,
     },
+    country_code_name: {
+      type: "string",
+      isRequired: true,
+      maxLength: 3,
+    },
     phone_number: {
       type: "string",
       isRequired: true,
@@ -2887,6 +3156,18 @@ export const $UserPublic = {
           type: "number",
           maximum: 999,
           minimum: 1,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    emergency_contact_country_code_name: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 3,
         },
         {
           type: "null",
@@ -3066,6 +3347,11 @@ export const $UserRegister = {
       maximum: 999,
       minimum: 1,
     },
+    country_code_name: {
+      type: "string",
+      isRequired: true,
+      maxLength: 3,
+    },
     phone_number: {
       type: "string",
       isRequired: true,
@@ -3082,6 +3368,48 @@ export const $UserRegister = {
           type: "null",
         },
       ],
+    },
+  },
+} as const
+
+export const $UserReservationsPublic = {
+  properties: {
+    today: {
+      type: "any-of",
+      contains: [
+        {
+          type: "ReservationPublic",
+        },
+        {
+          type: "null",
+        },
+      ],
+      isRequired: true,
+    },
+    upcoming: {
+      type: "array",
+      contains: {
+        type: "ReservationPublic",
+      },
+      isRequired: true,
+    },
+    past: {
+      type: "array",
+      contains: {
+        type: "ReservationPublic",
+      },
+      isRequired: true,
+    },
+    cancelled: {
+      type: "array",
+      contains: {
+        type: "ReservationPublic",
+      },
+      isRequired: true,
+    },
+    count: {
+      type: "number",
+      isRequired: true,
     },
   },
 } as const
@@ -3142,15 +3470,41 @@ export const $UserUpdate = {
       ],
     },
     country_code: {
-      type: "number",
-      isRequired: true,
-      maximum: 999,
-      minimum: 1,
+      type: "any-of",
+      contains: [
+        {
+          type: "number",
+          maximum: 999,
+          minimum: 1,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    country_code_name: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 3,
+        },
+        {
+          type: "null",
+        },
+      ],
     },
     phone_number: {
-      type: "string",
-      isRequired: true,
-      maxLength: 20,
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 20,
+        },
+        {
+          type: "null",
+        },
+      ],
     },
     emergency_contact_name: {
       type: "any-of",
@@ -3171,6 +3525,18 @@ export const $UserUpdate = {
           type: "number",
           maximum: 999,
           minimum: 1,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    emergency_contact_country_code_name: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 3,
         },
         {
           type: "null",
@@ -3353,6 +3719,18 @@ export const $UserUpdateMe = {
         },
       ],
     },
+    country_code_name: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 3,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     phone_number: {
       type: "any-of",
       contains: [
@@ -3384,6 +3762,172 @@ export const $UserUpdateMe = {
           type: "number",
           maximum: 999,
           minimum: 1,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    emergency_contact_country_code_name: {
+      type: "string",
+      maxLength: 3,
+    },
+    emergency_contact_phone_number: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 64,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    mailing_address: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 255,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    mailing_city: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 64,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    mailing_state: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 64,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    mailing_postal_code: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 20,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    mailing_country: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 64,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+  },
+} as const
+
+export const $UserWithPaymentPublic = {
+  properties: {
+    email: {
+      type: "string",
+      isRequired: true,
+      format: "email",
+      maxLength: 64,
+    },
+    is_active: {
+      type: "boolean",
+      default: true,
+    },
+    first_name: {
+      type: "string",
+      isRequired: true,
+      maxLength: 64,
+    },
+    last_name: {
+      type: "string",
+      isRequired: true,
+      maxLength: 64,
+    },
+    preferred_name: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 64,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    country_code: {
+      type: "number",
+      isRequired: true,
+      maximum: 999,
+      minimum: 1,
+    },
+    country_code_name: {
+      type: "string",
+      isRequired: true,
+      maxLength: 3,
+    },
+    phone_number: {
+      type: "string",
+      isRequired: true,
+      maxLength: 20,
+    },
+    emergency_contact_name: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 64,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    emergency_contact_country_code: {
+      type: "any-of",
+      contains: [
+        {
+          type: "number",
+          maximum: 999,
+          minimum: 1,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    emergency_contact_country_code_name: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 3,
         },
         {
           type: "null",
@@ -3461,6 +4005,81 @@ export const $UserUpdateMe = {
           type: "null",
         },
       ],
+    },
+    profile_pic_url: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 128,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    sign_up_code: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 20,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    id: {
+      type: "string",
+      isRequired: true,
+      format: "uuid",
+    },
+    referral_code: {
+      type: "string",
+      isRequired: true,
+    },
+    display_name: {
+      type: "string",
+      isRequired: true,
+    },
+    created_at: {
+      type: "string",
+      isRequired: true,
+      format: "date-time",
+    },
+    updated_at: {
+      type: "string",
+      isRequired: true,
+      format: "date-time",
+    },
+    items: {
+      type: "array",
+      contains: {
+        type: "Item",
+      },
+      isRequired: true,
+    },
+    reservations: {
+      type: "array",
+      contains: {
+        type: "Reservation",
+      },
+      isRequired: true,
+    },
+    active_boats: {
+      type: "array",
+      contains: {
+        type: "Boat",
+      },
+      isRequired: true,
+    },
+    payment_methods: {
+      type: "array",
+      contains: {
+        type: "PaymentMethodPublic",
+      },
+      isRequired: true,
     },
   },
 } as const

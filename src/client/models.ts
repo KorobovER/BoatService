@@ -5,10 +5,12 @@ export type AmenitiesPublic = {
 
 export type AmenityBase = {
   name: string
+  ranking?: number
 }
 
 export type AmenityPublic = {
   name: string
+  ranking?: number
   amenity_id: string
 }
 
@@ -23,6 +25,8 @@ export type Boat = {
   freeboard: number
   draft: number
   vessel_type: VesselType
+  registration_image_url: string | null
+  insurance_image_url: string | null
   boat_id?: string
   created_at?: string
   updated_at: string
@@ -40,6 +44,8 @@ export type BoatBase = {
   freeboard: number
   draft: number
   vessel_type: VesselType
+  registration_image_url: string | null
+  insurance_image_url: string | null
 }
 
 export type BoatCreate = {
@@ -53,6 +59,8 @@ export type BoatCreate = {
   freeboard: number
   draft: number
   vessel_type: VesselType
+  registration_image_url: string | null
+  insurance_image_url: string | null
 }
 
 export type BoatPublic = {
@@ -66,6 +74,8 @@ export type BoatPublic = {
   freeboard: number
   draft: number
   vessel_type: VesselType
+  registration_image_url: string | null
+  insurance_image_url: string | null
   boat_id: string
   owner_id: string
 }
@@ -81,12 +91,18 @@ export type BoatUpdate = {
   freeboard: number | null
   draft: number | null
   vessel_type: VesselType | null
-  boat_id: string
+  registration_image_url: string | null
+  insurance_image_url: string | null
 }
 
 export type BoatsPublic = {
   data: Array<BoatPublic>
   count: number
+}
+
+export type Body_boats_update_boat_docs = {
+  file_registration?: Blob | File | null
+  file_insurance?: Blob | File | null
 }
 
 export type Body_login_employees_login_access_token = {
@@ -109,6 +125,11 @@ export type Body_login_users_login_access_token_user = {
 
 export type Body_users_create_profile_pic_me = {
   file: Blob | File
+}
+
+export type Coordinate = {
+  latitude: number
+  longitude: number
 }
 
 export type DurationType = "hourly" | "daily" | "weekly" | "custom"
@@ -397,9 +418,20 @@ export type PaymentDetailsSimple = {
   brand: string
 }
 
+export type PaymentMethodPublic = {
+  id: string
+  is_default: boolean
+  card: StripeCardPublic
+}
+
 export type RegionData = {
   name: string
   subregions: Array<SubRegionData>
+}
+
+export type RegionStateData = {
+  region_data: Array<RegionData>
+  closest_subregion: SubRegionData | null
 }
 
 export type Reservation = {
@@ -511,6 +543,14 @@ export type ServicesPublic = {
   count: number
 }
 
+export type StripeCardPublic = {
+  country: string
+  display_brand: string
+  exp_month: number
+  exp_year: number
+  last4: string
+}
+
 export type SubRegion =
   | "British Virgin Islands"
   | "US Virgin Islands"
@@ -532,7 +572,7 @@ export type SubRegion =
 
 export type SubRegionData = {
   name: string
-  center: unknown[] | null
+  center: Coordinate | null
   zoom: number | null
   is_new: boolean | null
 }
@@ -554,9 +594,11 @@ export type UserBase = {
   last_name: string
   preferred_name?: string | null
   country_code: number
+  country_code_name: string
   phone_number: string
   emergency_contact_name?: string | null
   emergency_contact_country_code?: number | null
+  emergency_contact_country_code_name?: string | null
   emergency_contact_phone_number?: string | null
   mailing_address?: string | null
   mailing_city?: string | null
@@ -574,9 +616,11 @@ export type UserPublic = {
   last_name: string
   preferred_name?: string | null
   country_code: number
+  country_code_name: string
   phone_number: string
   emergency_contact_name?: string | null
   emergency_contact_country_code?: number | null
+  emergency_contact_country_code_name?: string | null
   emergency_contact_phone_number?: string | null
   mailing_address?: string | null
   mailing_city?: string | null
@@ -601,8 +645,17 @@ export type UserRegister = {
   first_name: string
   last_name: string
   country_code: number
+  country_code_name: string
   phone_number: string
   sign_up_code?: string | null
+}
+
+export type UserReservationsPublic = {
+  today: ReservationPublic | null
+  upcoming: Array<ReservationPublic>
+  past: Array<ReservationPublic>
+  cancelled: Array<ReservationPublic>
+  count: number
 }
 
 export type UserUpdate = {
@@ -611,10 +664,12 @@ export type UserUpdate = {
   first_name?: string | null
   last_name?: string | null
   preferred_name?: string | null
-  country_code: number
-  phone_number: string
+  country_code?: number | null
+  country_code_name?: string | null
+  phone_number?: string | null
   emergency_contact_name?: string | null
   emergency_contact_country_code?: number | null
+  emergency_contact_country_code_name?: string | null
   emergency_contact_phone_number?: string | null
   mailing_address?: string | null
   mailing_city?: string | null
@@ -632,15 +687,48 @@ export type UserUpdateMe = {
   email?: string | null
   preferred_name?: string | null
   country_code?: number | null
+  country_code_name?: string | null
   phone_number?: string | null
   emergency_contact_name?: string | null
   emergency_contact_country_code?: number | null
+  emergency_contact_country_code_name?: string
   emergency_contact_phone_number?: string | null
   mailing_address?: string | null
   mailing_city?: string | null
   mailing_state?: string | null
   mailing_postal_code?: string | null
   mailing_country?: string | null
+}
+
+export type UserWithPaymentPublic = {
+  email: string
+  is_active?: boolean
+  first_name: string
+  last_name: string
+  preferred_name?: string | null
+  country_code: number
+  country_code_name: string
+  phone_number: string
+  emergency_contact_name?: string | null
+  emergency_contact_country_code?: number | null
+  emergency_contact_country_code_name?: string | null
+  emergency_contact_phone_number?: string | null
+  mailing_address?: string | null
+  mailing_city?: string | null
+  mailing_state?: string | null
+  mailing_postal_code?: string | null
+  mailing_country?: string | null
+  profile_pic_url?: string | null
+  sign_up_code?: string | null
+  id: string
+  referral_code: string
+  display_name: string
+  created_at: string
+  updated_at: string
+  items: Array<Item>
+  reservations: Array<Reservation>
+  active_boats: Array<Boat>
+  payment_methods: Array<PaymentMethodPublic>
 }
 
 export type UsersPublic = {

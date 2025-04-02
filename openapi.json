@@ -540,6 +540,64 @@
         }
       }
     },
+    "/api/v1/boats/docs/{id}": {
+      "post": {
+        "tags": [
+          "boats"
+        ],
+        "summary": "Update Boat Docs",
+        "description": "Update a boat's documents.",
+        "operationId": "update_boat_docs",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_boats-update_boat_docs"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoatPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/boats/{id}": {
       "get": {
         "tags": [
@@ -593,7 +651,7 @@
           "boats"
         ],
         "summary": "Update Boat",
-        "description": "Update an boat.",
+        "description": "Update a boat.",
         "operationId": "update_boat",
         "security": [
           {
@@ -1401,33 +1459,6 @@
         "summary": "Read Amenities",
         "description": "Retrieve amenities.",
         "operationId": "read_amenities",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "skip",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 0,
-              "title": "Skip"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 100,
-              "title": "Limit"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -1438,18 +1469,13 @@
                 }
               }
             }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/api/v1/marinas/services": {
@@ -1832,13 +1858,13 @@
         }
       }
     },
-    "/api/v1/mooring-balls/eluminate": {
+    "/api/v1/mooring-balls/illuminate": {
       "get": {
         "tags": [
           "mooring-balls"
         ],
-        "summary": "Eluminate Sequence Options",
-        "operationId": "eluminate_sequence_options",
+        "summary": "Illuminate Sequence Options",
+        "operationId": "illuminate_sequence_options",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -1849,7 +1875,7 @@
                     "type": "string"
                   },
                   "type": "array",
-                  "title": "Response Mooring-Balls-Eluminate Sequence Options"
+                  "title": "Response Mooring-Balls-Illuminate Sequence Options"
                 }
               }
             }
@@ -1892,13 +1918,13 @@
         ]
       }
     },
-    "/api/v1/mooring-balls/eluminate/{mooring_ball_id}}": {
+    "/api/v1/mooring-balls/illuminate/{mooring_ball_id}}": {
       "post": {
         "tags": [
           "mooring-balls"
         ],
-        "summary": "Eluminate Mooring Ball",
-        "operationId": "eluminate_mooring_ball",
+        "summary": "Illuminate Mooring Ball",
+        "operationId": "illuminate_mooring_ball",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -2171,54 +2197,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/MooringBallPublic"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/mooring-balls/find/{id}": {
-      "get": {
-        "tags": [
-          "mooring-balls"
-        ],
-        "summary": "Find Mooring Ball",
-        "description": "Eluminate sequence for find my mooring_ball.",
-        "operationId": "find_mooring_ball",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Message"
                 }
               }
             }
@@ -2598,7 +2576,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ReservationsPublic"
+                  "$ref": "#/components/schemas/UserReservationsPublic"
                 }
               }
             }
@@ -2971,9 +2949,9 @@
         "tags": [
           "users"
         ],
-        "summary": "Verify Email",
+        "summary": "Get Verify Email",
         "description": "Check if user with this email exists in the system",
-        "operationId": "verify_email",
+        "operationId": "get_verify_email",
         "parameters": [
           {
             "name": "email_in",
@@ -3105,6 +3083,52 @@
       }
     },
     "/api/v1/users/payment-method/{payment_method_id}": {
+      "put": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Modify Customer Payment Method",
+        "description": "Modify a card for current user stripe payment info (set default).",
+        "operationId": "modify_customer_payment_method",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "payment_method_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Payment Method Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Users-Modify Customer Payment Method"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
       "delete": {
         "tags": [
           "users"
@@ -3225,7 +3249,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserPublic"
+                  "$ref": "#/components/schemas/UserWithPaymentPublic"
                 }
               }
             }
@@ -3745,11 +3769,54 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/RegionData"
-                  },
-                  "type": "array",
                   "title": "Response Utils-Get Region State Init"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "utils"
+        ],
+        "summary": "Get Region State Init With Coordinates",
+        "description": "Show region and subregions for mobile app alongside map and zoom presets for regions.\nOptionally show the closest subregion to the given coordinates.",
+        "operationId": "get_region_state_init_with_coordinates",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/Coordinate"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Coordinate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegionStateData"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -3883,6 +3950,13 @@
             "maxLength": 64,
             "minLength": 3,
             "title": "Name"
+          },
+          "ranking": {
+            "type": "integer",
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Ranking",
+            "default": 1
           }
         },
         "type": "object",
@@ -3898,6 +3972,13 @@
             "maxLength": 64,
             "minLength": 3,
             "title": "Name"
+          },
+          "ranking": {
+            "type": "integer",
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Ranking",
+            "default": 1
           },
           "amenity_id": {
             "type": "string",
@@ -3961,6 +4042,30 @@
           "vessel_type": {
             "$ref": "#/components/schemas/VesselType"
           },
+          "registration_image_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registration Image Url"
+          },
+          "insurance_image_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Insurance Image Url"
+          },
           "boat_id": {
             "type": "string",
             "format": "uuid",
@@ -3992,6 +4097,8 @@
           "freeboard",
           "draft",
           "vessel_type",
+          "registration_image_url",
+          "insurance_image_url",
           "updated_at",
           "owner_id"
         ],
@@ -4045,6 +4152,30 @@
           },
           "vessel_type": {
             "$ref": "#/components/schemas/VesselType"
+          },
+          "registration_image_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registration Image Url"
+          },
+          "insurance_image_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Insurance Image Url"
           }
         },
         "type": "object",
@@ -4056,7 +4187,9 @@
           "beam",
           "freeboard",
           "draft",
-          "vessel_type"
+          "vessel_type",
+          "registration_image_url",
+          "insurance_image_url"
         ],
         "title": "BoatBase"
       },
@@ -4108,6 +4241,30 @@
           },
           "vessel_type": {
             "$ref": "#/components/schemas/VesselType"
+          },
+          "registration_image_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registration Image Url"
+          },
+          "insurance_image_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Insurance Image Url"
           }
         },
         "type": "object",
@@ -4119,7 +4276,9 @@
           "beam",
           "freeboard",
           "draft",
-          "vessel_type"
+          "vessel_type",
+          "registration_image_url",
+          "insurance_image_url"
         ],
         "title": "BoatCreate"
       },
@@ -4172,6 +4331,30 @@
           "vessel_type": {
             "$ref": "#/components/schemas/VesselType"
           },
+          "registration_image_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registration Image Url"
+          },
+          "insurance_image_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Insurance Image Url"
+          },
           "boat_id": {
             "type": "string",
             "format": "uuid",
@@ -4193,6 +4376,8 @@
           "freeboard",
           "draft",
           "vessel_type",
+          "registration_image_url",
+          "insurance_image_url",
           "boat_id",
           "owner_id"
         ],
@@ -4303,10 +4488,29 @@
               }
             ]
           },
-          "boat_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Boat Id"
+          "registration_image_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registration Image Url"
+          },
+          "insurance_image_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Insurance Image Url"
           }
         },
         "type": "object",
@@ -4320,7 +4524,8 @@
           "freeboard",
           "draft",
           "vessel_type",
-          "boat_id"
+          "registration_image_url",
+          "insurance_image_url"
         ],
         "title": "BoatUpdate"
       },
@@ -4344,6 +4549,36 @@
           "count"
         ],
         "title": "BoatsPublic"
+      },
+      "Body_boats-update_boat_docs": {
+        "properties": {
+          "file_registration": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "binary"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Registration"
+          },
+          "file_insurance": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "binary"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Insurance"
+          }
+        },
+        "type": "object",
+        "title": "Body_boats-update_boat_docs"
       },
       "Body_login-employees-login_access_token": {
         "properties": {
@@ -4473,6 +4708,28 @@
         ],
         "title": "Body_users-create_profile_pic_me"
       },
+      "Coordinate": {
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "maximum": 90,
+            "minimum": -90,
+            "title": "Latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "maximum": 180,
+            "minimum": -180,
+            "title": "Longitude"
+          }
+        },
+        "type": "object",
+        "required": [
+          "latitude",
+          "longitude"
+        ],
+        "title": "Coordinate"
+      },
       "DurationType": {
         "type": "string",
         "enum": [
@@ -4501,17 +4758,7 @@
             "title": "Is Superuser",
             "default": false
           },
-          "first_name": {
-            "type": "string",
-            "maxLength": 64,
-            "title": "First Name"
-          },
-          "last_name": {
-            "type": "string",
-            "maxLength": 64,
-            "title": "Last Name"
-          },
-          "preferred_name": {
+          "full_name": {
             "anyOf": [
               {
                 "type": "string",
@@ -4521,7 +4768,7 @@
                 "type": "null"
               }
             ],
-            "title": "Preferred Name"
+            "title": "Full Name"
           },
           "marina_id": {
             "anyOf": [
@@ -4546,8 +4793,6 @@
         "type": "object",
         "required": [
           "email",
-          "first_name",
-          "last_name",
           "password"
         ],
         "title": "EmployeeCreate"
@@ -4570,17 +4815,7 @@
             "title": "Is Superuser",
             "default": false
           },
-          "first_name": {
-            "type": "string",
-            "maxLength": 64,
-            "title": "First Name"
-          },
-          "last_name": {
-            "type": "string",
-            "maxLength": 64,
-            "title": "Last Name"
-          },
-          "preferred_name": {
+          "full_name": {
             "anyOf": [
               {
                 "type": "string",
@@ -4590,7 +4825,7 @@
                 "type": "null"
               }
             ],
-            "title": "Preferred Name"
+            "title": "Full Name"
           },
           "marina_id": {
             "anyOf": [
@@ -4633,8 +4868,6 @@
         "type": "object",
         "required": [
           "email",
-          "first_name",
-          "last_name",
           "marina_id",
           "id",
           "created_at",
@@ -4657,15 +4890,17 @@
             "minLength": 8,
             "title": "Password"
           },
-          "first_name": {
-            "type": "string",
-            "maxLength": 64,
-            "title": "First Name"
-          },
-          "last_name": {
-            "type": "string",
-            "maxLength": 64,
-            "title": "Last Name"
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
           },
           "marina_id": {
             "anyOf": [
@@ -4684,9 +4919,7 @@
         "type": "object",
         "required": [
           "email",
-          "password",
-          "first_name",
-          "last_name"
+          "password"
         ],
         "title": "EmployeeRegister"
       },
@@ -4715,17 +4948,7 @@
             "title": "Is Superuser",
             "default": false
           },
-          "first_name": {
-            "type": "string",
-            "maxLength": 64,
-            "title": "First Name"
-          },
-          "last_name": {
-            "type": "string",
-            "maxLength": 64,
-            "title": "Last Name"
-          },
-          "preferred_name": {
+          "full_name": {
             "anyOf": [
               {
                 "type": "string",
@@ -4735,7 +4958,7 @@
                 "type": "null"
               }
             ],
-            "title": "Preferred Name"
+            "title": "Full Name"
           },
           "marina_id": {
             "anyOf": [
@@ -4765,15 +4988,11 @@
           }
         },
         "type": "object",
-        "required": [
-          "first_name",
-          "last_name"
-        ],
         "title": "EmployeeUpdate"
       },
       "EmployeeUpdateMe": {
         "properties": {
-          "first_name": {
+          "full_name": {
             "anyOf": [
               {
                 "type": "string",
@@ -4783,19 +5002,7 @@
                 "type": "null"
               }
             ],
-            "title": "First Name"
-          },
-          "last_name": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 64
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Last Name"
+            "title": "Full Name"
           },
           "email": {
             "anyOf": [
@@ -6246,6 +6453,28 @@
         ],
         "title": "PaymentDetailsSimple"
       },
+      "PaymentMethodPublic": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "is_default": {
+            "type": "boolean",
+            "title": "Is Default"
+          },
+          "card": {
+            "$ref": "#/components/schemas/StripeCardPublic"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "is_default",
+          "card"
+        ],
+        "title": "PaymentMethodPublic"
+      },
       "RegionData": {
         "properties": {
           "name": {
@@ -6266,6 +6495,33 @@
           "subregions"
         ],
         "title": "RegionData"
+      },
+      "RegionStateData": {
+        "properties": {
+          "region_data": {
+            "items": {
+              "$ref": "#/components/schemas/RegionData"
+            },
+            "type": "array",
+            "title": "Region Data"
+          },
+          "closest_subregion": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SubRegionData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "region_data",
+          "closest_subregion"
+        ],
+        "title": "RegionStateData"
       },
       "Reservation": {
         "properties": {
@@ -6845,6 +7101,39 @@
         ],
         "title": "ServicesPublic"
       },
+      "StripeCardPublic": {
+        "properties": {
+          "country": {
+            "type": "string",
+            "title": "Country"
+          },
+          "display_brand": {
+            "type": "string",
+            "title": "Display Brand"
+          },
+          "exp_month": {
+            "type": "integer",
+            "title": "Exp Month"
+          },
+          "exp_year": {
+            "type": "integer",
+            "title": "Exp Year"
+          },
+          "last4": {
+            "type": "string",
+            "title": "Last4"
+          }
+        },
+        "type": "object",
+        "required": [
+          "country",
+          "display_brand",
+          "exp_month",
+          "exp_year",
+          "last4"
+        ],
+        "title": "StripeCardPublic"
+      },
       "SubRegion": {
         "type": "string",
         "enum": [
@@ -6877,23 +7166,12 @@
           "center": {
             "anyOf": [
               {
-                "prefixItems": [
-                  {
-                    "type": "number"
-                  },
-                  {
-                    "type": "number"
-                  }
-                ],
-                "type": "array",
-                "maxItems": 2,
-                "minItems": 2
+                "$ref": "#/components/schemas/Coordinate"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Center"
+            ]
           },
           "zoom": {
             "anyOf": [
@@ -7008,6 +7286,11 @@
             "minimum": 1,
             "title": "Country Code"
           },
+          "country_code_name": {
+            "type": "string",
+            "maxLength": 3,
+            "title": "Country Code Name"
+          },
           "phone_number": {
             "type": "string",
             "maxLength": 20,
@@ -7037,6 +7320,18 @@
               }
             ],
             "title": "Emergency Contact Country Code"
+          },
+          "emergency_contact_country_code_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Emergency Contact Country Code Name"
           },
           "emergency_contact_phone_number": {
             "anyOf": [
@@ -7141,6 +7436,7 @@
           "first_name",
           "last_name",
           "country_code",
+          "country_code_name",
           "phone_number"
         ],
         "title": "UserBase"
@@ -7186,6 +7482,11 @@
             "minimum": 1,
             "title": "Country Code"
           },
+          "country_code_name": {
+            "type": "string",
+            "maxLength": 3,
+            "title": "Country Code Name"
+          },
           "phone_number": {
             "type": "string",
             "maxLength": 20,
@@ -7215,6 +7516,18 @@
               }
             ],
             "title": "Emergency Contact Country Code"
+          },
+          "emergency_contact_country_code_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Emergency Contact Country Code Name"
           },
           "emergency_contact_phone_number": {
             "anyOf": [
@@ -7363,6 +7676,7 @@
           "first_name",
           "last_name",
           "country_code",
+          "country_code_name",
           "phone_number",
           "id",
           "referral_code",
@@ -7405,6 +7719,11 @@
             "minimum": 1,
             "title": "Country Code"
           },
+          "country_code_name": {
+            "type": "string",
+            "maxLength": 3,
+            "title": "Country Code Name"
+          },
           "phone_number": {
             "type": "string",
             "maxLength": 20,
@@ -7430,9 +7749,58 @@
           "first_name",
           "last_name",
           "country_code",
+          "country_code_name",
           "phone_number"
         ],
         "title": "UserRegister"
+      },
+      "UserReservationsPublic": {
+        "properties": {
+          "today": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReservationPublic"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "upcoming": {
+            "items": {
+              "$ref": "#/components/schemas/ReservationPublic"
+            },
+            "type": "array",
+            "title": "Upcoming"
+          },
+          "past": {
+            "items": {
+              "$ref": "#/components/schemas/ReservationPublic"
+            },
+            "type": "array",
+            "title": "Past"
+          },
+          "cancelled": {
+            "items": {
+              "$ref": "#/components/schemas/ReservationPublic"
+            },
+            "type": "array",
+            "title": "Cancelled"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "today",
+          "upcoming",
+          "past",
+          "cancelled",
+          "count"
+        ],
+        "title": "UserReservationsPublic"
       },
       "UserUpdate": {
         "properties": {
@@ -7491,14 +7859,40 @@
             "title": "Preferred Name"
           },
           "country_code": {
-            "type": "integer",
-            "maximum": 999,
-            "minimum": 1,
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 999,
+                "minimum": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Country Code"
           },
+          "country_code_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country Code Name"
+          },
           "phone_number": {
-            "type": "string",
-            "maxLength": 20,
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Phone Number"
           },
           "emergency_contact_name": {
@@ -7525,6 +7919,18 @@
               }
             ],
             "title": "Emergency Contact Country Code"
+          },
+          "emergency_contact_country_code_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Emergency Contact Country Code Name"
           },
           "emergency_contact_phone_number": {
             "anyOf": [
@@ -7637,10 +8043,6 @@
           }
         },
         "type": "object",
-        "required": [
-          "country_code",
-          "phone_number"
-        ],
         "title": "UserUpdate"
       },
       "UserUpdateMe": {
@@ -7707,6 +8109,18 @@
             ],
             "title": "Country Code"
           },
+          "country_code_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country Code Name"
+          },
           "phone_number": {
             "anyOf": [
               {
@@ -7743,6 +8157,11 @@
               }
             ],
             "title": "Emergency Contact Country Code"
+          },
+          "emergency_contact_country_code_name": {
+            "type": "string",
+            "maxLength": 3,
+            "title": "Emergency Contact Country Code Name"
           },
           "emergency_contact_phone_number": {
             "anyOf": [
@@ -7819,6 +8238,262 @@
         },
         "type": "object",
         "title": "UserUpdateMe"
+      },
+      "UserWithPaymentPublic": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 64,
+            "format": "email",
+            "title": "Email"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          },
+          "first_name": {
+            "type": "string",
+            "maxLength": 64,
+            "title": "First Name"
+          },
+          "last_name": {
+            "type": "string",
+            "maxLength": 64,
+            "title": "Last Name"
+          },
+          "preferred_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Name"
+          },
+          "country_code": {
+            "type": "integer",
+            "maximum": 999,
+            "minimum": 1,
+            "title": "Country Code"
+          },
+          "country_code_name": {
+            "type": "string",
+            "maxLength": 3,
+            "title": "Country Code Name"
+          },
+          "phone_number": {
+            "type": "string",
+            "maxLength": 20,
+            "title": "Phone Number"
+          },
+          "emergency_contact_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Emergency Contact Name"
+          },
+          "emergency_contact_country_code": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 999,
+                "minimum": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Emergency Contact Country Code"
+          },
+          "emergency_contact_country_code_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Emergency Contact Country Code Name"
+          },
+          "emergency_contact_phone_number": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Emergency Contact Phone Number"
+          },
+          "mailing_address": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mailing Address"
+          },
+          "mailing_city": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mailing City"
+          },
+          "mailing_state": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mailing State"
+          },
+          "mailing_postal_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mailing Postal Code"
+          },
+          "mailing_country": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mailing Country"
+          },
+          "profile_pic_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Pic Url"
+          },
+          "sign_up_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sign Up Code"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "referral_code": {
+            "type": "string",
+            "title": "Referral Code"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "reservations": {
+            "items": {
+              "$ref": "#/components/schemas/Reservation"
+            },
+            "type": "array",
+            "title": "Reservations"
+          },
+          "active_boats": {
+            "items": {
+              "$ref": "#/components/schemas/Boat"
+            },
+            "type": "array",
+            "title": "Active Boats"
+          },
+          "payment_methods": {
+            "items": {
+              "$ref": "#/components/schemas/PaymentMethodPublic"
+            },
+            "type": "array",
+            "title": "Payment Methods"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "first_name",
+          "last_name",
+          "country_code",
+          "country_code_name",
+          "phone_number",
+          "id",
+          "referral_code",
+          "display_name",
+          "created_at",
+          "updated_at",
+          "items",
+          "reservations",
+          "active_boats",
+          "payment_methods"
+        ],
+        "title": "UserWithPaymentPublic"
       },
       "UsersPublic": {
         "properties": {

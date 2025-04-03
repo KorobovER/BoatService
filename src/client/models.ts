@@ -139,8 +139,8 @@ export type EmployeeCreate = {
   is_active?: boolean
   is_superuser?: boolean
   full_name?: string | null
-  marina_id?: string | null
   password: string
+  marina_id?: string | null
 }
 
 export type EmployeePublic = {
@@ -148,11 +148,10 @@ export type EmployeePublic = {
   is_active?: boolean
   is_superuser?: boolean
   full_name?: string | null
-  marina_id: string | null
   id: string
   created_at: string
   updated_at: string
-  marina: MarinaPublicBase | null
+  marinas: Array<MarinaPublicBase>
 }
 
 export type EmployeeRegister = {
@@ -167,8 +166,8 @@ export type EmployeeUpdate = {
   is_active?: boolean
   is_superuser?: boolean
   full_name?: string | null
-  marina_id?: string | null
   password?: string | null
+  marina_links?: Array<string>
 }
 
 export type EmployeeUpdateMe = {
@@ -215,11 +214,11 @@ export type ItemsPublic = {
 }
 
 export type MarinaBase = {
+  latitude: number
+  longitude: number
   name: string
   description: string | null
   address: string
-  latitude: number
-  longitude: number
   website: string
   contact_phone: string
   contact_email: string
@@ -231,11 +230,11 @@ export type MarinaBase = {
 }
 
 export type MarinaCreate = {
+  latitude: number
+  longitude: number
   name: string
   description: string | null
   address: string
-  latitude: number
-  longitude: number
   website: string
   contact_phone: string
   contact_email: string
@@ -247,11 +246,11 @@ export type MarinaCreate = {
 }
 
 export type MarinaPublic = {
+  latitude: number
+  longitude: number
   name: string
   description: string | null
   address: string
-  latitude: number
-  longitude: number
   website: string
   contact_phone: string
   contact_email: string
@@ -268,11 +267,11 @@ export type MarinaPublic = {
 }
 
 export type MarinaPublicBase = {
+  latitude: number
+  longitude: number
   name: string
   description: string | null
   address: string
-  latitude: number
-  longitude: number
   website: string
   contact_phone: string
   contact_email: string
@@ -314,11 +313,11 @@ export type Message = {
 }
 
 export type MooringBall = {
+  latitude: number
+  longitude: number
   mooring_ball_id: string
   ball_number: number
   version: string
-  latitude: number
-  longitude: number
   is_active?: boolean
   depth: number
   created_at?: string
@@ -327,21 +326,21 @@ export type MooringBall = {
 }
 
 export type MooringBallBase = {
+  latitude: number
+  longitude: number
   mooring_ball_id: string
   ball_number: number
   version: string
-  latitude: number
-  longitude: number
   is_active?: boolean
   depth: number
 }
 
 export type MooringBallCreate = {
+  latitude: number
+  longitude: number
   mooring_ball_id: string
   ball_number: number
   version: string
-  latitude: number
-  longitude: number
   is_active?: boolean
   depth: number
   marina_id: string
@@ -353,11 +352,11 @@ export type MooringBallPricingPublic = {
 }
 
 export type MooringBallPublic = {
+  latitude: number
+  longitude: number
   mooring_ball_id: string
   ball_number: number
   version: string
-  latitude: number
-  longitude: number
   is_active?: boolean
   depth: number
   marina_id: string
@@ -371,11 +370,11 @@ export type MooringBallUpdate = {
 }
 
 export type MooringBallWithReservationBasePublic = {
+  latitude: number
+  longitude: number
   mooring_ball_id: string
   ball_number: number
   version: string
-  latitude: number
-  longitude: number
   is_active?: boolean
   depth: number
   marina_id: string
@@ -385,11 +384,11 @@ export type MooringBallWithReservationBasePublic = {
 }
 
 export type MooringBallWithReservationsPublic = {
+  latitude: number
+  longitude: number
   mooring_ball_id: string
   ball_number: number
   version: string
-  latitude: number
-  longitude: number
   is_active?: boolean
   depth: number
   marina_id: string
@@ -691,7 +690,7 @@ export type UserUpdateMe = {
   phone_number?: string | null
   emergency_contact_name?: string | null
   emergency_contact_country_code?: number | null
-  emergency_contact_country_code_name?: string
+  emergency_contact_country_code_name?: string | null
   emergency_contact_phone_number?: string | null
   mailing_address?: string | null
   mailing_city?: string | null

@@ -286,10 +286,15 @@ export class LoginUsersService {
 
 export type TDataReadBoats = {
   limit?: number
+  marinaId: string
   skip?: number
 }
 export type TDataCreateBoat = {
   requestBody: BoatCreate
+}
+export type TDataReadBoatsMe = {
+  limit?: number
+  skip?: number
 }
 export type TDataUpdateBoatDocs = {
   formData?: Body_boats_update_boat_docs
@@ -327,13 +332,14 @@ export class BoatsService {
    * @throws ApiError
    */
   public static readBoats(
-    data: TDataReadBoats = {},
+    data: TDataReadBoats,
   ): CancelablePromise<BoatsPublic> {
-    const { limit = 100, skip = 0 } = data
+    const { limit = 100, marinaId, skip = 0 } = data
     return __request(OpenAPI, {
       method: "GET",
       url: "/api/v1/boats/",
       query: {
+        marina_id: marinaId,
         skip,
         limit,
       },
@@ -358,6 +364,29 @@ export class BoatsService {
       url: "/api/v1/boats/",
       body: requestBody,
       mediaType: "application/json",
+      errors: {
+        422: `Validation Error`,
+      },
+    })
+  }
+
+  /**
+   * Read Boats Me
+   * Retrieve boats for user.
+   * @returns BoatsPublic Successful Response
+   * @throws ApiError
+   */
+  public static readBoatsMe(
+    data: TDataReadBoatsMe = {},
+  ): CancelablePromise<BoatsPublic> {
+    const { limit = 100, skip = 0 } = data
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/boats/me",
+      query: {
+        skip,
+        limit,
+      },
       errors: {
         422: `Validation Error`,
       },
@@ -455,6 +484,7 @@ export class BoatsService {
 
 export type TDataReadEmployees = {
   limit?: number
+  marinaId: string
   skip?: number
 }
 export type TDataCreateEmployee = {
@@ -483,18 +513,19 @@ export type TDataDeleteEmployee = {
 export class EmployeesService {
   /**
    * Read Employees
-   * Retrieve employees.
+   * Retrieve employees, must view by a marina.
    * @returns EmployeesPublic Successful Response
    * @throws ApiError
    */
   public static readEmployees(
-    data: TDataReadEmployees = {},
+    data: TDataReadEmployees,
   ): CancelablePromise<EmployeesPublic> {
-    const { limit = 100, skip = 0 } = data
+    const { limit = 100, marinaId, skip = 0 } = data
     return __request(OpenAPI, {
       method: "GET",
       url: "/api/v1/employees/",
       query: {
+        marina_id: marinaId,
         skip,
         limit,
       },
@@ -816,7 +847,7 @@ export type TDataReadServices = {
   skip?: number
 }
 export type TDataOnboardMarina = {
-  marinaId: string
+  id: string
 }
 export type TDataReadMarinas = {
   limit?: number
@@ -883,12 +914,12 @@ export class MarinasService {
   public static onboardMarina(
     data: TDataOnboardMarina,
   ): CancelablePromise<unknown> {
-    const { marinaId } = data
+    const { id } = data
     return __request(OpenAPI, {
       method: "POST",
-      url: "/api/v1/marinas/onboard",
-      query: {
-        marina_id: marinaId,
+      url: "/api/v1/marinas/onboard/{id}",
+      path: {
+        id,
       },
       errors: {
         422: `Validation Error`,
@@ -1976,6 +2007,32 @@ export class UtilsService {
       errors: {
         422: `Validation Error`,
       },
+    })
+  }
+
+  /**
+   * Generate Geojson Mooring Buoy
+   * Generate geojson for mooring balls
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static generateGeojsonMooringBuoy(): CancelablePromise<unknown> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/utils/generate-geojson-mooring-ball",
+    })
+  }
+
+  /**
+   * Generate Geojson Marina
+   * Generate geojson for marinas
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static generateGeojsonMarina(): CancelablePromise<unknown> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/utils/generate-geojson-marina",
     })
   }
 

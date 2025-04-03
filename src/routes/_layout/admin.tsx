@@ -38,7 +38,8 @@ const PER_PAGE = 5
 function getUsersQueryOptions({ page }: { page: number }) {
   return {
     queryFn: () =>
-      EmployeesService.readEmployees({ skip: (page - 1) * PER_PAGE, limit: PER_PAGE }),
+        // todo: pass proper marinaId
+        EmployeesService.readEmployees({ marinaId: "", skip: (page - 1) * PER_PAGE, limit: PER_PAGE }),
     queryKey: ["users", { page }],
   }
 }

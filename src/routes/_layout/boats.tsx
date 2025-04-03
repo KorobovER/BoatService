@@ -37,7 +37,8 @@ const PER_PAGE = 5
 function getBoatsQueryOptions({ page }: { page: number }) {
   return {
     queryFn: () =>
-      BoatsService.readBoats({ skip: (page - 1) * PER_PAGE, limit: PER_PAGE }),
+      // todo: pass proper marinaId
+      BoatsService.readBoats({marinaId: "", skip: (page - 1) * PER_PAGE, limit: PER_PAGE }),
     queryKey: ["boats", { page }],
   }
 }

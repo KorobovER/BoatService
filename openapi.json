@@ -451,6 +451,16 @@
         ],
         "parameters": [
           {
+            "name": "marina_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Marina Id"
+            }
+          },
+          {
             "name": "skip",
             "in": "query",
             "required": false,
@@ -523,6 +533,65 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/BoatPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/boats/me": {
+      "get": {
+        "tags": [
+          "boats"
+        ],
+        "summary": "Read Boats Me",
+        "description": "Retrieve boats for user.",
+        "operationId": "read_boats_me",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoatsPublic"
                 }
               }
             }
@@ -757,7 +826,7 @@
           "employees"
         ],
         "summary": "Read Employees",
-        "description": "Retrieve employees.",
+        "description": "Retrieve employees, must view by a marina.",
         "operationId": "read_employees",
         "security": [
           {
@@ -765,6 +834,16 @@
           }
         ],
         "parameters": [
+          {
+            "name": "marina_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Marina Id"
+            }
+          },
           {
             "name": "skip",
             "in": "query",
@@ -1537,7 +1616,7 @@
         }
       }
     },
-    "/api/v1/marinas/onboard": {
+    "/api/v1/marinas/onboard/{id}": {
       "post": {
         "tags": [
           "marinas"
@@ -1552,12 +1631,13 @@
         ],
         "parameters": [
           {
-            "name": "marina_id",
-            "in": "query",
+            "name": "id",
+            "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Marina Id"
+              "format": "uuid",
+              "title": "Id"
             }
           }
         ],
@@ -3824,6 +3904,60 @@
         }
       }
     },
+    "/api/v1/utils/generate-geojson-mooring-ball": {
+      "get": {
+        "tags": [
+          "utils"
+        ],
+        "summary": "Generate Geojson Mooring Buoy",
+        "description": "Generate geojson for mooring balls",
+        "operationId": "generate_geojson_mooring_buoy",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Utils-Generate Geojson Mooring Buoy"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/utils/generate-geojson-marina": {
+      "get": {
+        "tags": [
+          "utils"
+        ],
+        "summary": "Generate Geojson Marina",
+        "description": "Generate geojson for marinas",
+        "operationId": "generate_geojson_marina",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Utils-Generate Geojson Marina"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/utils/test-email/": {
       "post": {
         "tags": [
@@ -4770,6 +4904,12 @@
             ],
             "title": "Full Name"
           },
+          "password": {
+            "type": "string",
+            "maxLength": 40,
+            "minLength": 8,
+            "title": "Password"
+          },
           "marina_id": {
             "anyOf": [
               {
@@ -4782,12 +4922,6 @@
               }
             ],
             "title": "Marina Id"
-          },
-          "password": {
-            "type": "string",
-            "maxLength": 40,
-            "minLength": 8,
-            "title": "Password"
           }
         },
         "type": "object",
@@ -4827,18 +4961,6 @@
             ],
             "title": "Full Name"
           },
-          "marina_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Marina Id"
-          },
           "id": {
             "type": "string",
             "format": "uuid",
@@ -4854,25 +4976,21 @@
             "format": "date-time",
             "title": "Updated At"
           },
-          "marina": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/MarinaPublicBase"
-              },
-              {
-                "type": "null"
-              }
-            ]
+          "marinas": {
+            "items": {
+              "$ref": "#/components/schemas/MarinaPublicBase"
+            },
+            "type": "array",
+            "title": "Marinas"
           }
         },
         "type": "object",
         "required": [
           "email",
-          "marina_id",
           "id",
           "created_at",
           "updated_at",
-          "marina"
+          "marinas"
         ],
         "title": "EmployeePublic"
       },
@@ -4960,19 +5078,6 @@
             ],
             "title": "Full Name"
           },
-          "marina_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 32,
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Marina Id"
-          },
           "password": {
             "anyOf": [
               {
@@ -4985,6 +5090,15 @@
               }
             ],
             "title": "Password"
+          },
+          "marina_links": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Marina Links",
+            "default": []
           }
         },
         "type": "object",
@@ -5212,6 +5326,18 @@
       },
       "MarinaBase": {
         "properties": {
+          "latitude": {
+            "type": "number",
+            "maximum": 90,
+            "minimum": -90,
+            "title": "Latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "maximum": 180,
+            "minimum": -180,
+            "title": "Longitude"
+          },
           "name": {
             "type": "string",
             "maxLength": 64,
@@ -5236,14 +5362,6 @@
             "maxLength": 255,
             "minLength": 3,
             "title": "Address"
-          },
-          "latitude": {
-            "type": "number",
-            "title": "Latitude"
-          },
-          "longitude": {
-            "type": "number",
-            "title": "Longitude"
           },
           "website": {
             "type": "string",
@@ -5317,11 +5435,11 @@
         },
         "type": "object",
         "required": [
+          "latitude",
+          "longitude",
           "name",
           "description",
           "address",
-          "latitude",
-          "longitude",
           "website",
           "contact_phone",
           "contact_email",
@@ -5335,6 +5453,18 @@
       },
       "MarinaCreate": {
         "properties": {
+          "latitude": {
+            "type": "number",
+            "maximum": 90,
+            "minimum": -90,
+            "title": "Latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "maximum": 180,
+            "minimum": -180,
+            "title": "Longitude"
+          },
           "name": {
             "type": "string",
             "maxLength": 64,
@@ -5359,14 +5489,6 @@
             "maxLength": 255,
             "minLength": 3,
             "title": "Address"
-          },
-          "latitude": {
-            "type": "number",
-            "title": "Latitude"
-          },
-          "longitude": {
-            "type": "number",
-            "title": "Longitude"
           },
           "website": {
             "type": "string",
@@ -5440,11 +5562,11 @@
         },
         "type": "object",
         "required": [
+          "latitude",
+          "longitude",
           "name",
           "description",
           "address",
-          "latitude",
-          "longitude",
           "website",
           "contact_phone",
           "contact_email",
@@ -5458,6 +5580,18 @@
       },
       "MarinaPublic": {
         "properties": {
+          "latitude": {
+            "type": "number",
+            "maximum": 90,
+            "minimum": -90,
+            "title": "Latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "maximum": 180,
+            "minimum": -180,
+            "title": "Longitude"
+          },
           "name": {
             "type": "string",
             "maxLength": 64,
@@ -5482,14 +5616,6 @@
             "maxLength": 255,
             "minLength": 3,
             "title": "Address"
-          },
-          "latitude": {
-            "type": "number",
-            "title": "Latitude"
-          },
-          "longitude": {
-            "type": "number",
-            "title": "Longitude"
           },
           "website": {
             "type": "string",
@@ -5596,11 +5722,11 @@
         },
         "type": "object",
         "required": [
+          "latitude",
+          "longitude",
           "name",
           "description",
           "address",
-          "latitude",
-          "longitude",
           "website",
           "contact_phone",
           "contact_email",
@@ -5619,6 +5745,18 @@
       },
       "MarinaPublicBase": {
         "properties": {
+          "latitude": {
+            "type": "number",
+            "maximum": 90,
+            "minimum": -90,
+            "title": "Latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "maximum": 180,
+            "minimum": -180,
+            "title": "Longitude"
+          },
           "name": {
             "type": "string",
             "maxLength": 64,
@@ -5643,14 +5781,6 @@
             "maxLength": 255,
             "minLength": 3,
             "title": "Address"
-          },
-          "latitude": {
-            "type": "number",
-            "title": "Latitude"
-          },
-          "longitude": {
-            "type": "number",
-            "title": "Longitude"
           },
           "website": {
             "type": "string",
@@ -5743,11 +5873,11 @@
         },
         "type": "object",
         "required": [
+          "latitude",
+          "longitude",
           "name",
           "description",
           "address",
-          "latitude",
-          "longitude",
           "website",
           "contact_phone",
           "contact_email",
@@ -5957,6 +6087,18 @@
       },
       "MooringBall": {
         "properties": {
+          "latitude": {
+            "type": "number",
+            "maximum": 90,
+            "minimum": -90,
+            "title": "Latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "maximum": 180,
+            "minimum": -180,
+            "title": "Longitude"
+          },
           "mooring_ball_id": {
             "type": "string",
             "maxLength": 8,
@@ -5972,14 +6114,6 @@
             "maxLength": 5,
             "minLength": 3,
             "title": "Version"
-          },
-          "latitude": {
-            "type": "number",
-            "title": "Latitude"
-          },
-          "longitude": {
-            "type": "number",
-            "title": "Longitude"
           },
           "is_active": {
             "type": "boolean",
@@ -6008,11 +6142,11 @@
         },
         "type": "object",
         "required": [
+          "latitude",
+          "longitude",
           "mooring_ball_id",
           "ball_number",
           "version",
-          "latitude",
-          "longitude",
           "depth",
           "updated_at",
           "marina_id"
@@ -6021,6 +6155,18 @@
       },
       "MooringBallBase": {
         "properties": {
+          "latitude": {
+            "type": "number",
+            "maximum": 90,
+            "minimum": -90,
+            "title": "Latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "maximum": 180,
+            "minimum": -180,
+            "title": "Longitude"
+          },
           "mooring_ball_id": {
             "type": "string",
             "maxLength": 8,
@@ -6036,14 +6182,6 @@
             "maxLength": 5,
             "minLength": 3,
             "title": "Version"
-          },
-          "latitude": {
-            "type": "number",
-            "title": "Latitude"
-          },
-          "longitude": {
-            "type": "number",
-            "title": "Longitude"
           },
           "is_active": {
             "type": "boolean",
@@ -6057,17 +6195,29 @@
         },
         "type": "object",
         "required": [
+          "latitude",
+          "longitude",
           "mooring_ball_id",
           "ball_number",
           "version",
-          "latitude",
-          "longitude",
           "depth"
         ],
         "title": "MooringBallBase"
       },
       "MooringBallCreate": {
         "properties": {
+          "latitude": {
+            "type": "number",
+            "maximum": 90,
+            "minimum": -90,
+            "title": "Latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "maximum": 180,
+            "minimum": -180,
+            "title": "Longitude"
+          },
           "mooring_ball_id": {
             "type": "string",
             "maxLength": 8,
@@ -6083,14 +6233,6 @@
             "maxLength": 5,
             "minLength": 3,
             "title": "Version"
-          },
-          "latitude": {
-            "type": "number",
-            "title": "Latitude"
-          },
-          "longitude": {
-            "type": "number",
-            "title": "Longitude"
           },
           "is_active": {
             "type": "boolean",
@@ -6109,11 +6251,11 @@
         },
         "type": "object",
         "required": [
+          "latitude",
+          "longitude",
           "mooring_ball_id",
           "ball_number",
           "version",
-          "latitude",
-          "longitude",
           "depth",
           "marina_id"
         ],
@@ -6138,6 +6280,18 @@
       },
       "MooringBallPublic": {
         "properties": {
+          "latitude": {
+            "type": "number",
+            "maximum": 90,
+            "minimum": -90,
+            "title": "Latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "maximum": 180,
+            "minimum": -180,
+            "title": "Longitude"
+          },
           "mooring_ball_id": {
             "type": "string",
             "title": "Mooring Ball Id"
@@ -6151,14 +6305,6 @@
             "maxLength": 5,
             "minLength": 3,
             "title": "Version"
-          },
-          "latitude": {
-            "type": "number",
-            "title": "Latitude"
-          },
-          "longitude": {
-            "type": "number",
-            "title": "Longitude"
           },
           "is_active": {
             "type": "boolean",
@@ -6187,11 +6333,11 @@
         },
         "type": "object",
         "required": [
+          "latitude",
+          "longitude",
           "mooring_ball_id",
           "ball_number",
           "version",
-          "latitude",
-          "longitude",
           "depth",
           "marina_id",
           "marina",
@@ -6233,6 +6379,18 @@
       },
       "MooringBallWithReservationBasePublic": {
         "properties": {
+          "latitude": {
+            "type": "number",
+            "maximum": 90,
+            "minimum": -90,
+            "title": "Latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "maximum": 180,
+            "minimum": -180,
+            "title": "Longitude"
+          },
           "mooring_ball_id": {
             "type": "string",
             "title": "Mooring Ball Id"
@@ -6246,14 +6404,6 @@
             "maxLength": 5,
             "minLength": 3,
             "title": "Version"
-          },
-          "latitude": {
-            "type": "number",
-            "title": "Latitude"
-          },
-          "longitude": {
-            "type": "number",
-            "title": "Longitude"
           },
           "is_active": {
             "type": "boolean",
@@ -6289,11 +6439,11 @@
         },
         "type": "object",
         "required": [
+          "latitude",
+          "longitude",
           "mooring_ball_id",
           "ball_number",
           "version",
-          "latitude",
-          "longitude",
           "depth",
           "marina_id",
           "marina",
@@ -6304,6 +6454,18 @@
       },
       "MooringBallWithReservationsPublic": {
         "properties": {
+          "latitude": {
+            "type": "number",
+            "maximum": 90,
+            "minimum": -90,
+            "title": "Latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "maximum": 180,
+            "minimum": -180,
+            "title": "Longitude"
+          },
           "mooring_ball_id": {
             "type": "string",
             "title": "Mooring Ball Id"
@@ -6317,14 +6479,6 @@
             "maxLength": 5,
             "minLength": 3,
             "title": "Version"
-          },
-          "latitude": {
-            "type": "number",
-            "title": "Latitude"
-          },
-          "longitude": {
-            "type": "number",
-            "title": "Longitude"
           },
           "is_active": {
             "type": "boolean",
@@ -6360,11 +6514,11 @@
         },
         "type": "object",
         "required": [
+          "latitude",
+          "longitude",
           "mooring_ball_id",
           "ball_number",
           "version",
-          "latitude",
-          "longitude",
           "depth",
           "marina_id",
           "marina",
@@ -8159,8 +8313,15 @@
             "title": "Emergency Contact Country Code"
           },
           "emergency_contact_country_code_name": {
-            "type": "string",
-            "maxLength": 3,
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Emergency Contact Country Code Name"
           },
           "emergency_contact_phone_number": {

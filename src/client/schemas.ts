@@ -739,6 +739,12 @@ export const $EmployeeCreate = {
         },
       ],
     },
+    password: {
+      type: "string",
+      isRequired: true,
+      maxLength: 40,
+      minLength: 8,
+    },
     marina_id: {
       type: "any-of",
       contains: [
@@ -751,12 +757,6 @@ export const $EmployeeCreate = {
           type: "null",
         },
       ],
-    },
-    password: {
-      type: "string",
-      isRequired: true,
-      maxLength: 40,
-      minLength: 8,
     },
   },
 } as const
@@ -789,19 +789,6 @@ export const $EmployeePublic = {
         },
       ],
     },
-    marina_id: {
-      type: "any-of",
-      contains: [
-        {
-          type: "string",
-          format: "uuid",
-        },
-        {
-          type: "null",
-        },
-      ],
-      isRequired: true,
-    },
     id: {
       type: "string",
       isRequired: true,
@@ -817,16 +804,11 @@ export const $EmployeePublic = {
       isRequired: true,
       format: "date-time",
     },
-    marina: {
-      type: "any-of",
-      contains: [
-        {
-          type: "MarinaPublicBase",
-        },
-        {
-          type: "null",
-        },
-      ],
+    marinas: {
+      type: "array",
+      contains: {
+        type: "MarinaPublicBase",
+      },
       isRequired: true,
     },
   },
@@ -909,19 +891,6 @@ export const $EmployeeUpdate = {
         },
       ],
     },
-    marina_id: {
-      type: "any-of",
-      contains: [
-        {
-          type: "string",
-          format: "uuid",
-          maxLength: 32,
-        },
-        {
-          type: "null",
-        },
-      ],
-    },
     password: {
       type: "any-of",
       contains: [
@@ -934,6 +903,14 @@ export const $EmployeeUpdate = {
           type: "null",
         },
       ],
+    },
+    marina_links: {
+      type: "array",
+      contains: {
+        type: "string",
+        format: "uuid",
+      },
+      default: [],
     },
   },
 } as const
@@ -1130,6 +1107,18 @@ export const $ItemsPublic = {
 
 export const $MarinaBase = {
   properties: {
+    latitude: {
+      type: "number",
+      isRequired: true,
+      maximum: 90,
+      minimum: -90,
+    },
+    longitude: {
+      type: "number",
+      isRequired: true,
+      maximum: 180,
+      minimum: -180,
+    },
     name: {
       type: "string",
       isRequired: true,
@@ -1155,14 +1144,6 @@ export const $MarinaBase = {
       isRequired: true,
       maxLength: 255,
       minLength: 3,
-    },
-    latitude: {
-      type: "number",
-      isRequired: true,
-    },
-    longitude: {
-      type: "number",
-      isRequired: true,
     },
     website: {
       type: "string",
@@ -1243,6 +1224,18 @@ export const $MarinaBase = {
 
 export const $MarinaCreate = {
   properties: {
+    latitude: {
+      type: "number",
+      isRequired: true,
+      maximum: 90,
+      minimum: -90,
+    },
+    longitude: {
+      type: "number",
+      isRequired: true,
+      maximum: 180,
+      minimum: -180,
+    },
     name: {
       type: "string",
       isRequired: true,
@@ -1268,14 +1261,6 @@ export const $MarinaCreate = {
       isRequired: true,
       maxLength: 255,
       minLength: 3,
-    },
-    latitude: {
-      type: "number",
-      isRequired: true,
-    },
-    longitude: {
-      type: "number",
-      isRequired: true,
     },
     website: {
       type: "string",
@@ -1356,6 +1341,18 @@ export const $MarinaCreate = {
 
 export const $MarinaPublic = {
   properties: {
+    latitude: {
+      type: "number",
+      isRequired: true,
+      maximum: 90,
+      minimum: -90,
+    },
+    longitude: {
+      type: "number",
+      isRequired: true,
+      maximum: 180,
+      minimum: -180,
+    },
     name: {
       type: "string",
       isRequired: true,
@@ -1381,14 +1378,6 @@ export const $MarinaPublic = {
       isRequired: true,
       maxLength: 255,
       minLength: 3,
-    },
-    latitude: {
-      type: "number",
-      isRequired: true,
-    },
-    longitude: {
-      type: "number",
-      isRequired: true,
     },
     website: {
       type: "string",
@@ -1502,6 +1491,18 @@ export const $MarinaPublic = {
 
 export const $MarinaPublicBase = {
   properties: {
+    latitude: {
+      type: "number",
+      isRequired: true,
+      maximum: 90,
+      minimum: -90,
+    },
+    longitude: {
+      type: "number",
+      isRequired: true,
+      maximum: 180,
+      minimum: -180,
+    },
     name: {
       type: "string",
       isRequired: true,
@@ -1527,14 +1528,6 @@ export const $MarinaPublicBase = {
       isRequired: true,
       maxLength: 255,
       minLength: 3,
-    },
-    latitude: {
-      type: "number",
-      isRequired: true,
-    },
-    longitude: {
-      type: "number",
-      isRequired: true,
     },
     website: {
       type: "string",
@@ -1809,6 +1802,18 @@ export const $Message = {
 
 export const $MooringBall = {
   properties: {
+    latitude: {
+      type: "number",
+      isRequired: true,
+      maximum: 90,
+      minimum: -90,
+    },
+    longitude: {
+      type: "number",
+      isRequired: true,
+      maximum: 180,
+      minimum: -180,
+    },
     mooring_ball_id: {
       type: "string",
       isRequired: true,
@@ -1824,14 +1829,6 @@ export const $MooringBall = {
       isRequired: true,
       maxLength: 5,
       minLength: 3,
-    },
-    latitude: {
-      type: "number",
-      isRequired: true,
-    },
-    longitude: {
-      type: "number",
-      isRequired: true,
     },
     is_active: {
       type: "boolean",
@@ -1860,6 +1857,18 @@ export const $MooringBall = {
 
 export const $MooringBallBase = {
   properties: {
+    latitude: {
+      type: "number",
+      isRequired: true,
+      maximum: 90,
+      minimum: -90,
+    },
+    longitude: {
+      type: "number",
+      isRequired: true,
+      maximum: 180,
+      minimum: -180,
+    },
     mooring_ball_id: {
       type: "string",
       isRequired: true,
@@ -1875,14 +1884,6 @@ export const $MooringBallBase = {
       isRequired: true,
       maxLength: 5,
       minLength: 3,
-    },
-    latitude: {
-      type: "number",
-      isRequired: true,
-    },
-    longitude: {
-      type: "number",
-      isRequired: true,
     },
     is_active: {
       type: "boolean",
@@ -1897,6 +1898,18 @@ export const $MooringBallBase = {
 
 export const $MooringBallCreate = {
   properties: {
+    latitude: {
+      type: "number",
+      isRequired: true,
+      maximum: 90,
+      minimum: -90,
+    },
+    longitude: {
+      type: "number",
+      isRequired: true,
+      maximum: 180,
+      minimum: -180,
+    },
     mooring_ball_id: {
       type: "string",
       isRequired: true,
@@ -1912,14 +1925,6 @@ export const $MooringBallCreate = {
       isRequired: true,
       maxLength: 5,
       minLength: 3,
-    },
-    latitude: {
-      type: "number",
-      isRequired: true,
-    },
-    longitude: {
-      type: "number",
-      isRequired: true,
     },
     is_active: {
       type: "boolean",
@@ -1952,6 +1957,18 @@ export const $MooringBallPricingPublic = {
 
 export const $MooringBallPublic = {
   properties: {
+    latitude: {
+      type: "number",
+      isRequired: true,
+      maximum: 90,
+      minimum: -90,
+    },
+    longitude: {
+      type: "number",
+      isRequired: true,
+      maximum: 180,
+      minimum: -180,
+    },
     mooring_ball_id: {
       type: "string",
       isRequired: true,
@@ -1965,14 +1982,6 @@ export const $MooringBallPublic = {
       isRequired: true,
       maxLength: 5,
       minLength: 3,
-    },
-    latitude: {
-      type: "number",
-      isRequired: true,
-    },
-    longitude: {
-      type: "number",
-      isRequired: true,
     },
     is_active: {
       type: "boolean",
@@ -2032,6 +2041,18 @@ export const $MooringBallUpdate = {
 
 export const $MooringBallWithReservationBasePublic = {
   properties: {
+    latitude: {
+      type: "number",
+      isRequired: true,
+      maximum: 90,
+      minimum: -90,
+    },
+    longitude: {
+      type: "number",
+      isRequired: true,
+      maximum: 180,
+      minimum: -180,
+    },
     mooring_ball_id: {
       type: "string",
       isRequired: true,
@@ -2045,14 +2066,6 @@ export const $MooringBallWithReservationBasePublic = {
       isRequired: true,
       maxLength: 5,
       minLength: 3,
-    },
-    latitude: {
-      type: "number",
-      isRequired: true,
-    },
-    longitude: {
-      type: "number",
-      isRequired: true,
     },
     is_active: {
       type: "boolean",
@@ -2090,6 +2103,18 @@ export const $MooringBallWithReservationBasePublic = {
 
 export const $MooringBallWithReservationsPublic = {
   properties: {
+    latitude: {
+      type: "number",
+      isRequired: true,
+      maximum: 90,
+      minimum: -90,
+    },
+    longitude: {
+      type: "number",
+      isRequired: true,
+      maximum: 180,
+      minimum: -180,
+    },
     mooring_ball_id: {
       type: "string",
       isRequired: true,
@@ -2103,14 +2128,6 @@ export const $MooringBallWithReservationsPublic = {
       isRequired: true,
       maxLength: 5,
       minLength: 3,
-    },
-    latitude: {
-      type: "number",
-      isRequired: true,
-    },
-    longitude: {
-      type: "number",
-      isRequired: true,
     },
     is_active: {
       type: "boolean",
@@ -3769,8 +3786,16 @@ export const $UserUpdateMe = {
       ],
     },
     emergency_contact_country_code_name: {
-      type: "string",
-      maxLength: 3,
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 3,
+        },
+        {
+          type: "null",
+        },
+      ],
     },
     emergency_contact_phone_number: {
       type: "any-of",

@@ -15,9 +15,12 @@ import {
     Center
 } from '@chakra-ui/react';
 import BollaCell from "../../../public/assets/images/bolla-cell.png";
-import { ReservationsService } from '../../client';
+import { ReservationsService, MooringBallsService, MarinasService } from '../../client';
 import { useMarina } from '../../context/MarinaContext';
 
+/**
+ * Интерфейс для данных лодки в резервации
+ */
 interface Boat {
     id: string;
     name: string;
@@ -28,6 +31,9 @@ interface Boat {
     registration_image_url?: string;
 }
 
+/**
+ * Интерфейс для строки таблицы (швартовки)
+ */
 interface Row {
     id: string;
     label: string;
@@ -37,18 +43,72 @@ interface TableWeekProps {
     currentWeekStart: string;
 }
 
+/**
+ * Компонент таблицы с недельным представлением резерваций
+ */
 const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
     const { selectedMarina } = useMarina();
     const [boats, setBoats] = useState<Boat[]>([]);
     const [allRows, setAllRows] = useState<Row[]>([]);
     const [days, setDays] = useState<string[]>([]);
 
-    const { data: reservations, isLoading, isError } = useQuery({
-        queryKey: ['reservations', currentWeekStart],
-        queryFn: () => ReservationsService.readReservations({ limit: 500 }),
+    // Запрос всех швартовок для выбранной марины
+    const { data: mooringBalls, isLoading: isLoadingMooringBalls, error: mooringBallsError } = useQuery({
+        queryKey: ['mooringBalls', selectedMarina?.marina_id],
+        queryFn: async () => {
+            try {
+                // Создаем объект результата с одинаковой структурой
+                let result = { mooring_balls: [] as Array<any> };
+                
+                // Если выбрана конкретная марина, используем readMarina
+                if (selectedMarina?.marina_id) {
+                    const marinaData = await MarinasService.readMarina({ 
+                        id: selectedMarina.marina_id 
+                    });
+                    
+                    // Извлекаем швартовки из данных марины
+                    if (marinaData.mooring_balls && Array.isArray(marinaData.mooring_balls)) {
+                        result.mooring_balls = marinaData.mooring_balls;
+                    }
+                } else {
+                    // Если марина не выбрана, получаем все швартовки
+                    const response = await MooringBallsService.readMooringBalls({
+                        limit: 5000
+                    });
+                    
+                    // Извлекаем швартовки из ответа API
+                    if (response.data && Array.isArray(response.data)) {
+                        result.mooring_balls = response.data;
+                    } else if (response.data && typeof response.data === 'object' && 'data' in response.data) {
+                        const dataArray = (response.data as any).data;
+                        if (Array.isArray(dataArray)) {
+                            result.mooring_balls = dataArray;
+                        }
+                    }
+                }
+                
+                return result;
+            } catch (error) {
+                console.error('Error fetching mooring balls:', error);
+                throw error;
+            }
+        },
+        enabled: true
+    });
+
+    // Запрос резерваций для выбранной марины
+    const { data: reservations, isLoading: isLoadingReservations, isError } = useQuery({
+        queryKey: ['reservations', currentWeekStart, selectedMarina?.marina_id],
+        queryFn: () => ReservationsService.readReservations({ 
+            limit: 500,
+            marinaId: selectedMarina?.marina_id || undefined
+        }),
         enabled: !!currentWeekStart
     });
 
+    /**
+     * Получает массив дат недели, начиная с указанной даты
+     */
     const getWeekDates = (startDate: string) => {
         return Array.from({ length: 7 }, (_, i) => {
             const date = new Date(new Date(startDate).getTime() + i * 24 * 60 * 60 * 1000);
@@ -56,57 +116,87 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
         });
     };
 
+    // Обрабатываем данные о швартовках из API
     useEffect(() => {
-        if (reservations?.data) {
-            const uniqueBalls = new Set<string>();
-            reservations.data.forEach(res => {
-                if (res.mooring_ball?.ball_number) {
-                    uniqueBalls.add(res.mooring_ball.ball_number.toString());
+        if (mooringBallsError) {
+            console.error('Mooring balls error:', mooringBallsError);
+        }
+        
+        try {
+            // Получаем швартовки из ответа API
+            if (mooringBalls?.mooring_balls) {
+                const apiMooringBalls = mooringBalls.mooring_balls;
+                
+                if (apiMooringBalls.length > 0) {
+                    // Проверяем, какое поле содержит номер швартовки
+                    let numberField = 'ball_number';
+                    if (apiMooringBalls[0] && !apiMooringBalls[0].ball_number) {
+                        if (apiMooringBalls[0].number) numberField = 'number';
+                        else if (apiMooringBalls[0].id) numberField = 'id';
+                    }
+                    
+                    // Создаем строки таблицы для швартовок
+                    const rows = apiMooringBalls
+                        .filter(ball => ball && ball[numberField]) 
+                        .map(ball => ({ 
+                            id: ball[numberField].toString(), 
+                            label: ball[numberField].toString() 
+                        }))
+                        .sort((a, b) => parseInt(a.id) - parseInt(b.id));
+                    
+                    setAllRows(rows);
+                } else {
+                    setAllRows([]);
                 }
-            });
-
-            const ballsArray = Array.from(uniqueBalls).sort((a, b) => parseInt(a) - parseInt(b));
-            const rows = ballsArray.map(id => ({ id, label: id }));
-            setAllRows(rows);
-
-            if (currentWeekStart) {
-                const endDate = new Date(new Date(currentWeekStart).getTime() + 6 * 24 * 60 * 60 * 1000)
-                    .toISOString().split('T')[0];
-
-                const targetDays = getWeekDates(currentWeekStart);
-                setDays(targetDays);
-
-                const filteredReservations = selectedMarina
-                    ? reservations.data.filter(res => res.marina?.marina_id === selectedMarina.marina_id)
-                    : reservations.data;
-
-                const apiBoats = filteredReservations
-                    .filter(reservation => {
-                        const resStart = new Date(reservation.start_date.split('T')[0]);
-                        const resEnd = new Date(reservation.end_date.split('T')[0]);
-                        const tableEnd = new Date(endDate);
-                        const tableStart = new Date(currentWeekStart);
-                        return resStart <= tableEnd && resEnd >= tableStart;
-                    })
-                    .map(reservation => ({
-                        id: reservation.mooring_ball.ball_number.toString(),
-                        name: reservation.boat?.boatname || 'N/A',
-                        code: reservation.boat?.model || 'N/A',
-                        startDay: reservation.start_date.split('T')[0],
-                        endDay: reservation.end_date.split('T')[0],
-                        marina_id: reservation.marina?.marina_id,
-                        registration_image_url: (reservation.boat as any)?.registration_image_url
-                    }));
-
-                setBoats(apiBoats);
+            } else {
+                setAllRows([]);
             }
+        } catch (error) {
+            console.error('Error processing mooring balls:', error);
+            setAllRows([]);
+        }
+    }, [mooringBalls, mooringBallsError]);
+
+    // Обрабатываем резервации
+    useEffect(() => {
+        if (reservations?.data && currentWeekStart) {
+            const endDate = new Date(new Date(currentWeekStart).getTime() + 6 * 24 * 60 * 60 * 1000)
+                .toISOString().split('T')[0];
+
+            const targetDays = getWeekDates(currentWeekStart);
+            setDays(targetDays);
+
+            // Фильтруем резервации по дате и преобразуем в формат для отображения
+            const apiBoats = reservations.data
+                .filter(reservation => {
+                    const resStart = new Date(reservation.start_date.split('T')[0]);
+                    const resEnd = new Date(reservation.end_date.split('T')[0]);
+                    const tableEnd = new Date(endDate);
+                    const tableStart = new Date(currentWeekStart);
+                    return resStart <= tableEnd && resEnd >= tableStart;
+                })
+                .map(reservation => ({
+                    id: reservation.mooring_ball.ball_number.toString(),
+                    name: reservation.boat?.boatname || 'N/A',
+                    code: reservation.boat?.model || 'N/A',
+                    startDay: reservation.start_date.split('T')[0],
+                    endDay: reservation.end_date.split('T')[0],
+                    marina_id: reservation.marina?.marina_id,
+                    registration_image_url: (reservation.boat as any)?.registration_image_url
+                }));
+
+            setBoats(apiBoats);
         }
     }, [reservations, currentWeekStart, selectedMarina]);
 
+    /**
+     * Определяет лодку для отображения в конкретной ячейке таблицы
+     */
     const getBoatForDay = (rowId: string, day: string, occupiedDays: boolean[]) => {
         const dayIndex = days.indexOf(day);
         if (occupiedDays[dayIndex]) return null;
 
+        // Находим лодку, зарезервированную на эту дату
         const boat = boats.find(b =>
             b.id === rowId &&
             new Date(day) >= new Date(b.startDay) &&
@@ -115,11 +205,13 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
 
         if (!boat) return null;
 
+        // Вычисляем количество дней резервации в пределах видимой недели
         const startDate = new Date(Math.max(new Date(boat.startDay).getTime(), new Date(days[0]).getTime()));
         const endDate = new Date(Math.min(new Date(boat.endDay).getTime(), new Date(days[days.length - 1]).getTime()));
         const dayDiff = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
         const colspan = Math.max(1, dayDiff);
 
+        // Отмечаем занятые дни
         for (let i = dayIndex; i < dayIndex + colspan && i < occupiedDays.length; i++) {
             occupiedDays[i] = true;
         }
@@ -127,6 +219,9 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
         return { boat, colspan };
     };
 
+    /**
+     * Проверяет, соответствует ли дата сегодняшнему дню
+     */
     const isToday = (day: string) => {
         const today = new Date();
         const date = new Date(day);
@@ -136,6 +231,8 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
             date.getFullYear() === today.getFullYear()
         );
     };
+
+    const isLoading = isLoadingMooringBalls || isLoadingReservations;
 
     if (isLoading) return (
         <Flex
@@ -147,10 +244,7 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
             bg="white"
             rounded='25px'
         >
-            <Spinner
-                size="xl"
-                color="ui.main"
-            />
+            <Spinner size="xl" color="ui.main" />
         </Flex>
     );
 

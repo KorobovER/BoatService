@@ -335,19 +335,6 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
                                                 p={1}
                                                 position="relative"
                                             >
-                                                {isToday(day) && (
-                                                    <Box
-                                                        position="absolute"
-                                                        top="50%"
-                                                        left="50%"
-                                                        transform="translate(-50%, -50%)"
-                                                        bg="#DD660026"
-                                                        borderRadius="full"
-                                                        width="34px"
-                                                        height="34px"
-                                                        zIndex="-1"
-                                                    />
-                                                )}
                                             </Td>
                                         );
                                     }
@@ -363,19 +350,6 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
                                             p={2}
                                             position="relative"
                                         >
-                                            {isToday(day) && (
-                                                <Box
-                                                    position="absolute"
-                                                    top="50%"
-                                                    left="50%"
-                                                    transform="translate(-50%, -50%)"
-                                                    bg="#DD660026"
-                                                    borderRadius="full"
-                                                    width="34px"
-                                                    height="34px"
-                                                    zIndex="-1"
-                                                />
-                                            )}
                                             <Box
                                                 borderRadius="5px"
                                                 p="5px"

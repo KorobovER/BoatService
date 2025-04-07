@@ -132,14 +132,6 @@ const MarinasMenu = () => {
                     </Flex>
                 </MenuButton>
                 <MenuList minWidth="240px" boxShadow="md" py={0}>
-                    <MenuItem
-                        onClick={handleSelectAllMarinas}
-                        _hover={{ bg: 'gray.100' }}
-                        px={3}
-                        py={2}
-                    >
-                        <Text fontWeight="medium">All marinas</Text>
-                    </MenuItem>
                     {marinas.map((marina) => (
                         <MenuItem
                             key={marina.marina_id}

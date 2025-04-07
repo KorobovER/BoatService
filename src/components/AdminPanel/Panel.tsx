@@ -50,12 +50,10 @@ const Panel: React.FC = () => {
 
     // Обработчики для месячного представления
     const handlePrevMonth = () => {
-        // Разбираем текущую дату на компоненты
-        const date = new Date(currentMonthDate);
+        const date = new Date(currentMonthDate + 'T00:00:00.000Z');
         let year = date.getFullYear();
         let month = date.getMonth();
         
-        // Переходим к предыдущему месяцу
         if (month === 0) {
             month = 11;
             year--;
@@ -63,20 +61,15 @@ const Panel: React.FC = () => {
             month--;
         }
         
-        // Создаем ISO строку даты первого дня нового месяца
-        const newDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
-        
-        // Обновляем состояние
+        const newDate = new Date(Date.UTC(year, month, 1)).toISOString().split('T')[0];
         setCurrentMonthDate(newDate);
     };
 
     const handleNextMonth = () => {
-        // Разбираем текущую дату на компоненты
-        const date = new Date(currentMonthDate);
+        const date = new Date(currentMonthDate + 'T00:00:00.000Z');
         let year = date.getFullYear();
         let month = date.getMonth();
         
-        // Переходим к следующему месяцу
         if (month === 11) {
             month = 0;
             year++;
@@ -84,10 +77,7 @@ const Panel: React.FC = () => {
             month++;
         }
         
-        // Создаем ISO строку даты первого дня нового месяца
-        const newDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
-        
-        // Обновляем состояние
+        const newDate = new Date(Date.UTC(year, month, 1)).toISOString().split('T')[0];
         setCurrentMonthDate(newDate);
     };
 
@@ -96,14 +86,11 @@ const Panel: React.FC = () => {
         const today = new Date();
         
         if (currentView === 'month') {
-            // Получаем текущий год и месяц
             const year = today.getFullYear();
-            const month = today.getMonth(); // 0-11
-            
-            // Создаем ISO строку даты первого дня текущего месяца
-            const firstDayOfMonth = `${year}-${String(month + 1).padStart(2, '0')}-01`;
-            setCurrentMonthDate(firstDayOfMonth);
-        } else { // week или day
+            const month = today.getMonth();
+            const newDate = new Date(Date.UTC(year, month, 1)).toISOString().split('T')[0];
+            setCurrentMonthDate(newDate);
+        } else {
             setCurrentWeekStart(getCurrentWeekMonday(today));
         }
     };
@@ -111,12 +98,11 @@ const Panel: React.FC = () => {
     // Форматирование отображаемого диапазона дат
     const formatDateRange = () => {
         if (currentView === 'month' && currentMonthDate) {
-            // Преобразуем ISO строку в объект Date для форматирования
-            const date = new Date(currentMonthDate + 'T00:00:00'); // Добавляем время для корректной работы в разных часовых поясах
+            const date = new Date(currentMonthDate + 'T00:00:00.000Z');
             return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
         } else if (currentView === 'week' && currentWeekStart) {
-            const start = new Date(currentWeekStart);
-            const end = new Date(currentWeekStart);
+            const start = new Date(currentWeekStart + 'T00:00:00.000Z');
+            const end = new Date(currentWeekStart + 'T00:00:00.000Z');
             end.setDate(end.getDate() + 6);
             return `${start.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
         }

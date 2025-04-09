@@ -1125,6 +1125,12 @@ export const $MarinaBase = {
       maxLength: 64,
       minLength: 3,
     },
+    marina_code: {
+      type: "string",
+      isRequired: true,
+      maxLength: 4,
+      minLength: 4,
+    },
     description: {
       type: "any-of",
       contains: [
@@ -1241,6 +1247,12 @@ export const $MarinaCreate = {
       isRequired: true,
       maxLength: 64,
       minLength: 3,
+    },
+    marina_code: {
+      type: "string",
+      isRequired: true,
+      maxLength: 4,
+      minLength: 4,
     },
     description: {
       type: "any-of",
@@ -1359,6 +1371,12 @@ export const $MarinaPublic = {
       maxLength: 64,
       minLength: 3,
     },
+    marina_code: {
+      type: "string",
+      isRequired: true,
+      maxLength: 4,
+      minLength: 4,
+    },
     description: {
       type: "any-of",
       contains: [
@@ -1465,13 +1483,6 @@ export const $MarinaPublic = {
       },
       isRequired: true,
     },
-    services: {
-      type: "array",
-      contains: {
-        type: "MarinaServiceBase",
-      },
-      isRequired: true,
-    },
     mooring_balls: {
       type: "array",
       contains: {
@@ -1483,6 +1494,13 @@ export const $MarinaPublic = {
       type: "array",
       contains: {
         type: "MooringBallPricingPublic",
+      },
+      isRequired: true,
+    },
+    active_services: {
+      type: "array",
+      contains: {
+        type: "MarinaServicePublic",
       },
       isRequired: true,
     },
@@ -1509,6 +1527,12 @@ export const $MarinaPublicBase = {
       maxLength: 64,
       minLength: 3,
     },
+    marina_code: {
+      type: "string",
+      isRequired: true,
+      maxLength: 4,
+      minLength: 4,
+    },
     description: {
       type: "any-of",
       contains: [
@@ -1615,19 +1639,37 @@ export const $MarinaPublicBase = {
       },
       isRequired: true,
     },
-    services: {
-      type: "array",
-      contains: {
-        type: "MarinaServiceBase",
-      },
+  },
+} as const
+
+export const $MarinaServiceItem = {
+  properties: {
+    name: {
+      type: "string",
+      isRequired: true,
+      maxLength: 64,
+      minLength: 3,
+    },
+    price: {
+      type: "number",
+      isRequired: true,
+      maximum: 1000,
+      minimum: 0,
+    },
+    unit: {
+      type: "string",
+      isRequired: true,
+    },
+    type: {
+      type: "string",
       isRequired: true,
     },
   },
 } as const
 
-export const $MarinaServiceBase = {
+export const $MarinaServicePublic = {
   properties: {
-    name: {
+    title: {
       type: "string",
       isRequired: true,
       maxLength: 64,
@@ -1647,15 +1689,32 @@ export const $MarinaServiceBase = {
       ],
       isRequired: true,
     },
-    price: {
+    service_items: {
+      type: "array",
+      contains: {
+        type: "MarinaServiceItem",
+      },
+    },
+    service_id: {
+      type: "string",
+      isRequired: true,
+      format: "uuid",
+    },
+  },
+} as const
+
+export const $MarinaServicesPublic = {
+  properties: {
+    data: {
+      type: "array",
+      contains: {
+        type: "MarinaServicePublic",
+      },
+      isRequired: true,
+    },
+    count: {
       type: "number",
       isRequired: true,
-      maximum: 1000,
-      minimum: 0,
-    },
-    is_active: {
-      type: "boolean",
-      default: false,
     },
   },
 } as const
@@ -1669,6 +1728,20 @@ export const $MarinaUpdate = {
           type: "string",
           maxLength: 64,
           minLength: 3,
+        },
+        {
+          type: "null",
+        },
+      ],
+      isRequired: true,
+    },
+    marina_code: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 4,
+          minLength: 4,
         },
         {
           type: "null",
@@ -2547,6 +2620,13 @@ export const $ReservationCreatedPublic = {
       ],
       isRequired: true,
     },
+    service_requests: {
+      type: "array",
+      contains: {
+        type: "ServiceOnReservationPublic",
+      },
+      isRequired: true,
+    },
     stripe_client_secret: {
       type: "any-of",
       contains: [
@@ -2659,6 +2739,13 @@ export const $ReservationPublic = {
       ],
       isRequired: true,
     },
+    service_requests: {
+      type: "array",
+      contains: {
+        type: "ServiceOnReservationPublic",
+      },
+      isRequired: true,
+    },
   },
 } as const
 
@@ -2760,15 +2847,136 @@ export const $ReservationsPublic = {
   },
 } as const
 
-export const $ServiceRequest = {
+export const $ServiceOnReservation = {
   properties: {
-    service_id: {
+    service_reservation_id: {
+      type: "string",
+      format: "uuid",
+    },
+    receipt_id: {
+      type: "string",
+      isRequired: true,
+    },
+    created_at: {
+      type: "string",
+      format: "date-time",
+    },
+    updated_at: {
+      type: "string",
+      isRequired: true,
+      format: "date-time",
+    },
+    requested_date: {
+      type: "string",
+      format: "date-time",
+    },
+    status: {
+      type: "ServiceRequestStatus",
+      isRequired: true,
+    },
+    services: {
+      type: "array",
+      contains: {
+        type: "SubServiceRequest",
+      },
+    },
+    special_instructions: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 255,
+        },
+        {
+          type: "null",
+        },
+      ],
+      isRequired: true,
+    },
+    total_price: {
+      type: "number",
+      isRequired: true,
+      minimum: 0,
+    },
+    payment_details: {
+      type: "dictionary",
+      contains: {
+        properties: {},
+      },
+    },
+    approved_by_user: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          format: "uuid",
+        },
+        {
+          type: "null",
+        },
+      ],
+      isRequired: true,
+    },
+    confirmation_image_url: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 256,
+        },
+        {
+          type: "null",
+        },
+      ],
+      isRequired: true,
+    },
+    reservation_id: {
       type: "string",
       isRequired: true,
       format: "uuid",
     },
-    quantity: {
-      type: "number",
+  },
+} as const
+
+export const $ServiceOnReservationCreate = {
+  properties: {
+    requested_date: {
+      type: "string",
+      isRequired: true,
+      format: "date-time",
+    },
+    requests: {
+      type: "array",
+      contains: {
+        type: "SubServiceRequest",
+      },
+      isRequired: true,
+    },
+    special_instructions: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 255,
+        },
+        {
+          type: "null",
+        },
+      ],
+      isRequired: true,
+    },
+  },
+} as const
+
+export const $ServiceOnReservationPublic = {
+  properties: {
+    service_reservation_id: {
+      type: "string",
+      isRequired: true,
+      format: "uuid",
+    },
+    receipt_id: {
+      type: "string",
       isRequired: true,
     },
     requested_date: {
@@ -2776,23 +2984,60 @@ export const $ServiceRequest = {
       isRequired: true,
       format: "date-time",
     },
-  },
-} as const
-
-export const $ServicesPublic = {
-  properties: {
-    data: {
+    status: {
+      type: "ServiceRequestStatus",
+      isRequired: true,
+    },
+    services: {
       type: "array",
       contains: {
-        type: "MarinaServiceBase",
+        type: "SubServiceRequest",
       },
       isRequired: true,
     },
-    count: {
+    special_instructions: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+        },
+        {
+          type: "null",
+        },
+      ],
+      isRequired: true,
+    },
+    total_price: {
       type: "number",
       isRequired: true,
     },
+    payment_details_simple: {
+      type: "any-of",
+      contains: [
+        {
+          type: "PaymentDetailsSimple",
+        },
+        {
+          type: "null",
+        },
+      ],
+      isRequired: true,
+    },
   },
+} as const
+
+export const $ServiceRequestStatus = {
+  type: "Enum",
+  enum: [
+    "initialized",
+    "confirmed",
+    "en-route",
+    "denied",
+    "delivered",
+    "completed",
+    "cancelled",
+    "failed",
+  ],
 } as const
 
 export const $StripeCardPublic = {
@@ -2883,6 +3128,23 @@ export const $SubRegionData = {
           type: "null",
         },
       ],
+      isRequired: true,
+    },
+  },
+} as const
+
+export const $SubServiceRequest = {
+  properties: {
+    name: {
+      type: "string",
+      isRequired: true,
+    },
+    quantity: {
+      type: "number",
+      isRequired: true,
+    },
+    price: {
+      type: "number",
       isRequired: true,
     },
   },

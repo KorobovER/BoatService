@@ -29,9 +29,9 @@ import type {
   AmenitiesPublic,
   MarinaCreate,
   MarinaPublic,
+  MarinaServicesPublic,
   MarinasPublic,
   MarinaUpdate,
-  ServicesPublic,
   SubRegion,
   MooringBallCreate,
   MooringBallPublic,
@@ -44,7 +44,8 @@ import type {
   ReservationPublic,
   ReservationsPublic,
   ReservationUpdate,
-  ServiceRequest,
+  ServiceOnReservation,
+  ServiceOnReservationCreate,
   UserReservationsPublic,
   Body_users_create_profile_pic_me,
   UserRegister,
@@ -252,7 +253,7 @@ export class LoginUsersService {
     const { requestBody } = data
     return __request(OpenAPI, {
       method: "POST",
-      url: "/api/v1/user/reset-password/",
+      url: "/api/v1/user/reset-password",
       body: requestBody,
       mediaType: "application/json",
       errors: {
@@ -885,12 +886,12 @@ export class MarinasService {
   /**
    * Read Services
    * Retrieve services.
-   * @returns ServicesPublic Successful Response
+   * @returns MarinaServicesPublic Successful Response
    * @throws ApiError
    */
   public static readServices(
     data: TDataReadServices = {},
-  ): CancelablePromise<ServicesPublic> {
+  ): CancelablePromise<MarinaServicesPublic> {
     const { limit = 100, skip = 0 } = data
     return __request(OpenAPI, {
       method: "GET",
@@ -1295,7 +1296,7 @@ export type TDataDeleteReservation = {
 }
 export type TDataRequestReservationService = {
   id: string
-  requestBody: ServiceRequest
+  requestBody: ServiceOnReservationCreate
 }
 export type TDataActivateReservation = {
   id: string
@@ -1458,12 +1459,12 @@ export class ReservationsService {
 
   /**
    * Request Reservation Service
-   * @returns unknown Successful Response
+   * @returns ServiceOnReservation Successful Response
    * @throws ApiError
    */
   public static requestReservationService(
     data: TDataRequestReservationService,
-  ): CancelablePromise<unknown> {
+  ): CancelablePromise<ServiceOnReservation> {
     const { id, requestBody } = data
     return __request(OpenAPI, {
       method: "POST",
@@ -1552,6 +1553,9 @@ export type TDataCreateProfilePicMe = {
 }
 export type TDataRegisterUser = {
   requestBody: UserRegister
+}
+export type TDataAdminResendsVerificationEmail = {
+  email: string
 }
 export type TDataVerifyUser = {
   token: string
@@ -1874,6 +1878,28 @@ export class UsersService {
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/users/send-email-verification",
+    })
+  }
+
+  /**
+   * Admin Resends Verification Email
+   * Send email verification on behalf of a user.
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static adminResendsVerificationEmail(
+    data: TDataAdminResendsVerificationEmail,
+  ): CancelablePromise<Message> {
+    const { email } = data
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/users/admin-sends-email-verification",
+      query: {
+        email,
+      },
+      errors: {
+        422: `Validation Error`,
+      },
     })
   }
 

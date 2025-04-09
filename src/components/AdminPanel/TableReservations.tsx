@@ -12,11 +12,14 @@ import {
     Image,
     Spinner,
     Flex,
-    Center
+    Center,
+    useDisclosure
 } from '@chakra-ui/react';
 import BollaCell from "../../../public/assets/images/bolla-cell.png";
 import { ReservationsService, MooringBallsService, MarinasService } from '../../client';
 import { useMarina } from '../../context/MarinaContext';
+import PopupFreeCell from './PopupFreeCell';
+import PopupReserved from './PopupReserved';
 
 interface Row {
     id: string;
@@ -52,6 +55,9 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     const { selectedMarina } = useMarina();
     const [boats, setBoats] = useState<Boat[]>([]);
     const [allRows, setAllRows] = useState<Row[]>([]);
+    const { isOpen: isFreeCellOpen, onOpen: onFreeCellOpen, onClose: onFreeCellClose } = useDisclosure();
+    const { isOpen: isReservedOpen, onOpen: onReservedOpen, onClose: onReservedClose } = useDisclosure();
+    const [selectedCell, setSelectedCell] = useState<{ rowId: string; day: string; boat?: Boat } | null>(null);
 
     // Запрос швартовок (общий для обоих компонентов)
     const { data: mooringBalls, isLoading: isLoadingMooringBalls } = useQuery({
@@ -209,6 +215,15 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         }
     };
 
+    const handleCellClick = (rowId: string, day: string, boat?: Boat) => {
+        setSelectedCell({ rowId, day, boat });
+        if (boat) {
+            onReservedOpen();
+        } else {
+            onFreeCellOpen();
+        }
+    };
+
     const isLoading = isLoadingMooringBalls || isLoadingReservations;
 
     if (isLoading) return (
@@ -248,7 +263,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 width={cellWidth}
                                 position="relative"
                                 p={1}
-                                height={cellWidth === '150px' ? '44px' : '52px'}
+                                height="52px"
                                 style={{ verticalAlign: 'middle' }}
                             >
                                 {renderHeader(day)}
@@ -268,8 +283,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                     justifyContent="center"
                                     bg="transparent"
                                     border="none"
-                                    width="150px"
-                                    height={cellWidth === '150px' ? '44px' : '52px'}
+                                    width="50px"
+                                    height="52px"
                                     p={1}
                                     style={{ verticalAlign: 'middle' }}
                                 >
@@ -286,10 +301,15 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                             <Td
                                                 key={`cell-${row.id}-${day}`}
                                                 width={cellWidth}
-                                                height={cellWidth === '150px' ? '44px' : '52px'}
+                                                height="52px"
                                                 p={1}
                                                 position="relative"
                                                 style={{ verticalAlign: 'middle' }}
+                                                _hover={{
+                                                    bg: '#DD660026'
+                                                }}
+                                                onClick={() => handleCellClick(row.id, day)}
+                                                cursor="pointer"
                                             />
                                         );
                                     }
@@ -301,10 +321,12 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                             borderRadius={cellWidth === '150px' ? '25px' : '10px'}
                                             colSpan={boatData.colspan}
                                             width={cellWidth}
-                                            height={cellWidth === '150px' ? '44px' : '52px'}
+                                            height="52px"
                                             p={1}
                                             position="relative"
                                             style={{ verticalAlign: 'middle' }}
+                                            onClick={() => handleCellClick(row.id, day, boatData.boat)}
+                                            cursor="pointer"
                                         >
                                             {renderBoatCell(boatData.boat, boatData.colspan)}
                                         </Td>
@@ -315,6 +337,23 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                     })}
                 </Tbody>
             </Table>
+            {selectedCell && (
+                <>
+                    <PopupFreeCell
+                        isOpen={isFreeCellOpen}
+                        onClose={onFreeCellClose}
+                        rowId={selectedCell.rowId}
+                        day={selectedCell.day}
+                    />
+                    <PopupReserved
+                        isOpen={isReservedOpen}
+                        onClose={onReservedClose}
+                        rowId={selectedCell.rowId}
+                        day={selectedCell.day}
+                        boat={selectedCell.boat}
+                    />
+                </>
+            )}
         </Box>
     );
 };

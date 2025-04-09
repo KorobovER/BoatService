@@ -80,15 +80,11 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate }) => {
         <Tooltip
             hasArrow
             label={
-                <Box p="2" bg="white" borderRadius="md" color="black">
+                <Box width="200px" p="2" bg="white" borderRadius="sm" color="black">
                     <Text fontSize="14px" fontWeight="500">{boat.name}</Text>
-                    <Box>
-                        <Text fontSize="12px" opacity="0.8">{boat.code}</Text>
-                        <Text fontSize="12px" opacity="0.8">{boat.vessel_type}</Text>
-                        <Text fontSize="12px" opacity="0.8">
-                            {new Date(boat.startDay).toLocaleDateString()} - {new Date(boat.endDay).toLocaleDateString()}
-                        </Text>
-                    </Box>
+                    <Text fontSize="14px" fontWeight="300" opacity="0.8">
+                        {boat.code} - {new Date(boat.startDay).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(boat.endDay).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </Text>
                 </Box>
             }
             bg="transparent"

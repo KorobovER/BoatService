@@ -31,6 +31,7 @@ export interface Boat {
     endDay: string;
     marina_id?: string;
     registration_image_url?: string;
+    vessel_type?: string;
 }
 
 interface TableReservationsProps {
@@ -132,6 +133,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 endDay: new Date(reservation.end_date).toISOString().split('T')[0],
                                 marina_id: reservation.marina?.marina_id,
                                 registration_image_url: (reservation.boat as any)?.registration_image_url,
+                                vessel_type: reservation.boat?.vessel_type,
                             };
                         } catch (error) {
                             console.error('Error processing reservation:', reservation);

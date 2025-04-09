@@ -1,6 +1,6 @@
 // TableWeek.tsx
 import React from 'react';
-import { Box, Text, Image } from '@chakra-ui/react';
+import { Box, Text, Image, Tooltip } from '@chakra-ui/react';
 import TableReservations, { Boat } from './TableReservations';
 
 interface TableWeekProps {
@@ -67,44 +67,69 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
         </>
     );
 
-    const renderBoatCell = (boat: Boat, colspan: number) => (
-        <Box
-            borderRadius="5px"
-            p="5px"
-            width="fit-content"
-            height="100%"
-            display="flex"
-            gap="8px"
-            alignItems="center"
-            margin="0 auto"
-        >
-            {boat.registration_image_url ? (
-                <Image 
-                    src={boat.registration_image_url} 
-                    alt={boat.name}
-                    width="24px"
-                    height="24px"
-                    objectFit="cover"
-                    borderRadius="4px"
-                />
-            ) : (
-                <Box
-                    width="24px"
-                    height="24px"
-                    borderRadius="4px"
-                    bg="white"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                >
-                    <Text color="#007A7B" fontSize="12px">{boat.name[0]}</Text>
+    const renderBoatCell = (boat: Boat) => (
+        <Tooltip
+            hasArrow
+            label={
+                <Box width="200px" p="2" bg="white" borderRadius="sm" color="black">
+                    <Text fontSize="14px" fontWeight="500">{boat.name}</Text>
+                    <Text fontSize="14px" fontWeight="300" opacity="0.8">
+                        {boat.code} - {new Date(boat.startDay).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(boat.endDay).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </Text>
                 </Box>
-            )}
-            <Box>
-                <Text color="white" fontSize="14px" fontWeight="500">{boat.name}</Text>
-                <Text color="white" fontSize="12px" opacity="0.8">{boat.code}</Text>
+            }
+            bg="transparent"
+            placement="bottom"
+        >
+            <Box
+                borderRadius="5px"
+                p="5px"
+                width="fit-content"
+                height="100%"
+                display="flex"
+                gap="8px"
+                alignItems="center"
+                margin="0 auto"
+            >
+                {boat.vessel_type === 'power' ? (
+                    <Image
+                        src="/assets/images/power-boat.png"
+                        alt={boat.name}
+                        width="22px"
+                        height="22px"
+                        objectFit="cover"
+                        borderRadius="4px"
+                        filter="brightness(0) invert(1)"
+                    />
+                ) : boat.vessel_type === 'catamaran' ? (
+                    <Image
+                        src="/assets/images/catamaran-boat.png"
+                        alt={boat.name}
+                        width="22px"
+                        height="22px"
+                        objectFit="cover"
+                        borderRadius="4px"
+                        filter="brightness(0) invert(1)"
+                    />
+                ) : boat.vessel_type === 'monohull' ? (
+                    <Image
+                        src="/assets/images/monohul-boat.png"
+                        alt={boat.name}
+                        width="22px"
+                        height="22px"
+                        objectFit="cover"
+                        borderRadius="4px"
+                        filter="brightness(0) invert(1)"
+                    />
+                ) : (
+                    <Text color="white" fontSize="14px" fontWeight="500">{boat.name}</Text>
+                )}
+                <Box>
+                    <Text color="white" fontSize="16px" fontWeight="400">{boat.name}</Text>
+                    <Text color="white" fontSize="12px" fontWeight="300" opacity="0.8">{boat.code}</Text>
+                </Box>
             </Box>
-        </Box>
+        </Tooltip>
     );
 
     return (

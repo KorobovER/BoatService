@@ -1,6 +1,6 @@
 // TableMonth.tsx
 import React from 'react';
-import { Box, Text, Image } from '@chakra-ui/react';
+import { Box, Text, Image, Tooltip } from '@chakra-ui/react';
 import TableReservations, { Boat } from './TableReservations';
 
 interface TableMonthProps {
@@ -15,7 +15,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate }) => {
             const month = date.getMonth();
             const firstDay = new Date(year, month, 1);
             const lastDay = new Date(year, month + 1, 0);
-            
+
             const datesArray = [];
             const currentDate = new Date(firstDay);
 
@@ -76,22 +76,71 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate }) => {
         </>
     );
 
-    const renderBoatCell = (boat: Boat, colspan: number) => (
-        <Box width="100%" height="100%" position="relative" display="flex" justifyContent="center" alignItems="center">
-            {boat.registration_image_url ? (
-                <Image
-                    src={boat.registration_image_url}
-                    alt={boat.name}
-                    width="18px"
-                    height="18px"
-                    objectFit="cover"
-                    borderRadius="4px"
-                />
-            ) : (
-                <Text color="white" fontSize="10px">{boat.name[0]}</Text>
-            )}
-            {colspan > 1 && <Text color="white" fontSize="10px" ml="4px">{boat.name}</Text>}
-        </Box>
+    const renderBoatCell = (boat: Boat) => (
+        <Tooltip
+            hasArrow
+            label={
+                <Box p="2" bg="white" borderRadius="md" color="black">
+                    <Text fontSize="14px" fontWeight="500">{boat.name}</Text>
+                    <Box>
+                        <Text fontSize="12px" opacity="0.8">{boat.code}</Text>
+                        <Text fontSize="12px" opacity="0.8">{boat.vessel_type}</Text>
+                        <Text fontSize="12px" opacity="0.8">
+                            {new Date(boat.startDay).toLocaleDateString()} - {new Date(boat.endDay).toLocaleDateString()}
+                        </Text>
+                    </Box>
+                </Box>
+            }
+            bg="transparent"
+            placement="bottom"
+        >
+            <Box borderRadius="5px"
+                p="5px"
+                width="fit-content"
+                height="100%"
+                display="flex"
+                gap="8px"
+                alignItems="center"
+                margin="0 auto">
+                {boat.vessel_type === 'power' ? (
+                    <Image
+                        src="/assets/images/power-boat.png"
+                        alt={boat.name}
+                        width="22px"
+                        height="22px"
+                        objectFit="cover"
+                        borderRadius="4px"
+                        filter="brightness(0) invert(1)"
+                    />
+                ) : boat.vessel_type === 'catamaran' ? (
+                    <Image
+                        src="/assets/images/catamaran-boat.png"
+                        alt={boat.name}
+                        width="22px"
+                        height="22px"
+                        objectFit="cover"
+                        borderRadius="4px"
+                        filter="brightness(0) invert(1)"
+                    />
+                ) : boat.vessel_type === 'monohull' ? (
+                    <Image
+                        src="/assets/images/monohul-boat.png"
+                        alt={boat.name}
+                        width="22px"
+                        height="22px"
+                        objectFit="cover"
+                        borderRadius="4px"
+                        filter="brightness(0) invert(1)"
+                    />
+                ) : (
+                    <Text color="white" fontSize="10px">{boat.name[0]}</Text>
+                )}
+                <Box>
+                    <Text color="white" fontSize="16px" fontWeight="400">{boat.name}</Text>
+                    <Text color="white" fontSize="12px" fontWeight="300" opacity="0.8">{boat.code}</Text>
+                </Box>
+            </Box>
+        </Tooltip>
     );
 
     return (

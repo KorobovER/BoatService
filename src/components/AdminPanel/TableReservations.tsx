@@ -226,6 +226,9 @@ const TableReservations: React.FC<TableReservationsProps> = ({
 
     const isLoading = isLoadingMooringBalls || isLoadingReservations;
 
+    const isStartOfWeek = (dayIndex: number) => dayIndex % 7 === 0;
+    const isEndOfWeek = (dayIndex: number) => (dayIndex + 1) % 7 === 0;
+
     if (isLoading) return (
         <Flex width="98%" m="auto" height="100vh" alignItems="center" justifyContent="center" bg="white" rounded='25px'>
             <Spinner size="xl" color="ui.main" />
@@ -245,98 +248,94 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     );
 
     return (
-        <Box width="98%" margin="auto" overflowX="auto">
-            <Table
-                variant="unstyled"
-                width="100%"
-                sx={{
-                    borderCollapse: 'separate',
-                    borderSpacing: cellWidth === '150px' ? '40px' : '5px',
-                }}
-            >
-                <Thead>
-                    <Tr>
-                        <Th width="150px"></Th>
-                        {days.map(day => (
-                            <Th
-                                key={`date-${day}`}
-                                width={cellWidth}
-                                position="relative"
-                                p={1}
-                                height="52px"
-                                style={{ verticalAlign: 'middle' }}
-                            >
-                                {renderHeader(day)}
-                            </Th>
-                        ))}
-                    </Tr>
-                </Thead>
-                <Tbody>
-                    {allRows.map(row => {
-                        const occupiedDays = new Array(days.length).fill(false);
-                        return (
-                            <Tr key={`row-${row.id}`}>
-                                <Td
-                                    display="flex"
-                                    gap="20px"
-                                    alignItems="center"
-                                    justifyContent="center"
-                                    bg="transparent"
-                                    border="none"
-                                    width="50px"
-                                    height="52px"
+        <Box display="flex" alignItems="center">
+            {/* Контейнер для швартовок */}
+            <Box mt='56px' mr='20px' width="105px" display="flex" flexDirection="column" alignItems="center">
+                {allRows.map(row => (
+                    <Box key={row.id} p="16px 24px" width="100px" height="60px" display="flex" alignItems="center" justifyContent="space-between">
+                        <Image width="24px" height="24px" src={BollaCell} alt="Bolla" />
+                        <Text fontSize="16px" lineHeight="52px">{row.label}</Text>
+                    </Box>
+                ))}
+            </Box>
+
+            {/* Таблица */}
+            <Box width="calc(100% - 50px)" overflowX="auto">
+                <Table
+                    variant="unstyled"
+                    width="100%"
+                    sx={{
+                        borderCollapse: 'separate',
+                        borderSpacing: '2px',
+                    }}
+                >
+                    <Thead>
+                        <Tr>
+                            {days.map(day => (
+                                <Th
+                                    key={`date-${day}`}
+                                    width='150px'
+                                    position="relative"
                                     p={1}
+                                    height="58px"
                                     style={{ verticalAlign: 'middle' }}
                                 >
-                                    <Image src={BollaCell} alt="Bolla" />
-                                    <Text>{row.label}</Text>
-                                </Td>
+                                    {renderHeader(day)}
+                                </Th>
+                            ))}
+                        </Tr>
+                    </Thead>
+                    <Tbody>
+                        {allRows.map(row => {
+                            const occupiedDays = new Array(days.length).fill(false);
+                            return (
+                                <Tr key={`row-${row.id}`}>
+                                    {days.map((day, dayIndex) => {
+                                        if (occupiedDays[dayIndex]) return null;
+                                        const boatData = getBoatForDay(row.id, dayIndex, occupiedDays);
 
-                                {days.map((day, dayIndex) => {
-                                    if (occupiedDays[dayIndex]) return null;
-                                    const boatData = getBoatForDay(row.id, dayIndex, occupiedDays);
+                                        if (!boatData) {
+                                            return (
+                                                <Td
+                                                    key={`cell-${row.id}-${day}`}
+                                                    width='150px'
+                                                    height="58px"
+                                                    p={1}
+                                                    position="relative"
+                                                    style={{ verticalAlign: 'middle' }}
+                                                    _hover={{
+                                                        bg: '#DD660026'
+                                                    }}
+                                                    onClick={() => handleCellClick(row.id, day)}
+                                                    cursor="pointer"
+                                                />
+                                            );
+                                        }
 
-                                    if (!boatData) {
                                         return (
                                             <Td
                                                 key={`cell-${row.id}-${day}`}
+                                                bg="#007A7B"
+                                                borderRadius={cellWidth === '150px' ? '25px' : '10px'}
+                                                colSpan={boatData.colspan}
                                                 width={cellWidth}
-                                                height="52px"
+                                                height="58px"
                                                 p={1}
                                                 position="relative"
                                                 style={{ verticalAlign: 'middle' }}
-                                                _hover={{
-                                                    bg: '#DD660026'
-                                                }}
-                                                onClick={() => handleCellClick(row.id, day)}
+                                                onClick={() => handleCellClick(row.id, day, boatData.boat)}
                                                 cursor="pointer"
-                                            />
+                                            >
+                                                {renderBoatCell(boatData.boat, boatData.colspan)}
+                                            </Td>
                                         );
-                                    }
-
-                                    return (
-                                        <Td
-                                            key={`cell-${row.id}-${day}`}
-                                            bg="#007A7B"
-                                            borderRadius={cellWidth === '150px' ? '25px' : '10px'}
-                                            colSpan={boatData.colspan}
-                                            width={cellWidth}
-                                            height="52px"
-                                            p={1}
-                                            position="relative"
-                                            style={{ verticalAlign: 'middle' }}
-                                            onClick={() => handleCellClick(row.id, day, boatData.boat)}
-                                            cursor="pointer"
-                                        >
-                                            {renderBoatCell(boatData.boat, boatData.colspan)}
-                                        </Td>
-                                    );
-                                })}
-                            </Tr>
-                        );
-                    })}
-                </Tbody>
-            </Table>
+                                    })}
+                                </Tr>
+                            );
+                        })}
+                    </Tbody>
+                </Table>
+            </Box>
             {selectedCell && (
                 <>
                     <PopupFreeCell

@@ -50,35 +50,15 @@ const Panel: React.FC = () => {
 
     // Обработчики для месячного представления
     const handlePrevMonth = () => {
-        const date = new Date(currentMonthDate + 'T00:00:00.000Z');
-        let year = date.getFullYear();
-        let month = date.getMonth();
-        
-        if (month === 0) {
-            month = 11;
-            year--;
-        } else {
-            month--;
-        }
-        
-        const newDate = new Date(Date.UTC(year, month, 1)).toISOString().split('T')[0];
-        setCurrentMonthDate(newDate);
+        const date = new Date(currentMonthDate);
+        date.setMonth(date.getMonth() - 1);
+        setCurrentMonthDate(date.toISOString().split('T')[0]);
     };
 
     const handleNextMonth = () => {
-        const date = new Date(currentMonthDate + 'T00:00:00.000Z');
-        let year = date.getFullYear();
-        let month = date.getMonth();
-        
-        if (month === 11) {
-            month = 0;
-            year++;
-        } else {
-            month++;
-        }
-        
-        const newDate = new Date(Date.UTC(year, month, 1)).toISOString().split('T')[0];
-        setCurrentMonthDate(newDate);
+        const date = new Date(currentMonthDate);
+        date.setMonth(date.getMonth() + 1);
+        setCurrentMonthDate(date.toISOString().split('T')[0]);
     };
 
     // Обработчик кнопки "Today"
@@ -125,7 +105,7 @@ const Panel: React.FC = () => {
 
     return (
         <>
-            <Box m='auto' w='98%' bg='white' rounded='25px'>
+            <Box m='auto' w='100%' p='24px' bg='white' rounded='25px'>
                 <TableSwitch
                     onPrevWeek={() => handleNavigation('prev')}
                     onNextWeek={() => handleNavigation('next')}

@@ -44,7 +44,11 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
             <Text color="#777777" textAlign="center">
                 {(() => {
                     try {
-                        return new Date(day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        const date = new Date(day);
+                        const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'short' });
+                        const month = date.getMonth() + 1;
+                        const dayOfMonth = date.getDate();
+                        return `${dayOfWeek} ${month}/${dayOfMonth}`;
                     } catch (error) {
                         console.error('Error in renderHeader:', error);
                         return 'Invalid Date';

@@ -10,20 +10,26 @@ interface TableMonthProps {
 const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate }) => {
     const getMonthDates = (dateString: string) => {
         try {
-            const date = new Date(dateString);
-            const year = date.getFullYear();
-            const month = date.getMonth();
-            const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-
+            // Создаем дату в UTC
+            const date = new Date(dateString + 'T00:00:00.000Z');
+            const year = date.getUTCFullYear();
+            const month = date.getUTCMonth();
+            
+            // Получаем первый день месяца в UTC
+            const firstDay = new Date(Date.UTC(year, month, 1));
+            // Получаем последний день месяца в UTC
+            const lastDay = new Date(Date.UTC(year, month + 1, 0));
+            
             const datesArray = [];
+            // Начинаем с первого дня месяца
             const currentDate = new Date(firstDay);
-
+            
+            // Добавляем дни до последнего дня месяца включительно
             while (currentDate <= lastDay) {
                 datesArray.push(currentDate.toISOString().split('T')[0]);
-                currentDate.setDate(currentDate.getDate() + 1);
+                currentDate.setUTCDate(currentDate.getUTCDate() + 1);
             }
-
+            
             return datesArray;
         } catch (error) {
             console.error('Error in getMonthDates:', error);

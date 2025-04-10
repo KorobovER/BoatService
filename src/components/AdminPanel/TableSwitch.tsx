@@ -23,9 +23,9 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
         <Flex
             justifyContent="space-between"
             alignItems="center"
-            width="95%"
+            width="100%"
             margin="auto"
-            padding="25px 0"
+            padding="24px 0"
         >
             <Button
                 display="flex"

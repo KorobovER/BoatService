@@ -14,17 +14,17 @@ const theme = extendTheme({
       success: "#007A7B",
       danger: "#DA0000",
       warning: "#FEA02F",
-      light: "#F6F6F6", // Это ваш #F6F6F6
+      light: "#F6F6F6", 
       dark: "#1A202C",
       darkSlate: "#252D3D",
       dim: "#A0AEC0",
     },
   },
-  // ⬇️ Добавляем глобальные стили для body
+
   styles: {
     global: {
       body: {
-        bg: "ui.light", // или просто "#F6F6F6"
+        bg: "ui.light", 
       },
     },
   },

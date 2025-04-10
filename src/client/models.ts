@@ -217,6 +217,7 @@ export type MarinaBase = {
   latitude: number
   longitude: number
   name: string
+  marina_code: string
   description: string | null
   address: string
   website: string
@@ -233,6 +234,7 @@ export type MarinaCreate = {
   latitude: number
   longitude: number
   name: string
+  marina_code: string
   description: string | null
   address: string
   website: string
@@ -249,6 +251,7 @@ export type MarinaPublic = {
   latitude: number
   longitude: number
   name: string
+  marina_code: string
   description: string | null
   address: string
   website: string
@@ -261,15 +264,16 @@ export type MarinaPublic = {
   subregion: SubRegion
   marina_id: string
   amenities: Array<AmenityBase>
-  services: Array<MarinaServiceBase>
   mooring_balls: Array<MooringBall>
   min_price: Array<MooringBallPricingPublic>
+  active_services: Array<MarinaServicePublic>
 }
 
 export type MarinaPublicBase = {
   latitude: number
   longitude: number
   name: string
+  marina_code: string
   description: string | null
   address: string
   website: string
@@ -282,18 +286,30 @@ export type MarinaPublicBase = {
   subregion: SubRegion
   marina_id: string
   amenities: Array<AmenityBase>
-  services: Array<MarinaServiceBase>
 }
 
-export type MarinaServiceBase = {
+export type MarinaServiceItem = {
   name: string
-  description: string | null
   price: number
-  is_active?: boolean
+  unit: string
+  type: string
+}
+
+export type MarinaServicePublic = {
+  title: string
+  description: string | null
+  service_items?: Array<MarinaServiceItem>
+  service_id: string
+}
+
+export type MarinaServicesPublic = {
+  data: Array<MarinaServicePublic>
+  count: number
 }
 
 export type MarinaUpdate = {
   name: string | null
+  marina_code: string | null
   description: string | null
   address: string | null
   website: string | null
@@ -486,6 +502,7 @@ export type ReservationCreatedPublic = {
   user: UserBase
   boat: BoatBase
   payment_details_simple: PaymentDetailsSimple | null
+  service_requests: Array<ServiceOnReservationPublic>
   stripe_client_secret: string | null
 }
 
@@ -506,6 +523,7 @@ export type ReservationPublic = {
   user: UserBase
   boat: BoatBase
   payment_details_simple: PaymentDetailsSimple | null
+  service_requests: Array<ServiceOnReservationPublic>
 }
 
 export type ReservationStatus =
@@ -531,16 +549,48 @@ export type ReservationsPublic = {
   count: number
 }
 
-export type ServiceRequest = {
-  service_id: string
-  quantity: number
-  requested_date: string
+export type ServiceOnReservation = {
+  service_reservation_id?: string
+  receipt_id: string
+  created_at?: string
+  updated_at: string
+  requested_date?: string
+  status: ServiceRequestStatus
+  services?: Array<SubServiceRequest>
+  special_instructions: string | null
+  total_price: number
+  payment_details?: Record<string, unknown>
+  approved_by_user: string | null
+  confirmation_image_url: string | null
+  reservation_id: string
 }
 
-export type ServicesPublic = {
-  data: Array<MarinaServiceBase>
-  count: number
+export type ServiceOnReservationCreate = {
+  requested_date: string
+  requests: Array<SubServiceRequest>
+  special_instructions: string | null
 }
+
+export type ServiceOnReservationPublic = {
+  service_reservation_id: string
+  receipt_id: string
+  requested_date: string
+  status: ServiceRequestStatus
+  services: Array<SubServiceRequest>
+  special_instructions: string | null
+  total_price: number
+  payment_details_simple: PaymentDetailsSimple | null
+}
+
+export type ServiceRequestStatus =
+  | "initialized"
+  | "confirmed"
+  | "en-route"
+  | "denied"
+  | "delivered"
+  | "completed"
+  | "cancelled"
+  | "failed"
 
 export type StripeCardPublic = {
   country: string
@@ -574,6 +624,12 @@ export type SubRegionData = {
   center: Coordinate | null
   zoom: number | null
   is_new: boolean | null
+}
+
+export type SubServiceRequest = {
+  name: string
+  quantity: number
+  price: number
 }
 
 export type Token = {

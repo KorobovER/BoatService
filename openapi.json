@@ -319,7 +319,7 @@
         }
       }
     },
-    "/api/v1/user/reset-password/": {
+    "/api/v1/user/reset-password": {
       "post": {
         "tags": [
           "login-users"
@@ -1598,7 +1598,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServicesPublic"
+                  "$ref": "#/components/schemas/MarinaServicesPublic"
                 }
               }
             }
@@ -2856,18 +2856,18 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ServiceRequest"
+                "$ref": "#/components/schemas/ServiceOnReservationCreate"
               }
             }
           }
         },
         "responses": {
-          "202": {
+          "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Reservations-Request Reservation Service"
+                  "$ref": "#/components/schemas/ServiceOnReservation"
                 }
               }
             }
@@ -3627,6 +3627,54 @@
             "OAuth2PasswordBearer": []
           }
         ]
+      }
+    },
+    "/api/v1/users/admin-sends-email-verification": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Admin Resends Verification Email",
+        "description": "Send email verification on behalf of a user.",
+        "operationId": "admin_resends_verification_email",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Email"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/users/{user_id}/verify": {
@@ -5344,6 +5392,12 @@
             "minLength": 3,
             "title": "Name"
           },
+          "marina_code": {
+            "type": "string",
+            "maxLength": 4,
+            "minLength": 4,
+            "title": "Marina Code"
+          },
           "description": {
             "anyOf": [
               {
@@ -5438,6 +5492,7 @@
           "latitude",
           "longitude",
           "name",
+          "marina_code",
           "description",
           "address",
           "website",
@@ -5471,6 +5526,12 @@
             "minLength": 3,
             "title": "Name"
           },
+          "marina_code": {
+            "type": "string",
+            "maxLength": 4,
+            "minLength": 4,
+            "title": "Marina Code"
+          },
           "description": {
             "anyOf": [
               {
@@ -5565,6 +5626,7 @@
           "latitude",
           "longitude",
           "name",
+          "marina_code",
           "description",
           "address",
           "website",
@@ -5598,6 +5660,12 @@
             "minLength": 3,
             "title": "Name"
           },
+          "marina_code": {
+            "type": "string",
+            "maxLength": 4,
+            "minLength": 4,
+            "title": "Marina Code"
+          },
           "description": {
             "anyOf": [
               {
@@ -5698,13 +5766,6 @@
             "type": "array",
             "title": "Amenities"
           },
-          "services": {
-            "items": {
-              "$ref": "#/components/schemas/MarinaServiceBase"
-            },
-            "type": "array",
-            "title": "Services"
-          },
           "mooring_balls": {
             "items": {
               "$ref": "#/components/schemas/MooringBall"
@@ -5718,6 +5779,13 @@
             },
             "type": "array",
             "title": "Min Price"
+          },
+          "active_services": {
+            "items": {
+              "$ref": "#/components/schemas/MarinaServicePublic"
+            },
+            "type": "array",
+            "title": "Active Services"
           }
         },
         "type": "object",
@@ -5725,6 +5793,7 @@
           "latitude",
           "longitude",
           "name",
+          "marina_code",
           "description",
           "address",
           "website",
@@ -5737,9 +5806,9 @@
           "subregion",
           "marina_id",
           "amenities",
-          "services",
           "mooring_balls",
-          "min_price"
+          "min_price",
+          "active_services"
         ],
         "title": "MarinaPublic"
       },
@@ -5763,6 +5832,12 @@
             "minLength": 3,
             "title": "Name"
           },
+          "marina_code": {
+            "type": "string",
+            "maxLength": 4,
+            "minLength": 4,
+            "title": "Marina Code"
+          },
           "description": {
             "anyOf": [
               {
@@ -5862,13 +5937,6 @@
             },
             "type": "array",
             "title": "Amenities"
-          },
-          "services": {
-            "items": {
-              "$ref": "#/components/schemas/MarinaServiceBase"
-            },
-            "type": "array",
-            "title": "Services"
           }
         },
         "type": "object",
@@ -5876,6 +5944,7 @@
           "latitude",
           "longitude",
           "name",
+          "marina_code",
           "description",
           "address",
           "website",
@@ -5887,18 +5956,49 @@
           "logo_url",
           "subregion",
           "marina_id",
-          "amenities",
-          "services"
+          "amenities"
         ],
         "title": "MarinaPublicBase"
       },
-      "MarinaServiceBase": {
+      "MarinaServiceItem": {
         "properties": {
           "name": {
             "type": "string",
             "maxLength": 64,
             "minLength": 3,
             "title": "Name"
+          },
+          "price": {
+            "type": "number",
+            "maximum": 1000,
+            "minimum": 0,
+            "title": "Price"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "price",
+          "unit",
+          "type"
+        ],
+        "title": "MarinaServiceItem"
+      },
+      "MarinaServicePublic": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 3,
+            "title": "Title"
           },
           "description": {
             "anyOf": [
@@ -5913,25 +6013,47 @@
             ],
             "title": "Description"
           },
-          "price": {
-            "type": "number",
-            "maximum": 1000,
-            "minimum": 0,
-            "title": "Price"
+          "service_items": {
+            "items": {
+              "$ref": "#/components/schemas/MarinaServiceItem"
+            },
+            "type": "array",
+            "title": "Service Items"
           },
-          "is_active": {
-            "type": "boolean",
-            "title": "Is Active",
-            "default": false
+          "service_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Service Id"
           }
         },
         "type": "object",
         "required": [
-          "name",
+          "title",
           "description",
-          "price"
+          "service_id"
         ],
-        "title": "MarinaServiceBase"
+        "title": "MarinaServicePublic"
+      },
+      "MarinaServicesPublic": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/MarinaServicePublic"
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "count"
+        ],
+        "title": "MarinaServicesPublic"
       },
       "MarinaUpdate": {
         "properties": {
@@ -5947,6 +6069,19 @@
               }
             ],
             "title": "Name"
+          },
+          "marina_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4,
+                "minLength": 4
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Marina Code"
           },
           "description": {
             "anyOf": [
@@ -6041,6 +6176,7 @@
         "type": "object",
         "required": [
           "name",
+          "marina_code",
           "description",
           "address",
           "website",
@@ -6961,6 +7097,13 @@
               }
             ]
           },
+          "service_requests": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceOnReservationPublic"
+            },
+            "type": "array",
+            "title": "Service Requests"
+          },
           "stripe_client_secret": {
             "anyOf": [
               {
@@ -6991,6 +7134,7 @@
           "user",
           "boat",
           "payment_details_simple",
+          "service_requests",
           "stripe_client_secret"
         ],
         "title": "ReservationCreatedPublic"
@@ -7081,6 +7225,13 @@
                 "type": "null"
               }
             ]
+          },
+          "service_requests": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceOnReservationPublic"
+            },
+            "type": "array",
+            "title": "Service Requests"
           }
         },
         "type": "object",
@@ -7100,7 +7251,8 @@
           "marina",
           "user",
           "boat",
-          "payment_details_simple"
+          "payment_details_simple",
+          "service_requests"
         ],
         "title": "ReservationPublic"
       },
@@ -7209,51 +7361,219 @@
         ],
         "title": "ReservationsPublic"
       },
-      "ServiceRequest": {
+      "ServiceOnReservation": {
         "properties": {
-          "service_id": {
+          "service_reservation_id": {
             "type": "string",
             "format": "uuid",
-            "title": "Service Id"
+            "title": "Service Reservation Id"
           },
-          "quantity": {
-            "type": "number",
-            "title": "Quantity"
+          "receipt_id": {
+            "type": "string",
+            "title": "Receipt Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
           },
           "requested_date": {
             "type": "string",
             "format": "date-time",
             "title": "Requested Date"
-          }
-        },
-        "type": "object",
-        "required": [
-          "service_id",
-          "quantity",
-          "requested_date"
-        ],
-        "title": "ServiceRequest"
-      },
-      "ServicesPublic": {
-        "properties": {
-          "data": {
+          },
+          "status": {
+            "$ref": "#/components/schemas/ServiceRequestStatus"
+          },
+          "services": {
             "items": {
-              "$ref": "#/components/schemas/MarinaServiceBase"
+              "$ref": "#/components/schemas/SubServiceRequest"
             },
             "type": "array",
-            "title": "Data"
+            "title": "Services"
           },
-          "count": {
-            "type": "integer",
-            "title": "Count"
+          "special_instructions": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Special Instructions"
+          },
+          "total_price": {
+            "type": "number",
+            "minimum": 0,
+            "title": "Total Price"
+          },
+          "payment_details": {
+            "type": "object",
+            "title": "Payment Details"
+          },
+          "approved_by_user": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved By User"
+          },
+          "confirmation_image_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirmation Image Url"
+          },
+          "reservation_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Reservation Id"
           }
         },
         "type": "object",
         "required": [
-          "data",
-          "count"
+          "receipt_id",
+          "updated_at",
+          "status",
+          "special_instructions",
+          "total_price",
+          "approved_by_user",
+          "confirmation_image_url",
+          "reservation_id"
         ],
-        "title": "ServicesPublic"
+        "title": "ServiceOnReservation"
+      },
+      "ServiceOnReservationCreate": {
+        "properties": {
+          "requested_date": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Requested Date"
+          },
+          "requests": {
+            "items": {
+              "$ref": "#/components/schemas/SubServiceRequest"
+            },
+            "type": "array",
+            "title": "Requests"
+          },
+          "special_instructions": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Special Instructions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "requested_date",
+          "requests",
+          "special_instructions"
+        ],
+        "title": "ServiceOnReservationCreate"
+      },
+      "ServiceOnReservationPublic": {
+        "properties": {
+          "service_reservation_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Service Reservation Id"
+          },
+          "receipt_id": {
+            "type": "string",
+            "title": "Receipt Id"
+          },
+          "requested_date": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Requested Date"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ServiceRequestStatus"
+          },
+          "services": {
+            "items": {
+              "$ref": "#/components/schemas/SubServiceRequest"
+            },
+            "type": "array",
+            "title": "Services"
+          },
+          "special_instructions": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Special Instructions"
+          },
+          "total_price": {
+            "type": "number",
+            "title": "Total Price"
+          },
+          "payment_details_simple": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PaymentDetailsSimple"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "service_reservation_id",
+          "receipt_id",
+          "requested_date",
+          "status",
+          "services",
+          "special_instructions",
+          "total_price",
+          "payment_details_simple"
+        ],
+        "title": "ServiceOnReservationPublic"
+      },
+      "ServiceRequestStatus": {
+        "type": "string",
+        "enum": [
+          "initialized",
+          "confirmed",
+          "en-route",
+          "denied",
+          "delivered",
+          "completed",
+          "cancelled",
+          "failed"
+        ],
+        "title": "ServiceRequestStatus"
       },
       "StripeCardPublic": {
         "properties": {
@@ -7358,6 +7678,29 @@
           "is_new"
         ],
         "title": "SubRegionData"
+      },
+      "SubServiceRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "quantity": {
+            "type": "number",
+            "title": "Quantity"
+          },
+          "price": {
+            "type": "number",
+            "title": "Price"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "quantity",
+          "price"
+        ],
+        "title": "SubServiceRequest"
       },
       "Token": {
         "properties": {

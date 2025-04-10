@@ -1,4 +1,4 @@
-import { Flex, Icon, Text, useColorModeValue, IconButton, Image } from "@chakra-ui/react";
+import { Flex, Icon, Text, useColorModeValue, IconButton } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import {
@@ -24,7 +24,6 @@ interface SidebarItemsProps {
 
 const SidebarItems = ({ onClose }: SidebarItemsProps) => {
   const queryClient = useQueryClient();
-  const textColor = useColorModeValue("ui.light", "ui.light");
   const bgActive = useColorModeValue("white", "#4A5568"); // todo fix this? highlighted item
   const currentUser = queryClient.getQueryData<EmployeePublic>(["currentUser"]);
 
@@ -81,6 +80,11 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
           rounded="full"
           w="42px"
           h="42px"
+          _hover={{
+            "& svg path": {
+              fill: "#DD6600"
+            }
+          }}
           icon={
             <svg width="14" height="22" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
@@ -93,10 +97,15 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
 
         <IconButton
           aria-label="Icon 2"
-          bg="white"
+          bg="#FFFFFF"
           rounded="full"
           w="42px"
           h="42px"
+          _hover={{
+            "& svg path": {
+              fill: "#DD6600"
+            }
+          }}
           icon={
             <svg width="14" height="22" viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
@@ -113,6 +122,11 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
           rounded="full"
           w="42px"
           h="42px"
+          _hover={{
+            "& svg path": {
+              fill: "#DD6600"
+            }
+          }}
           icon={
             <svg width="14" height="22" viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path

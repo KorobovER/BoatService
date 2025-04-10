@@ -15,7 +15,7 @@ import {
     Center,
     useDisclosure
 } from '@chakra-ui/react';
-import BollaCell from "../../../public/assets/images/bolla-cell.png";
+import BollaCell from "../../../public/assets/images/bolla-cell.svg";
 import { ReservationsService, MooringBallsService, MarinasService } from '../../client';
 import { useMarina } from '../../context/MarinaContext';
 import PopupFreeCell from './PopupFreeCell';
@@ -24,6 +24,9 @@ import PopupReserved from './PopupReserved';
 interface Row {
     id: string;
     label: string;
+    marina?: {
+        logo_url: string | null;
+    };
 }
 
 export interface Boat {
@@ -104,7 +107,11 @@ const TableReservations: React.FC<TableReservationsProps> = ({
             
             const rows = apiMooringBalls
                 .filter(ball => ball && ball[numberField])
-                .map(ball => ({ id: ball[numberField].toString(), label: ball[numberField].toString() }))
+                .map(ball => ({
+                    id: ball[numberField].toString(),
+                    label: ball[numberField].toString(),
+                    marina: ball.marina
+                }))
                 .sort((a, b) => parseInt(a.id) - parseInt(b.id));
             
             setAllRows(rows);
@@ -226,9 +233,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
 
     const isLoading = isLoadingMooringBalls || isLoadingReservations;
 
-    const isStartOfWeek = (dayIndex: number) => dayIndex % 7 === 0;
-    const isEndOfWeek = (dayIndex: number) => (dayIndex + 1) % 7 === 0;
-
     if (isLoading) return (
         <Flex width="98%" m="auto" height="100vh" alignItems="center" justifyContent="center" bg="white" rounded='25px'>
             <Spinner size="xl" color="ui.main" />
@@ -253,7 +257,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
             <Box mt='56px' mr='20px' width="105px" display="flex" flexDirection="column" alignItems="center">
                 {allRows.map(row => (
                     <Box key={row.id} p="16px 24px" width="100px" height="60px" display="flex" alignItems="center" justifyContent="space-between">
-                        <Image width="24px" height="24px" src={BollaCell} alt="Bolla" />
+                        <Image width="24px" height="24px" src={row.marina?.logo_url || BollaCell} alt="Bolla" />
                         <Text fontSize="16px" lineHeight="52px">{row.label}</Text>
                     </Box>
                 ))}
@@ -326,7 +330,12 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                                 onClick={() => handleCellClick(row.id, day, boatData.boat)}
                                                 cursor="pointer"
                                             >
-                                                {renderBoatCell(boatData.boat, boatData.colspan)}
+                                                <Box
+                                                    position="relative"
+                                                    height="100%"
+                                                >
+                                                    {renderBoatCell(boatData.boat, boatData.colspan)}
+                                                </Box>
                                             </Td>
                                         );
                                     })}

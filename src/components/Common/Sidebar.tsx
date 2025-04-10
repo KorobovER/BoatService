@@ -15,7 +15,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { FiLogOut, FiMenu } from "react-icons/fi";
 
-import LogoPrimary from "/assets/images/logo-primary.png";
+import LogoPrimary from "/assets/images/logo-primary.svg";
 import LogoSecondary from "/assets/images/logo-secondary.svg";
 import type { EmployeePublic } from "../../client";
 import useAuth from "../../hooks/useAuth";

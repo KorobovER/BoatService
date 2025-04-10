@@ -35,6 +35,8 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
                 borderRadius="25px"
                 padding="10px 25px"
                 gap="10px"
+                fontSize="12px"
+                fontWeight="400"
                 onClick={onToday}
             >
                 Today
@@ -111,7 +113,10 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
                     border="1px solid #B7B7B7"
                     borderRadius="25px"
                     padding="10px 25px"
-                    bg={currentView === 'month' ? '#F6F6F6' : 'white'}
+                    bg={currentView === 'month' ? 'linear-gradient(90deg, #003F5A 0%, #165874 100%)' : 'white'}
+                    color={currentView === 'month' ? 'white' : 'black'}
+                    fontSize="12px"
+                    fontWeight="400"
                     onClick={() => onViewChange('month')}
                 >
                     Month
@@ -122,7 +127,10 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
                     border="1px solid #B7B7B7"
                     borderRadius="25px"
                     padding="10px 25px"
-                    bg={currentView === 'week' ? '#F6F6F6' : 'white'}
+                    bg={currentView === 'week' ? 'linear-gradient(90deg, #003F5A 0%, #165874 100%)' : 'white'}
+                    color={currentView === 'week' ? 'white' : 'black'}
+                    fontSize="12px"
+                    fontWeight="400"
                     onClick={() => onViewChange('week')}
                 >
                     Week
@@ -133,7 +141,10 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
                     border="1px solid #B7B7B7"
                     borderRadius="25px"
                     padding="10px 25px"
-                    bg={currentView === 'day' ? '#F6F6F6' : 'white'}
+                    bg={currentView === 'day' ? 'linear-gradient(90deg, #003F5A 0%, #165874 100%)' : 'white'}
+                    color={currentView === 'day' ? 'white' : 'black'}
+                    fontSize="12px"
+                    fontWeight="400"
                     onClick={() => onViewChange('day')}
                 >
                     Day

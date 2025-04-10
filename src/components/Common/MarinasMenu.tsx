@@ -27,7 +27,7 @@ interface Marina {
 const MarinasMenu = () => {
     const { selectedMarina, setSelectedMarina, setFullMarinaData } = useMarina();
     const [marinas, setMarinas] = useState<Marina[]>([]);
-    
+
     // Запрос данных сотрудника через readEmployeeMe
     const { data: employeeData, isLoading, isError } = useQuery({
         queryKey: ['employee'],
@@ -40,7 +40,7 @@ const MarinasMenu = () => {
             console.log(`Fetching complete data for marina: ${marina.name} (${marina.marina_id})`);
             const fullMarinaData = await MarinasService.readMarina({ id: marina.marina_id });
             console.log('Full marina data:', fullMarinaData);
-            
+
             // Сохраняем базовые и полные данные марины
             setSelectedMarina(marina);
             setFullMarinaData(fullMarinaData);
@@ -60,7 +60,7 @@ const MarinasMenu = () => {
 
     useEffect(() => {
         console.log('Employee data:', employeeData);
-        
+
         if (employeeData && employeeData.marinas && employeeData.marinas.length > 0) {
             // Преобразуем все марины сотрудника в массив для компонента
             const marinasArray = employeeData.marinas.map(marina => ({
@@ -69,10 +69,10 @@ const MarinasMenu = () => {
                 logo_url: marina.logo_url,
                 subregion: marina.subregion
             }));
-            
+
             setMarinas(marinasArray);
             console.log('Marinas array:', marinasArray);
-            
+
             if (!selectedMarina && marinasArray.length > 0) {
                 // При первой загрузке получаем полные данные выбранной марины
                 handleMarinaSelect(marinasArray[0]);
@@ -126,9 +126,18 @@ const MarinasMenu = () => {
                             fallbackSrc={PLACE}
                             alt={selectedMarina?.name || "Marina"}
                         />
-                        <Text fontWeight="medium" noOfLines={1} textAlign="left">
-                            {selectedMarina?.name || "Select marina"}
-                        </Text>
+                        <Flex justify='space-between' align='center' w='75%'>
+                            <Text fontWeight="medium" noOfLines={1} textAlign="left">
+                                {selectedMarina?.name || "Select marina"}
+                            </Text>
+                            <Box>
+                                <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M13.0001 1.63461L7.49048 6.91346C7.3174 7.05769 7.14433 7.11538 7.00009 7.11538C6.82702 7.11538 6.65394 7.05769 6.50971 6.94231L0.971248 1.63461C0.682786 1.375 0.682786 0.913461 0.942402 0.653846C1.20202 0.365384 1.66356 0.365384 1.92317 0.624999L7.00009 5.47115L12.0482 0.624999C12.3078 0.365384 12.7693 0.365384 13.0289 0.653846C13.2886 0.913461 13.2886 1.375 13.0001 1.63461Z" fill="#262626" />
+                                </svg>
+                            </Box>
+                        </Flex>
+
+
                     </Flex>
                 </MenuButton>
                 <MenuList minWidth="240px" boxShadow="md" py={0}>

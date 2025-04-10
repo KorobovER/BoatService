@@ -7044,6 +7044,14 @@
           "status": {
             "$ref": "#/components/schemas/ReservationStatus"
           },
+          "is_pending": {
+            "type": "boolean",
+            "title": "Is Pending"
+          },
+          "is_completed": {
+            "type": "boolean",
+            "title": "Is Completed"
+          },
           "applied_rate_type": {
             "$ref": "#/components/schemas/DurationType"
           },
@@ -7125,6 +7133,8 @@
           "end_date",
           "reservation_id",
           "status",
+          "is_pending",
+          "is_completed",
           "applied_rate_type",
           "applied_rate",
           "arrived_time",
@@ -7172,6 +7182,14 @@
           },
           "status": {
             "$ref": "#/components/schemas/ReservationStatus"
+          },
+          "is_pending": {
+            "type": "boolean",
+            "title": "Is Pending"
+          },
+          "is_completed": {
+            "type": "boolean",
+            "title": "Is Completed"
           },
           "applied_rate_type": {
             "$ref": "#/components/schemas/DurationType"
@@ -7243,6 +7261,8 @@
           "end_date",
           "reservation_id",
           "status",
+          "is_pending",
+          "is_completed",
           "applied_rate_type",
           "applied_rate",
           "arrived_time",
@@ -7515,6 +7535,14 @@
           "status": {
             "$ref": "#/components/schemas/ServiceRequestStatus"
           },
+          "is_pending": {
+            "type": "boolean",
+            "title": "Is Pending"
+          },
+          "is_completed": {
+            "type": "boolean",
+            "title": "Is Completed"
+          },
           "services": {
             "items": {
               "$ref": "#/components/schemas/SubServiceRequest"
@@ -7554,6 +7582,8 @@
           "receipt_id",
           "requested_date",
           "status",
+          "is_pending",
+          "is_completed",
           "services",
           "special_instructions",
           "total_price",
@@ -8152,6 +8182,10 @@
             "type": "array",
             "title": "Items"
           },
+          "is_verified": {
+            "type": "boolean",
+            "title": "Is Verified"
+          },
           "reservations": {
             "items": {
               "$ref": "#/components/schemas/Reservation"
@@ -8181,6 +8215,7 @@
           "created_at",
           "updated_at",
           "items",
+          "is_verified",
           "reservations",
           "active_boats"
         ],
@@ -8957,6 +8992,10 @@
             "type": "array",
             "title": "Items"
           },
+          "is_verified": {
+            "type": "boolean",
+            "title": "Is Verified"
+          },
           "reservations": {
             "items": {
               "$ref": "#/components/schemas/Reservation"
@@ -8993,6 +9032,7 @@
           "created_at",
           "updated_at",
           "items",
+          "is_verified",
           "reservations",
           "active_boats",
           "payment_methods"

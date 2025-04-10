@@ -2558,6 +2558,14 @@ export const $ReservationCreatedPublic = {
       type: "ReservationStatus",
       isRequired: true,
     },
+    is_pending: {
+      type: "boolean",
+      isRequired: true,
+    },
+    is_completed: {
+      type: "boolean",
+      isRequired: true,
+    },
     applied_rate_type: {
       type: "DurationType",
       isRequired: true,
@@ -2675,6 +2683,14 @@ export const $ReservationPublic = {
     },
     status: {
       type: "ReservationStatus",
+      isRequired: true,
+    },
+    is_pending: {
+      type: "boolean",
+      isRequired: true,
+    },
+    is_completed: {
+      type: "boolean",
       isRequired: true,
     },
     applied_rate_type: {
@@ -2986,6 +3002,14 @@ export const $ServiceOnReservationPublic = {
     },
     status: {
       type: "ServiceRequestStatus",
+      isRequired: true,
+    },
+    is_pending: {
+      type: "boolean",
+      isRequired: true,
+    },
+    is_completed: {
+      type: "boolean",
       isRequired: true,
     },
     services: {
@@ -3577,6 +3601,10 @@ export const $UserPublic = {
       contains: {
         type: "Item",
       },
+      isRequired: true,
+    },
+    is_verified: {
+      type: "boolean",
       isRequired: true,
     },
     reservations: {
@@ -4345,6 +4373,10 @@ export const $UserWithPaymentPublic = {
       contains: {
         type: "Item",
       },
+      isRequired: true,
+    },
+    is_verified: {
+      type: "boolean",
       isRequired: true,
     },
     reservations: {

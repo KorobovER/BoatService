@@ -493,6 +493,8 @@ export type ReservationCreatedPublic = {
   end_date: string
   reservation_id: string
   status: ReservationStatus
+  is_pending: boolean
+  is_completed: boolean
   applied_rate_type: DurationType
   applied_rate: number
   arrived_time: string | null
@@ -514,6 +516,8 @@ export type ReservationPublic = {
   end_date: string
   reservation_id: string
   status: ReservationStatus
+  is_pending: boolean
+  is_completed: boolean
   applied_rate_type: DurationType
   applied_rate: number
   arrived_time: string | null
@@ -576,6 +580,8 @@ export type ServiceOnReservationPublic = {
   receipt_id: string
   requested_date: string
   status: ServiceRequestStatus
+  is_pending: boolean
+  is_completed: boolean
   services: Array<SubServiceRequest>
   special_instructions: string | null
   total_price: number
@@ -690,6 +696,7 @@ export type UserPublic = {
   created_at: string
   updated_at: string
   items: Array<Item>
+  is_verified: boolean
   reservations: Array<Reservation>
   active_boats: Array<Boat>
 }
@@ -781,6 +788,7 @@ export type UserWithPaymentPublic = {
   created_at: string
   updated_at: string
   items: Array<Item>
+  is_verified: boolean
   reservations: Array<Reservation>
   active_boats: Array<Boat>
   payment_methods: Array<PaymentMethodPublic>

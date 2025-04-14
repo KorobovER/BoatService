@@ -271,6 +271,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                     sx={{
                         borderCollapse: 'separate',
                         borderSpacing: '2px',
+                        tableLayout: 'fixed'
                     }}
                 >
                     <Thead>
@@ -278,7 +279,9 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                             {days.map(day => (
                                 <Th
                                     key={`date-${day}`}
-                                    width='150px'
+                                    width={cellWidth}
+                                    minWidth={cellWidth}
+                                    maxWidth={cellWidth}
                                     position="relative"
                                     p={1}
                                     height="58px"
@@ -302,7 +305,9 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                             return (
                                                 <Td
                                                     key={`cell-${row.id}-${day}`}
-                                                    width='150px'
+                                                    width={cellWidth}
+                                                    minWidth={cellWidth}
+                                                    maxWidth={cellWidth}
                                                     height="58px"
                                                     p={1}
                                                     position="relative"
@@ -320,9 +325,11 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                             <Td
                                                 key={`cell-${row.id}-${day}`}
                                                 bg="#007A7B"
-                                                borderRadius={cellWidth === '150px' ? '25px' : '10px'}
+                                                borderRadius="full"
                                                 colSpan={boatData.colspan}
                                                 width={cellWidth}
+                                                minWidth={cellWidth}
+                                                maxWidth={cellWidth}
                                                 height="58px"
                                                 p={1}
                                                 position="relative"

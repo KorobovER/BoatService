@@ -1,6 +1,6 @@
 // TableWeek.tsx
 import React from 'react';
-import { Box, Text, Image, Tooltip } from '@chakra-ui/react';
+import { Box, Text, Image, Tooltip, Flex, Button, Popover, PopoverTrigger, PopoverContent, PopoverBody, Link } from '@chakra-ui/react';
 import TableReservations, { Boat } from './TableReservations';
 
 interface TableWeekProps {
@@ -72,68 +72,134 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
     );
 
     const renderBoatCell = (boat: Boat) => (
-        <Tooltip
-            hasArrow
-            label={
-                <Box width="200px" p="2" bg="white" borderRadius="sm" color="black">
-                    <Text fontSize="14px" fontWeight="500">{boat.name}</Text>
-                    <Text fontSize="14px" fontWeight="300" opacity="0.8">
-                        {boat.code} - {new Date(boat.startDay).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(boat.endDay).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                    </Text>
+        <Popover trigger="hover" placement="bottom">
+            <PopoverTrigger>
+                <Box
+                    borderRadius="5px"
+                    p="5px"
+                    width="fit-content"
+                    height="100%"
+                    display="flex"
+                    gap="8px"
+                    alignItems="center"
+                    margin="0 auto"
+                >
+                    {boat.vessel_type === 'power' ? (
+                        <Image
+                            src="/assets/images/power-boat.png"
+                            alt={boat.name}
+                            width="22px"
+                            height="22px"
+                            objectFit="cover"
+                            borderRadius="4px"
+                            filter="brightness(0) invert(1)"
+                        />
+                    ) : boat.vessel_type === 'catamaran' ? (
+                        <Image
+                            src="/assets/images/catamaran-boat.png"
+                            alt={boat.name}
+                            width="22px"
+                            height="22px"
+                            objectFit="cover"
+                            borderRadius="4px"
+                            filter="brightness(0) invert(1)"
+                        />
+                    ) : boat.vessel_type === 'monohull' ? (
+                        <Image
+                            src="/assets/images/monohul-boat.png"
+                            alt={boat.name}
+                            width="22px"
+                            height="22px"
+                            objectFit="cover"
+                            borderRadius="4px"
+                            filter="brightness(0) invert(1)"
+                        />
+                    ) : (
+                        <Text color="white" fontSize="14px" fontWeight="500">{boat.name}</Text>
+                    )}
+                    <Box>
+                        <Text color="white" fontSize="16px" fontWeight="400">{boat.name}</Text>
+                        <Text color="white" fontSize="12px" fontWeight="300" opacity="0.8">{boat.code}</Text>
+                    </Box>
                 </Box>
-            }
-            bg="transparent"
-            placement="bottom"
-        >
-            <Box
-                borderRadius="5px"
-                p="5px"
-                width="fit-content"
-                height="100%"
-                display="flex"
-                gap="8px"
-                alignItems="center"
-                margin="0 auto"
-            >
-                {boat.vessel_type === 'power' ? (
-                    <Image
-                        src="/assets/images/power-boat.png"
-                        alt={boat.name}
-                        width="22px"
-                        height="22px"
-                        objectFit="cover"
-                        borderRadius="4px"
-                        filter="brightness(0) invert(1)"
-                    />
-                ) : boat.vessel_type === 'catamaran' ? (
-                    <Image
-                        src="/assets/images/catamaran-boat.png"
-                        alt={boat.name}
-                        width="22px"
-                        height="22px"
-                        objectFit="cover"
-                        borderRadius="4px"
-                        filter="brightness(0) invert(1)"
-                    />
-                ) : boat.vessel_type === 'monohull' ? (
-                    <Image
-                        src="/assets/images/monohul-boat.png"
-                        alt={boat.name}
-                        width="22px"
-                        height="22px"
-                        objectFit="cover"
-                        borderRadius="4px"
-                        filter="brightness(0) invert(1)"
-                    />
-                ) : (
-                    <Text color="white" fontSize="14px" fontWeight="500">{boat.name}</Text>
-                )}
-                <Box>
-                    <Text color="white" fontSize="16px" fontWeight="400">{boat.name}</Text>
-                    <Text color="white" fontSize="12px" fontWeight="300" opacity="0.8">{boat.code}</Text>
-                </Box>
-            </Box>
-        </Tooltip>
+            </PopoverTrigger>
+            <PopoverContent width="fit-content" border="1px solid #D2D2D2" borderRadius="8px">
+                <PopoverBody p="8px">
+                    <Flex gap='8px' alignItems='center' color="black">
+                        <Box>
+                            <Flex gap='8px' alignItems='center'>
+                                {boat.vessel_type === 'power' ? (
+                                    <Image
+                                        src="/assets/images/power-boat.png"
+                                        alt={boat.name}
+                                        width="22px"
+                                        height="22px"
+                                        objectFit="cover"
+                                        borderRadius="4px"
+                                        filter="brightness(0)"
+                                    />
+                                ) : boat.vessel_type === 'catamaran' ? (
+                                    <Image
+                                        src="/assets/images/catamaran-boat.png"
+                                        alt={boat.name}
+                                        width="22px"
+                                        height="22px"
+                                        objectFit="cover"
+                                        borderRadius="4px"
+                                        filter="brightness(0)"
+                                    />
+                                ) : boat.vessel_type === 'monohull' ? (
+                                    <Image
+                                        src="/assets/images/monohul-boat.png"
+                                        alt={boat.name}
+                                        width="22px"
+                                        height="22px"
+                                        objectFit="cover"
+                                        borderRadius="4px"
+                                        filter="brightness(0)"
+                                    />
+                                ) : (
+                                    <Text color="white" fontSize="14px" fontWeight="500">{boat.name}</Text>
+                                )}
+                                <Text fontSize="14px" fontWeight="500">{boat.name}</Text>
+                                <Text fontSize="14px" fontWeight="300" opacity="0.8">|</Text>
+                                <Text fontSize="14px" fontWeight="300" opacity="0.8">
+                                    {boat.code}
+                                </Text>
+                            </Flex>
+                            <Flex p='8px 0px' gap='16px'>
+                                <Flex gap='4px'>
+                                    <Text fontSize="14px" fontWeight="400" color='white' bg='black' p='0 8px' borderRadius='56px'>In</Text>
+                                    <Text fontSize="14px" fontWeight="400" color='black'>{`${new Date(boat.startDay).getDate()} ${new Date(boat.startDay).toLocaleString('en-US', { month: 'long' })}`}</Text>
+                                </Flex>
+                                <Flex gap='4px'>
+                                    <Text fontSize="14px" fontWeight="400" color='white' bg='black' p='0 8px' borderRadius='56px'>Out</Text>
+                                    <Text fontSize="14px" fontWeight="400" color='black'>{`${new Date(boat.endDay).getDate()} ${new Date(boat.endDay).toLocaleString('en-US', { month: 'long' })}`}</Text>
+                                </Flex>
+                            </Flex>
+                            <Flex gap='24px' alignItems="flex-end">
+                                <Button 
+                                    borderRadius='full' 
+                                    bg='#FEA02F' 
+                                    fontSize='14px' 
+                                    fontWeight='400'
+                                    color='black' 
+                                    sx={{ 
+                                        padding: '4px 8px !important',
+                                        minHeight: 'unset',
+                                        height: 'auto',
+                                        lineHeight: '1.2'
+                                    }}
+                                >
+                                    service request
+                                </Button>
+                                <Link variant="unstyled" textDecoration="underline" fontSize='14px' fontWeight='400'>Open detail view</Link>
+                            </Flex>
+                        </Box>
+                    </Flex>
+                </PopoverBody>
+            </PopoverContent>
+        </Popover>
     );
 
     return (

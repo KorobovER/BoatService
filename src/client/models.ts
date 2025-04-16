@@ -667,7 +667,6 @@ export type UserBase = {
   mailing_postal_code?: string | null
   mailing_country?: string | null
   profile_pic_url?: string | null
-  sign_up_code?: string | null
 }
 
 export type UserPublic = {
@@ -689,7 +688,6 @@ export type UserPublic = {
   mailing_postal_code?: string | null
   mailing_country?: string | null
   profile_pic_url?: string | null
-  sign_up_code?: string | null
   id: string
   referral_code: string
   display_name: string
@@ -739,7 +737,6 @@ export type UserUpdate = {
   mailing_postal_code?: string | null
   mailing_country?: string | null
   profile_pic_url?: string | null
-  sign_up_code?: string | null
   password?: string | null
 }
 
@@ -781,7 +778,6 @@ export type UserWithPaymentPublic = {
   mailing_postal_code?: string | null
   mailing_country?: string | null
   profile_pic_url?: string | null
-  sign_up_code?: string | null
   id: string
   referral_code: string
   display_name: string

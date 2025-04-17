@@ -23,16 +23,16 @@ const theme = extendTheme({
   
   space: {
     zero: 0,
-    xs: 4,
-    sm: 8,
-    md: 12,
-    lg: 16,
-    xl: 24,
-    "2xl": 32,
-    "3xl": 40,
-    "4xl": 48,
-    "5xl": 56,
-    full: 1000,
+    xs: "4px",
+    sm: "8px",
+    md: "12px",
+    lg: "16px",
+    xl: "24px",
+    "2xl": "32px",
+    "3xl": "40px",
+    "4xl": "48px",
+    "5xl": "56px",
+    full: "1000px",
   },
 
   styles: {

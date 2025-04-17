@@ -8,7 +8,8 @@ import {
     MenuItem,
     Box,
     HStack,
-    Spinner
+    Spinner,
+    space
 } from "@chakra-ui/react";
 import PLACE from '../../../public/assets/images/place.png';
 import { useState, useEffect } from "react";
@@ -112,10 +113,11 @@ const MarinasMenu = () => {
                 <MenuButton>
                     <Flex
                         align='center'
-                        gap='3'
-                        w='300px'
+                        gap='md'
+                        w='236px'
+                        p='xs'
+                        pr='lg'
                         bg='white'
-                        p='1'
                         rounded='full'
                         border='1px solid #D2D2D2'
                         _hover={{ bg: 'gray.50' }}
@@ -124,12 +126,12 @@ const MarinasMenu = () => {
                         <Image
                             rounded='full'
                             src={selectedMarina?.logo_url || PLACE}
-                            boxSize="40px"
+                            boxSize="35px"
                             fallbackSrc={PLACE}
                             alt={selectedMarina?.name || "Marina"}
                         />
-                        <Flex justify='space-between' align='center' w='75%'>
-                            <Text fontWeight="medium" noOfLines={1} textAlign="left">
+                        <Flex align='center' gap='sm'>
+                            <Text fontSize='14px' fontWeight="400" noOfLines={1} textAlign="left">
                                 {selectedMarina?.name || "Select marina"}
                             </Text>
                             <Box>
@@ -138,29 +140,27 @@ const MarinasMenu = () => {
                                 </svg>
                             </Box>
                         </Flex>
-
-
                     </Flex>
                 </MenuButton>
-                <MenuList minWidth="240px" boxShadow="md" py={0}>
+                <MenuList minWidth="240px" rounded='xl' boxShadow="md" py={0}>
                     {marinas.map((marina) => (
                         <MenuItem
                             key={marina.marina_id}
+                            rounded='xl'
                             onClick={() => handleMarinaSelect(marina)}
-                            _hover={{ bg: 'gray.100' }}
-                            px={3}
-                            py={2}
+                            _hover={{ bg: '#FAE8D9' }}
+                            p='xs'
                         >
-                            <HStack spacing={3}>
+                            <HStack gap='sm'>
                                 <Image
                                     src={marina.logo_url || PLACE}
-                                    boxSize="6"
+                                    boxSize="35px"
                                     rounded="full"
                                     fallbackSrc={PLACE}
                                     alt={marina.name}
                                 />
                                 <Box>
-                                    <Text fontWeight="medium" noOfLines={1}>
+                                    <Text fontSize='14px' fontWeight="400" noOfLines={1}>
                                         {marina.name}
                                     </Text>
                                 </Box>

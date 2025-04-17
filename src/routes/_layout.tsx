@@ -25,7 +25,6 @@ function Layout() {
         h="100vh"
         position="relative"
         flexDirection="column"
-        gap="4"
       >
         <Sidebar />
         {isLoading ? (

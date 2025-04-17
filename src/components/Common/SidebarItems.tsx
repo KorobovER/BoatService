@@ -37,21 +37,17 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
       justify="space-between"
       w="full"
     >
-      <Flex
-        justify='space-between'
-        gap='50px'
-      >
+      <Flex>
         {finalItems.map(({ icon, title, path }) => (
           <Flex
             align="center"
             as={Link}
             to={path}
             key={title}
-            p={2}
-            borderRadius="md"
+            pl='xl'
+            pr='xl'
             activeProps={{
               style: {
-                background: bgActive,
                 color: "#DD6600",
               },
             }}
@@ -61,26 +57,17 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
             transition="background 0.3s ease"
             onClick={onClose}
           >
-            <Icon as={icon} mr={2} boxSize={4} />
-            <Text
-              fontSize='14px'
-            >{title}</Text>
+            <Icon as={icon} mr='sm' boxSize='14px' />
+            <Text fontSize='14px' fontWeight='400'>{title}</Text>
           </Flex>
         ))}
       </Flex>
-      <Flex
-        gap='16px'
-        p='4'
-        align="center"
-        justify='space-between'
-      >
-        <Box display='flex' gap='11px'>
+      <Flex gap='lg'>
+        <Box gap='11px' display='flex'>
           <IconButton
+            variant='unstyled'
             aria-label="Icon 1"
-            bg="white"
-            rounded="full"
-            w="42px"
-            h="42px"
+            p='md'
             _hover={{
               "& svg path": {
                 fill: "#DD6600"
@@ -95,13 +82,10 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
               </svg>
             }
           />
-
           <IconButton
             aria-label="Icon 2"
-            bg="#FFFFFF"
-            rounded="full"
-            w="42px"
-            h="42px"
+            variant='unstyled'
+            p='md'
             _hover={{
               "& svg path": {
                 fill: "#DD6600"
@@ -119,10 +103,8 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
 
           <IconButton
             aria-label="Icon 3"
-            bg="white"
-            rounded="full"
-            w="42px"
-            h="42px"
+            variant='unstyled'
+            p='md'
             _hover={{
               "& svg path": {
                 fill: "#DD6600"

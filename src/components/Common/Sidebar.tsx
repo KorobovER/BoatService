@@ -80,6 +80,7 @@ const Sidebar = () => {
       <Box
         bg={bgColor}
         w="full"
+        p='xl'
         position="relative"
         display={{ base: "none", md: "flex" }}
       >
@@ -88,20 +89,18 @@ const Sidebar = () => {
           justify="space-between"
           bg={bgColor}
           borderRadius={12}
-          p={4}
           w="full"
         >
           {/* Верхняя часть: Логотип и элементы в строку */}
-          <Flex align="center" justify="space-between" w="full">
+          <Flex gap='md' align="center" justify="space-between" w="full">
             {/* Логотип */}
             <Image
               src={useColorModeValue(LogoPrimary, LogoSecondary)}
               alt="Logo"
-              w="100px"
+              w="50px"
+              h="50px"
               maxW="full"
-              p={6}
             />
-
             {/* Элементы в строку */}
             <Flex flexDir="row" gap={4} flexGrow={1} justify="flex-end">
               <SidebarItems />

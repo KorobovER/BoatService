@@ -7943,18 +7943,6 @@
               }
             ],
             "title": "Profile Pic Url"
-          },
-          "sign_up_code": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 20
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sign Up Code"
           }
         },
         "type": "object",
@@ -8139,18 +8127,6 @@
               }
             ],
             "title": "Profile Pic Url"
-          },
-          "sign_up_code": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 20
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sign Up Code"
           },
           "id": {
             "type": "string",
@@ -8548,18 +8524,6 @@
             ],
             "title": "Profile Pic Url"
           },
-          "sign_up_code": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 20
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sign Up Code"
-          },
           "password": {
             "anyOf": [
               {
@@ -8949,18 +8913,6 @@
               }
             ],
             "title": "Profile Pic Url"
-          },
-          "sign_up_code": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 20
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sign Up Code"
           },
           "id": {
             "type": "string",

@@ -53,10 +53,12 @@ const MarinasMenu = () => {
     };
 
     // Обработчик для опции "All marinas"
+    /*
     const handleSelectAllMarinas = () => {
         setSelectedMarina(null);
         setFullMarinaData(null);
     };
+    */
 
     useEffect(() => {
         console.log('Employee data:', employeeData);

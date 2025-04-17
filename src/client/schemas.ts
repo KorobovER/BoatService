@@ -3375,18 +3375,6 @@ export const $UserBase = {
         },
       ],
     },
-    sign_up_code: {
-      type: "any-of",
-      contains: [
-        {
-          type: "string",
-          maxLength: 20,
-        },
-        {
-          type: "null",
-        },
-      ],
-    },
   },
 } as const
 
@@ -3555,18 +3543,6 @@ export const $UserPublic = {
         {
           type: "string",
           maxLength: 128,
-        },
-        {
-          type: "null",
-        },
-      ],
-    },
-    sign_up_code: {
-      type: "any-of",
-      contains: [
-        {
-          type: "string",
-          maxLength: 20,
         },
         {
           type: "null",
@@ -3928,18 +3904,6 @@ export const $UserUpdate = {
         {
           type: "string",
           maxLength: 128,
-        },
-        {
-          type: "null",
-        },
-      ],
-    },
-    sign_up_code: {
-      type: "any-of",
-      contains: [
-        {
-          type: "string",
-          maxLength: 20,
         },
         {
           type: "null",
@@ -4327,18 +4291,6 @@ export const $UserWithPaymentPublic = {
         {
           type: "string",
           maxLength: 128,
-        },
-        {
-          type: "null",
-        },
-      ],
-    },
-    sign_up_code: {
-      type: "any-of",
-      contains: [
-        {
-          type: "string",
-          maxLength: 20,
         },
         {
           type: "null",

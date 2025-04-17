@@ -1,4 +1,4 @@
-import { Box, Container, Text } from "@chakra-ui/react"
+import { Box, Container } from "@chakra-ui/react"
 import { createFileRoute } from "@tanstack/react-router"
 import Panel from "../../components/AdminPanel/Panel"
 
@@ -10,7 +10,7 @@ export const Route = createFileRoute("/_layout/")({
 
 function Dashboard() {
   const { user: currentUser } = useAuth()
-
+  console.log(`currentUser ${currentUser}`); // todo: fix this
   return (
     <>
       <Container maxW="full"

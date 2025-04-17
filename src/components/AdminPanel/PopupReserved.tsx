@@ -22,6 +22,7 @@ interface PopupReservedProps {
 
 const PopupReserved: React.FC<PopupReservedProps> = ({ isOpen, onClose, rowId, day, boat }) => {
     if (!boat) return null;
+    console.log(day); // todo: fix this
 
     return (
         <Modal isOpen={isOpen} onClose={onClose}>

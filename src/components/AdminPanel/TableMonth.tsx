@@ -1,6 +1,6 @@
 // TableMonth.tsx
 import React from 'react';
-import { Box, Text, Image, Tooltip, Flex, Button, Popover, PopoverTrigger, PopoverContent, PopoverBody, Link } from '@chakra-ui/react';
+import { Box, Text, Image, Flex, Button, Popover, PopoverTrigger, PopoverContent, PopoverBody, Link } from '@chakra-ui/react';
 import TableReservations, { Boat } from './TableReservations';
 
 interface TableMonthProps {

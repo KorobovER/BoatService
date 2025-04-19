@@ -1,6 +1,5 @@
 import React from 'react';
-import { Box, Text, Image, Button, Flex, IconButton, Divider } from '@chakra-ui/react';
-import { CloseIcon } from '@chakra-ui/icons';
+import { Box, Text, Image, Flex, Divider } from '@chakra-ui/react';
 import { Boat } from './TableReservations';
 
 interface PopupReservedProps {
@@ -13,9 +12,7 @@ interface PopupReservedProps {
 
 const PopupReserved: React.FC<PopupReservedProps> = ({
     isOpen,
-    onClose,
     rowId,
-    day,
     boat,
 }) => {
     if (!isOpen || !boat) return null;

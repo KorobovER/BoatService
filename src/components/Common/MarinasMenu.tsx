@@ -9,7 +9,6 @@ import {
     Box,
     HStack,
     Spinner,
-    space
 } from "@chakra-ui/react";
 import PLACE from '../../../public/assets/images/place.png';
 import { useState, useEffect } from "react";

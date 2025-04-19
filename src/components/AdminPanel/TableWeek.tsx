@@ -72,7 +72,7 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
         </>
     );
 
-    const renderBoatCell = (boat: Boat, colspan: number, textColor: string) => (
+    const renderBoatCell = (boat: Boat, _colspan: number, textColor: string) => (
         <Popover trigger="hover" placement="bottom" strategy="fixed">
             <PopoverTrigger>
                 <Box

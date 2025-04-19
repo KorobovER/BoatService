@@ -132,9 +132,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                 
                 const periodStart = new Date(days[0] + 'T00:00:00.000Z');
                 const periodEnd = new Date(days[days.length - 1] + 'T23:59:59.999Z');
-                
-                // Добавление дня к конечной дате периода, чтобы захватить полные дни
-                periodEnd.setDate(periodEnd.getDate() + 1);
 
                 const apiBoats = reservations.data
                     .filter(reservation => {
@@ -227,7 +224,25 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                 }
             }
 
-            return { boat, colspan };
+            // Определение, находится ли резервация на границе периода просмотра
+            const firstVisibleDay = new Date(days[0] + 'T00:00:00.000Z');
+            const lastVisibleDay = new Date(days[days.length-1] + 'T23:59:59.999Z');
+            const boatStartDate = new Date(boat.startDay + 'T00:00:00.000Z');
+            const boatEndDate = new Date(boat.endDay + 'T23:59:59.999Z');
+            
+            // Проверяем, выходит ли начало резервации за пределы видимого периода
+            const startsBeforeVisiblePeriod = boatStartDate < firstVisibleDay;
+            
+            // Проверяем, выходит ли конец резервации за пределы видимого периода
+            const endsAfterVisiblePeriod = boatEndDate > lastVisibleDay;
+
+            return { 
+                boat,
+                colspan,
+                // Используем новые названия флагов для большей ясности
+                startsBeforeVisiblePeriod,
+                endsAfterVisiblePeriod
+            };
         } catch (error) {
             console.error('Error in getBoatForDay:', error);
             return null;
@@ -400,7 +415,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                                 key={`cell-${row.id}-${day}`}
                                                 bg={getCellColor(boatData.boat).bg}
                                                 color={getCellColor(boatData.boat).textColor}
-                                                borderRadius="full"
                                                 colSpan={boatData.colspan}
                                                 width={cellWidth}
                                                 minWidth={cellWidth}
@@ -408,7 +422,22 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                                 height="58px"
                                                 p={1}
                                                 position="relative"
-                                                style={{ verticalAlign: 'middle' }}
+                                                style={{ 
+                                                    verticalAlign: 'middle',
+                                                    // Применяем точный borderRadius через inline styles
+                                                    borderRadius: (() => {
+                                                        const isFirstDayOfWeek = dayIndex === 0;
+                                                        const isLastDayOfWeek = dayIndex + boatData.colspan - 1 === days.length - 1;
+                                                        
+                                                        if (isFirstDayOfWeek && boatData.startsBeforeVisiblePeriod) {
+                                                            return '0 30px 30px 0'; // Плоский слева, круглый справа
+                                                        } else if (isLastDayOfWeek && boatData.endsAfterVisiblePeriod) {
+                                                            return '30px 0 0 30px'; // Круглый слева, плоский справа
+                                                        }
+                                                        
+                                                        return '30px'; // По умолчанию полностью скругленный
+                                                    })()
+                                                }}
                                                 onClick={() => handleCellClick(row.id, day, boatData.boat)}
                                                 cursor="pointer"
                                                 className={isSelected ? 'selected-cell' : ''}

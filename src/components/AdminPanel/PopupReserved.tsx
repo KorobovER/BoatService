@@ -1,15 +1,6 @@
 import React from 'react';
-import {
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalCloseButton,
-    Box,
-    Text,
-    Image,
-} from '@chakra-ui/react';
+import { Box, Text, Image, Button, Flex, IconButton, Divider } from '@chakra-ui/react';
+import { CloseIcon } from '@chakra-ui/icons';
 import { Boat } from './TableReservations';
 
 interface PopupReservedProps {
@@ -20,62 +11,96 @@ interface PopupReservedProps {
     boat?: Boat;
 }
 
-const PopupReserved: React.FC<PopupReservedProps> = ({ isOpen, onClose, rowId, day, boat }) => {
-    if (!boat) return null;
-    console.log(day); // todo: fix this
+const PopupReserved: React.FC<PopupReservedProps> = ({
+    isOpen,
+    onClose,
+    rowId,
+    day,
+    boat,
+}) => {
+    if (!isOpen || !boat) return null;
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose}>
-            <ModalOverlay />
-            <ModalContent>
-                <ModalHeader>Reservation Details</ModalHeader>
-                <ModalCloseButton />
-                <ModalBody>
-                    <Box p={4}>
-                        <Text fontSize="lg" fontWeight="bold" mb={4}>{boat.name}</Text>
-                        <Box display="flex" alignItems="center" mb={2}>
-                            {boat.vessel_type === 'power' ? (
-                                <Image 
-                                    src="/assets/images/power-boat.png" 
-                                    alt={boat.name}
-                                    width="24px"
-                                    height="24px"
-                                    objectFit="cover"
-                                    borderRadius="4px"
-                                    filter="brightness(0) invert(1)"
-                                    mr={2}
-                                />
-                            ) : boat.vessel_type === 'catamaran' ? (
-                                <Image 
-                                    src="/assets/images/catamaran-boat.png" 
-                                    alt={boat.name}
-                                    width="24px"
-                                    height="24px"
-                                    objectFit="cover"
-                                    borderRadius="4px"
-                                    filter="brightness(0) invert(1)"
-                                    mr={2}
-                                />
-                            ) : boat.vessel_type === 'monohull' ? (
-                                <Image 
-                                    src="/assets/images/monohul-boat.png" 
-                                    alt={boat.name}
-                                    width="24px"
-                                    height="24px"
-                                    objectFit="cover"
-                                    borderRadius="4px"
-                                    filter="brightness(0) invert(1)"
-                                    mr={2}
-                                />
-                            ) : null}
-                            <Text>Mooring Ball: {rowId}</Text>
-                        </Box>
-                        <Text>Code: {boat.code}</Text>
-                        <Text>Period: {new Date(boat.startDay).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(boat.endDay).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</Text>
+        <Box
+            position="relative"
+            height="100%"
+            bg="white"
+            overflow="hidden"
+        >
+            {/* Header */}
+            <Flex 
+                
+                borderBottom="1px solid"
+                borderColor="gray.100"
+                justify="space-between"
+                align="center"
+                bg="white"
+            >
+                <Flex align="center" gap="12px">
+                    <Image
+                        src={boat.vessel_type === 'power' 
+                            ? "/assets/images/power-boat.png"
+                            : boat.vessel_type === 'catamaran'
+                            ? "/assets/images/catamaran-boat.png"
+                            : "/assets/images/monohul-boat.png"}
+                        alt={boat.name}
+                        width="32px"
+                        height="32px"
+                    />
+                    <Box>
+                        <Text fontSize="18px" fontWeight="600" color="gray.900">{boat.name}</Text>
+                        <Text fontSize="14px" color="gray.500">{boat.code}</Text>
                     </Box>
-                </ModalBody>
-            </ModalContent>
-        </Modal>
+                </Flex>
+             
+            </Flex>
+
+            {/* Content */}
+            <Box 
+                p="24px"
+                height="calc(100% - 85px)" // 85px - высота header
+                overflowY="auto"
+            >
+                {/* Reservation Info */}
+                <Box mb="24px">
+                    <Text fontSize="14px" fontWeight="600" color="gray.700" mb="16px">
+                        Reservation Info
+                    </Text>
+                    <Flex gap="16px">
+                        <Box flex="1">
+                            <Text fontSize="12px" color="gray.500" mb="4px">Check-in</Text>
+                            <Text fontSize="14px" color="gray.900">
+                                {new Date(boat.startDay).toLocaleDateString('en-US', { 
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric'
+                                })}
+                            </Text>
+                        </Box>
+                        <Box flex="1">
+                            <Text fontSize="12px" color="gray.500" mb="4px">Check-out</Text>
+                            <Text fontSize="14px" color="gray.900">
+                                {new Date(boat.endDay).toLocaleDateString('en-US', { 
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric'
+                                })}
+                            </Text>
+                        </Box>
+                    </Flex>
+                </Box>
+
+                <Divider mb="24px" />
+
+                {/* Mooring Ball */}
+                <Box mb="24px">
+                    <Text fontSize="14px" fontWeight="600" color="gray.700" mb="16px">
+                        Mooring Ball
+                    </Text>
+                    <Text fontSize="14px" color="gray.900">Ball #{rowId}</Text>
+                </Box>
+            </Box>
+        </Box>
     );
 };
 

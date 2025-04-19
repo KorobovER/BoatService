@@ -5,9 +5,10 @@ import TableReservations, { Boat } from './TableReservations';
 
 interface TableMonthProps {
     currentMonthDate: string;
+    onReservationClick: (rowId: string, day: string, boat?: Boat) => void;
 }
 
-const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate }) => {
+const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservationClick }) => {
     const getMonthDates = (dateString: string) => {
         try {
             // Создаем дату в UTC
@@ -86,7 +87,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate }) => {
         const isSingleDay = colspan === 1;
         
         return (
-            <Popover trigger="hover" placement="bottom">
+            <Popover trigger="hover" placement="bottom" strategy="fixed">
                 <PopoverTrigger>
                     <Box
                         p="5px"
@@ -97,7 +98,8 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate }) => {
                         alignItems="center"
                         margin="0 auto"
                         maxWidth="100%"
-                        overflow="hidden">
+                        overflow="hidden"
+                    >
                         {boat.vessel_type === 'power' ? (
                             <Image
                                 src="/assets/images/power-boat.png"
@@ -144,11 +146,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate }) => {
                     border="1px solid #D2D2D2" 
                     borderRadius="8px" 
                     overflow="hidden"
-                    sx={{
-                        '&:focus': {
-                            outline: 'none'
-                        }
-                    }}
+                    _focus={{ outline: 'none' }}
                 >
                     <PopoverBody p="8px">
                         <Flex gap='8px' alignItems='center' color="black">
@@ -232,10 +230,11 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate }) => {
     return (
         <TableReservations
             days={days}
-            cellWidth="40px"
+            cellWidth="32px"
             renderHeader={renderHeader}
             renderBoatCell={renderBoatCell}
             currentDate={currentMonthDate}
+            onReservationClick={onReservationClick}
         />
     );
 };

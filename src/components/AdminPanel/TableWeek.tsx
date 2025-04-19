@@ -5,9 +5,10 @@ import TableReservations, { Boat } from './TableReservations';
 
 interface TableWeekProps {
     currentWeekStart: string;
+    onReservationClick: (rowId: string, day: string, boat?: Boat) => void;
 }
 
-const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
+const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationClick }) => {
     const getWeekDates = (startDate: string) => {
         try {
             const date = new Date(startDate);
@@ -72,7 +73,7 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
     );
 
     const renderBoatCell = (boat: Boat) => (
-        <Popover trigger="hover" placement="bottom">
+        <Popover trigger="hover" placement="bottom" strategy="fixed">
             <PopoverTrigger>
                 <Box
                     borderRadius="5px"
@@ -123,7 +124,12 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
                     </Box>
                 </Box>
             </PopoverTrigger>
-            <PopoverContent width="fit-content" border="1px solid #D2D2D2" borderRadius="8px">
+            <PopoverContent 
+                width="fit-content" 
+                border="1px solid #D2D2D2" 
+                borderRadius="8px"
+                _focus={{ outline: 'none' }}
+            >
                 <PopoverBody p="8px">
                     <Flex gap='8px' alignItems='center' color="black">
                         <Box>
@@ -209,6 +215,7 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart }) => {
             renderHeader={renderHeader}
             renderBoatCell={renderBoatCell}
             currentDate={currentWeekStart}
+            onReservationClick={onReservationClick}
         />
     );
 };

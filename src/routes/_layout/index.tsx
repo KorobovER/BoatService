@@ -2,9 +2,11 @@ import { createFileRoute } from "@tanstack/react-router"
 import { Box, Flex } from '@chakra-ui/react';
 import TableWeek from '../../components/AdminPanel/TableWeek';
 import TableSwitch from '../../components/AdminPanel/TableSwitch';
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 import TableDay from '../../components/AdminPanel/TableDay';
 import TableMonth from '../../components/AdminPanel/TableMonth';
+import PopupReserved from '../../components/AdminPanel/PopupReserved';
+import { Boat } from '../../components/AdminPanel/TableReservations';
 
 type TableView = 'month' | 'week' | 'day';
 
@@ -16,6 +18,8 @@ function Dashboard() {
     const [currentWeekStart, setCurrentWeekStart] = useState<string>('');
     const [currentMonthDate, setCurrentMonthDate] = useState<string>('');
     const [currentView, setCurrentView] = useState<TableView>('week');
+    const [selectedReservation, setSelectedReservation] = useState<{rowId: string; day: string; boat?: Boat} | null>(null);
+    const tableContainerRef = useRef<HTMLDivElement>(null);
 
     const getCurrentWeekMonday = useCallback((date = new Date()) => {
         const day = date.getDay();
@@ -107,26 +111,106 @@ function Dashboard() {
         }
     };
 
+    const handleReservationClick = (rowId: string, day: string, boat?: Boat) => {
+        setSelectedReservation({ rowId, day, boat });
+    };
+
+    const handleClosePopup = () => {
+        setSelectedReservation(null);
+    };
+
     return (
-        <Flex flexDir='column' w='100%' p='xl' gap='md' bg='white' rounded='25px'>
-            <TableSwitch
-                onPrevWeek={() => handleNavigation('prev')}
-                onNextWeek={() => handleNavigation('next')}
-                onToday={handleToday}
-                weekRange={formatDateRange()}
-                currentView={currentView}
-                onViewChange={handleViewChange}
-            />
-            {currentView === 'week' && (
-                <TableWeek currentWeekStart={currentWeekStart} />
-            )}
-            {currentView === 'month' && (
-                <TableMonth 
-                    key={currentMonthDate} 
-                    currentMonthDate={currentMonthDate}
-                />
-            )}
-            {currentView === 'day' && <TableDay />}
-        </Flex>
+        <Box 
+            position="relative" 
+            bg="white" 
+            minH="100vh"
+            transition="all 0.3s ease"
+        >
+            <Flex w='100%' p='24px' gap='24px' position="relative">
+                <Box 
+                    width={selectedReservation ? "70%" : "100%"}
+                    transition="all 0.3s ease"
+                >
+                    <Box mb="24px">
+                        <TableSwitch
+                            onPrevWeek={() => handleNavigation('prev')}
+                            onNextWeek={() => handleNavigation('next')}
+                            onToday={handleToday}
+                            weekRange={formatDateRange()}
+                            currentView={currentView}
+                            onViewChange={handleViewChange}
+                        />
+                    </Box>
+                    <Box 
+                        ref={tableContainerRef}
+                        position="relative"
+                        borderRadius="16px"
+                        overflow="hidden"
+                        bg="white"
+                    >
+                        {selectedReservation && (
+                            <Box
+                                position="absolute"
+                                top="58px"
+                                left="80px"
+                                right="0"
+                                bottom="0"
+                                bg="rgba(255, 255, 255, 0.6)"
+                                backdropFilter="blur(1px)"
+                                zIndex="2"
+                                onClick={handleClosePopup}
+                                cursor="pointer"
+                                transition="all 0.3s ease"
+                                sx={{
+                                    '.selected-cell': {
+                                        position: 'relative',
+                                        zIndex: 3,
+                                        '&::before': {
+                                            content: '""',
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                            right: 0,
+                                            bottom: 0,
+                                            background: 'transparent',
+                                            zIndex: 3
+                                        }
+                                    }
+                                }}
+                            />
+                        )}
+                        {currentView === 'week' && (
+                            <TableWeek 
+                                currentWeekStart={currentWeekStart} 
+                                onReservationClick={handleReservationClick}
+                            />
+                        )}
+                        {currentView === 'month' && (
+                            <TableMonth 
+                                key={currentMonthDate} 
+                                currentMonthDate={currentMonthDate}
+                                onReservationClick={handleReservationClick}
+                            />
+                        )}
+                        {currentView === 'day' && <TableDay />}
+                    </Box>
+                </Box>
+                {selectedReservation && (
+                    <Box
+                        position="absolute"
+                        right="24px"
+                        width="25%"
+                    >
+                        <PopupReserved
+                            isOpen={!!selectedReservation}
+                            onClose={handleClosePopup}
+                            rowId={selectedReservation.rowId}
+                            day={selectedReservation.day}
+                            boat={selectedReservation.boat}
+                        />
+                    </Box>
+                )}
+            </Flex>
+        </Box>
     );
 }

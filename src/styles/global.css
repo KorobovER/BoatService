@@ -1,0 +1,30 @@
+*:focus {
+    outline: none !important;
+}
+
+*:focus-visible {
+    outline: none !important;
+}
+
+.css-1hl90pk {
+    outline: none !important;
+}
+
+.css-1hl90pk:focus {
+    outline: none !important;
+}
+
+.css-1hl90pk:focus-visible {
+    outline: none !important;
+}
+
+[role="dialog"] {
+    outline: none !important;
+}
+
+[data-popper-escaped],
+[data-popper-reference-hidden],
+[data-popper-placement] {
+    outline: none !important;
+    box-shadow: none !important;
+} 

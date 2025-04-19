@@ -38,6 +38,10 @@ export interface Boat {
     marina_id?: string;
     registration_image_url?: string;
     vessel_type?: string;
+    service_requests?: Array<{
+        is_completed: boolean;
+    }>;
+    is_completed?: boolean;
 }
 
 interface TableReservationsProps {
@@ -46,6 +50,7 @@ interface TableReservationsProps {
     renderHeader: (day: string) => React.ReactNode;
     renderBoatCell: (boat: Boat, colspan: number) => React.ReactNode;
     currentDate: string;
+    onReservationClick: (rowId: string, day: string, boat?: Boat) => void;
 }
 
 const TableReservations: React.FC<TableReservationsProps> = ({
@@ -54,12 +59,13 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     renderHeader,
     renderBoatCell,
     currentDate,
+    onReservationClick,
 }) => {
     const { selectedMarina } = useMarina();
     const [boats, setBoats] = useState<Boat[]>([]);
     const [allRows, setAllRows] = useState<Row[]>([]);
-    const { isOpen: isFreeCellOpen, onOpen: onFreeCellOpen, onClose: onFreeCellClose } = useDisclosure();
-    const { isOpen: isReservedOpen, onOpen: onReservedOpen, onClose: onReservedClose } = useDisclosure();
+    const { isOpen: isFreeCellOpen, onClose: onFreeCellClose } = useDisclosure();
+    const { isOpen: isReservedOpen, onClose: onReservedClose } = useDisclosure();
     const [selectedCell, setSelectedCell] = useState<{ rowId: string; day: string; boat?: Boat } | null>(null);
 
     // Запрос швартовок (общий для обоих компонентов)
@@ -122,6 +128,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     useEffect(() => {
         if (reservations?.data && days.length > 0) {
             try {
+                console.log('Raw reservations data:', reservations.data);
+                
                 const periodStart = new Date(days[0] + 'T00:00:00.000Z');
                 const periodEnd = new Date(days[days.length - 1] + 'T00:00:00.000Z');
 
@@ -138,7 +146,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                     })
                     .map(reservation => {
                         try {
-                            return {
+                            const boat = {
                                 id: reservation.mooring_ball.ball_number.toString(),
                                 name: reservation.boat?.boatname || 'N/A',
                                 code: reservation.boat?.model || 'N/A',
@@ -147,7 +155,11 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 marina_id: reservation.marina?.marina_id,
                                 registration_image_url: (reservation.boat as any)?.registration_image_url,
                                 vessel_type: reservation.boat?.vessel_type,
+                                service_requests: reservation.service_requests,
+                                is_completed: reservation.is_completed,
                             };
+                            console.log('Processed boat data:', boat);
+                            return boat;
                         } catch (error) {
                             console.error('Error processing reservation:', reservation);
                             return null;
@@ -224,11 +236,58 @@ const TableReservations: React.FC<TableReservationsProps> = ({
 
     const handleCellClick = (rowId: string, day: string, boat?: Boat) => {
         setSelectedCell({ rowId, day, boat });
-        if (boat) {
-            onReservedOpen();
-        } else {
-            onFreeCellOpen();
+        onReservationClick(rowId, day, boat);
+    };
+
+    const getCellColor = (boat: Boat) => {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        const startDate = new Date(boat.startDay);
+        const endDate = new Date(boat.endDay);
+        
+        console.log('Checking color for boat:', {
+            boat,
+            today: today.toISOString(),
+            tomorrow: tomorrow.toISOString(),
+            startDate: startDate.toISOString(),
+            endDate: endDate.toISOString(),
+            hasUncompletedServices: boat.service_requests?.some(service => !service.is_completed),
+            isToday: startDate.toDateString() === today.toDateString(),
+            hasServices: boat.service_requests?.length,
+            isFuture: startDate >= tomorrow,
+            isPast: endDate < today,
+            isCompleted: boat.is_completed
+        });
+        
+        // Если есть незавершенные сервисы и дата начала сегодня
+        if (boat.service_requests?.some(service => !service.is_completed) && 
+            startDate.toDateString() === today.toDateString()) {
+            console.log('Color: Red (uncompleted services today)');
+            return "#A85555"; // red
         }
+        
+        // Если есть сервисы и дата начала в будущем
+        if (boat.service_requests?.length && startDate >= tomorrow) {
+            console.log('Color: Yellow (future services)');
+            return "#FEA02F"; // yellow
+        }
+        
+        // Если резервация завершена и дата окончания в прошлом
+        if (endDate < today && boat.is_completed) {
+            console.log('Color: Light Green (completed past)');
+            return "#90EE90"; // light green
+        }
+        
+        // Если резервация не завершена и дата окончания в прошлом
+        if (endDate < today && !boat.is_completed) {
+            console.log('Color: Red (uncompleted past)');
+            return "#A85555"; // red
+        }
+        
+        console.log('Color: Green (default)');
+        return "#007A7B"; // green (default)
     };
 
     const isLoading = isLoadingMooringBalls || isLoadingReservations;
@@ -264,14 +323,29 @@ const TableReservations: React.FC<TableReservationsProps> = ({
             </Box>
 
             {/* Таблица */}
-            <Box width="calc(100% - 50px)" overflowX="auto">
+            <Box 
+                width="calc(100% - 50px)" 
+                overflowX="auto"
+                sx={{
+                    '&:focus': {
+                        outline: 'none'
+                    },
+                    '&:focus-visible': {
+                        outline: 'none'
+                    },
+                    '*:focus': {
+                        outline: 'none'
+                    }
+                }}
+            >
                 <Table
                     variant="unstyled"
                     width="100%"
                     sx={{
                         borderCollapse: 'separate',
                         borderSpacing: '2px',
-                        tableLayout: 'fixed'
+                        tableLayout: 'fixed',
+                        minWidth: '100%'
                     }}
                 >
                     <Thead>
@@ -301,6 +375,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                         if (occupiedDays[dayIndex]) return null;
                                         const boatData = getBoatForDay(row.id, dayIndex, occupiedDays);
 
+                                        const isSelected = selectedCell?.rowId === row.id && selectedCell?.day === day;
+
                                         if (!boatData) {
                                             return (
                                                 <Td
@@ -315,8 +391,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                                     _hover={{
                                                         bg: '#DD660026'
                                                     }}
-                                                    onClick={() => handleCellClick(row.id, day)}
-                                                    cursor="pointer"
                                                 />
                                             );
                                         }
@@ -324,7 +398,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                         return (
                                             <Td
                                                 key={`cell-${row.id}-${day}`}
-                                                bg="#007A7B"
+                                                bg={getCellColor(boatData.boat)}
                                                 borderRadius="full"
                                                 colSpan={boatData.colspan}
                                                 width={cellWidth}
@@ -336,6 +410,12 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                                 style={{ verticalAlign: 'middle' }}
                                                 onClick={() => handleCellClick(row.id, day, boatData.boat)}
                                                 cursor="pointer"
+                                                className={isSelected ? 'selected-cell' : ''}
+                                                sx={{
+                                                    '&.selected-cell': {
+                                                        zIndex: 1000,
+                                                    }
+                                                }}
                                             >
                                                 <Box
                                                     position="relative"

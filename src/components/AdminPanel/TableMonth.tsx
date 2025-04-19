@@ -83,7 +83,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
         </>
     );
 
-    const renderBoatCell = (boat: Boat, colspan: number) => {
+    const renderBoatCell = (boat: Boat, colspan: number, textColor: string) => {
         const isSingleDay = colspan === 1;
         
         return (
@@ -108,7 +108,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                                 height="22px"
                                 objectFit="cover"
                                 borderRadius="4px"
-                                filter="brightness(0) invert(1)"
+                                filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
                             />
                         ) : boat.vessel_type === 'catamaran' ? (
                             <Image
@@ -118,7 +118,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                                 height="22px"
                                 objectFit="cover"
                                 borderRadius="4px"
-                                filter="brightness(0) invert(1)"
+                                filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
                             />
                         ) : boat.vessel_type === 'monohull' ? (
                             <Image
@@ -128,15 +128,15 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                                 height="22px"
                                 objectFit="cover"
                                 borderRadius="4px"
-                                filter="brightness(0) invert(1)"
+                                filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
                             />
                         ) : (
-                            <Text color="white" fontSize="10px">{boat.name[0]}</Text>
+                            <Text color={textColor} fontSize="10px">{boat.name[0]}</Text>
                         )}
                         {!isSingleDay && (
                             <Box maxWidth="calc(100% - 30px)" overflow="hidden">
-                                <Text color="white" fontSize="16px" fontWeight="400" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.name}</Text>
-                                <Text color="white" fontSize="12px" fontWeight="300" opacity="0.8" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.code}</Text>
+                                <Text color={textColor} fontSize="16px" fontWeight="400" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.name}</Text>
+                                <Text color={textColor} fontSize="12px" fontWeight="300" opacity="0.8" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.code}</Text>
                             </Box>
                         )}
                     </Box>

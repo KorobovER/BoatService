@@ -72,7 +72,7 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
         </>
     );
 
-    const renderBoatCell = (boat: Boat) => (
+    const renderBoatCell = (boat: Boat, colspan: number, textColor: string) => (
         <Popover trigger="hover" placement="bottom" strategy="fixed">
             <PopoverTrigger>
                 <Box
@@ -93,7 +93,7 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
                             height="22px"
                             objectFit="cover"
                             borderRadius="4px"
-                            filter="brightness(0) invert(1)"
+                            filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
                         />
                     ) : boat.vessel_type === 'catamaran' ? (
                         <Image
@@ -103,7 +103,7 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
                             height="22px"
                             objectFit="cover"
                             borderRadius="4px"
-                            filter="brightness(0) invert(1)"
+                            filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
                         />
                     ) : boat.vessel_type === 'monohull' ? (
                         <Image
@@ -113,14 +113,14 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
                             height="22px"
                             objectFit="cover"
                             borderRadius="4px"
-                            filter="brightness(0) invert(1)"
+                            filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
                         />
                     ) : (
-                        <Text color="white" fontSize="14px" fontWeight="500">{boat.name}</Text>
+                        <Text color={textColor} fontSize="14px" fontWeight="500">{boat.name}</Text>
                     )}
                     <Box>
-                        <Text color="white" fontSize="16px" fontWeight="400">{boat.name}</Text>
-                        <Text color="white" fontSize="12px" fontWeight="300" opacity="0.8">{boat.code}</Text>
+                        <Text color={textColor} fontSize="16px" fontWeight="400">{boat.name}</Text>
+                        <Text color={textColor} fontSize="12px" fontWeight="300" opacity="0.8">{boat.code}</Text>
                     </Box>
                 </Box>
             </PopoverTrigger>

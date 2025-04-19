@@ -48,7 +48,7 @@ interface TableReservationsProps {
     days: string[];
     cellWidth: string;
     renderHeader: (day: string) => React.ReactNode;
-    renderBoatCell: (boat: Boat, colspan: number) => React.ReactNode;
+    renderBoatCell: (boat: Boat, colspan: number, textColor: string) => React.ReactNode;
     currentDate: string;
     onReservationClick: (rowId: string, day: string, boat?: Boat) => void;
 }
@@ -265,29 +265,29 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         if (boat.service_requests?.some(service => !service.is_completed) && 
             startDate.toDateString() === today.toDateString()) {
             console.log('Color: Red (uncompleted services today)');
-            return "#A85555"; // red
+            return { bg: "#A85555", textColor: "white" }; // red
         }
         
         // Если есть сервисы и дата начала в будущем
         if (boat.service_requests?.length && startDate >= tomorrow) {
             console.log('Color: Yellow (future services)');
-            return "#FEA02F"; // yellow
+            return { bg: "#FEA02F", textColor: "white" }; // yellow
         }
         
         // Если резервация завершена и дата окончания в прошлом
         if (endDate < today && boat.is_completed) {
             console.log('Color: Light Green (completed past)');
-            return "#90EE90"; // light green
+            return { bg: "#E5F2F2", textColor: "black" }; // light green
         }
         
         // Если резервация не завершена и дата окончания в прошлом
         if (endDate < today && !boat.is_completed) {
             console.log('Color: Red (uncompleted past)');
-            return "#A85555"; // red
+            return { bg: "#A85555", textColor: "white" }; // red
         }
         
         console.log('Color: Green (default)');
-        return "#007A7B"; // green (default)
+        return { bg: "#007A7B", textColor: "white" }; // green (default)
     };
 
     const isLoading = isLoadingMooringBalls || isLoadingReservations;
@@ -398,7 +398,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                         return (
                                             <Td
                                                 key={`cell-${row.id}-${day}`}
-                                                bg={getCellColor(boatData.boat)}
+                                                bg={getCellColor(boatData.boat).bg}
+                                                color={getCellColor(boatData.boat).textColor}
                                                 borderRadius="full"
                                                 colSpan={boatData.colspan}
                                                 width={cellWidth}
@@ -421,7 +422,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                                     position="relative"
                                                     height="100%"
                                                 >
-                                                    {renderBoatCell(boatData.boat, boatData.colspan)}
+                                                    {renderBoatCell(boatData.boat, boatData.colspan, getCellColor(boatData.boat).textColor)}
                                                 </Box>
                                             </Td>
                                         );

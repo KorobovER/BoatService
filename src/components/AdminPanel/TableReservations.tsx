@@ -131,13 +131,19 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                 console.log('Raw reservations data:', reservations.data);
                 
                 const periodStart = new Date(days[0] + 'T00:00:00.000Z');
-                const periodEnd = new Date(days[days.length - 1] + 'T00:00:00.000Z');
+                const periodEnd = new Date(days[days.length - 1] + 'T23:59:59.999Z');
+                
+                // Добавление дня к конечной дате периода, чтобы захватить полные дни
+                periodEnd.setDate(periodEnd.getDate() + 1);
 
                 const apiBoats = reservations.data
                     .filter(reservation => {
                         try {
                             const resStart = new Date(reservation.start_date);
                             const resEnd = new Date(reservation.end_date);
+                            
+                            // Проверяем, если хотя бы часть резервации попадает в видимый период
+                            // Резервация начинается до конца периода И заканчивается после начала периода
                             return resStart <= periodEnd && resEnd >= periodStart;
                         } catch (error) {
                             console.error('Invalid date in reservation:', reservation);
@@ -200,27 +206,21 @@ const TableReservations: React.FC<TableReservationsProps> = ({
             let colspan = 1;
             let currentDayIndex = dayIndex;
 
-            while (currentDayIndex + 1 < days.length && !occupiedDays[currentDayIndex + 1]) {
+            // Проверяем следующие дни в рамках текущего просмотра
+            while (currentDayIndex + 1 < days.length) {
                 try {
                     const nextDay = new Date(days[currentDayIndex + 1] + 'T00:00:00.000Z');
-                    const sameBoat = boats.find(b => {
-                        try {
-                            const startDate = new Date(b.startDay + 'T00:00:00.000Z');
-                            const endDate = new Date(b.endDay + 'T00:00:00.000Z');
-                            return b.id === rowId && nextDay >= startDate && nextDay <= endDate;
-                        } catch (error) {
-                            console.error('Invalid date in boat:', b);
-                            return false;
-                        }
-                    });
-
-                    if (sameBoat) {
-                        colspan++;
-                        occupiedDays[currentDayIndex + 1] = true;
-                        currentDayIndex++;
-                    } else {
+                    const endDate = new Date(boat.endDay + 'T00:00:00.000Z');
+                    
+                    // Если следующий день уже занят другой резервацией или выходит за пределы текущей резервации
+                    if (occupiedDays[currentDayIndex + 1] || nextDay > endDate) {
                         break;
                     }
+                    
+                    // Увеличиваем colspan и отмечаем день как занятый
+                    colspan++;
+                    occupiedDays[currentDayIndex + 1] = true;
+                    currentDayIndex++;
                 } catch (error) {
                     console.error('Error processing next day:', error);
                     break;

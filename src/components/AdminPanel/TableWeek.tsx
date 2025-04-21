@@ -114,7 +114,7 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
                             filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
                         />
                     ) : (
-                        <Text color={textColor} fontSize="14px" fontWeight="500">{boat.name}</Text>
+                        <Text color={textColor} fontSize="14px" fontWeight="400">{boat.name}</Text>
                     )}
                     <Box>
                         <Text color={textColor} fontSize="16px" fontWeight="400">{boat.name}</Text>

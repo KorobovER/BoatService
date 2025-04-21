@@ -124,7 +124,7 @@ const MarinasMenu = () => {
                     >
                         <Image
                             rounded='full'
-                            src={selectedMarina?.logo_url || PLACE}
+                            src={selectedMarina?.logo_url ?? undefined}
                             boxSize="35px"
                             fallbackSrc={PLACE}
                             alt={selectedMarina?.name || "Marina"}
@@ -152,7 +152,7 @@ const MarinasMenu = () => {
                         >
                             <HStack gap='sm'>
                                 <Image
-                                    src={marina.logo_url || PLACE}
+                                    src={marina.logo_url ?? undefined}
                                     boxSize="35px"
                                     rounded="full"
                                     fallbackSrc={PLACE}

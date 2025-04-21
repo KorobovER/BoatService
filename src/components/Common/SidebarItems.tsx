@@ -24,7 +24,6 @@ interface SidebarItemsProps {
 
 const SidebarItems = ({ onClose }: SidebarItemsProps) => {
   const queryClient = useQueryClient();
-  const bgActive = useColorModeValue("white", "#4A5568"); // todo fix this? highlighted item
   const currentUser = queryClient.getQueryData<EmployeePublic>(["currentUser"]);
 
   const finalItems = currentUser?.is_superuser
@@ -44,10 +43,13 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
             as={Link}
             to={path}
             key={title}
+            height='42px'
             pl='xl'
-            pr='xl'
+            pr='xl' 
             activeProps={{
               style: {
+                background: "white",
+                borderRadius: "16px",
                 color: "#DD6600",
               },
             }}
@@ -63,11 +65,16 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
         ))}
       </Flex>
       <Flex gap='lg'>
-        <Box gap='11px' display='flex'>
+        <Box gap='11px' display='flex' alignItems='center' justifyContent='center'>
           <IconButton
+            background='white'
+            rounded='full'
             variant='unstyled'
             aria-label="Icon 1"
             p='md'
+            display='flex'
+            alignItems='center'
+            justifyContent='center'
             _hover={{
               "& svg path": {
                 fill: "#DD6600"
@@ -83,9 +90,14 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
             }
           />
           <IconButton
+            background='white'
+            rounded='full'
             aria-label="Icon 2"
             variant='unstyled'
             p='md'
+            display='flex'
+            alignItems='center'
+            justifyContent='center'
             _hover={{
               "& svg path": {
                 fill: "#DD6600"
@@ -102,9 +114,14 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
           />
 
           <IconButton
+            background='white'
+            rounded='full'
             aria-label="Icon 3"
             variant='unstyled'
             p='md'
+            display='flex'
+            alignItems='center'
+            justifyContent='center'
             _hover={{
               "& svg path": {
                 fill: "#DD6600"

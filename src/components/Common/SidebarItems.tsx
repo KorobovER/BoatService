@@ -1,4 +1,4 @@
-import { Flex, Icon, Text, useColorModeValue, IconButton, Box } from "@chakra-ui/react";
+import { Flex, Icon, Text, IconButton, Box } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import {

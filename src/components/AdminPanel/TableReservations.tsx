@@ -2,12 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
     Box,
-    Table,
-    Thead,
-    Tbody,
-    Tr,
-    Th,
-    Td,
     Text,
     Image,
     Spinner,
@@ -239,6 +233,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
             return { 
                 boat,
                 colspan,
+                dayIndex, // Добавляем индекс дня для корректного позиционирования
                 // Используем новые названия флагов для большей ясности
                 startsBeforeVisiblePeriod,
                 endsAfterVisiblePeriod
@@ -326,9 +321,9 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     );
 
     return (
-        <Box display="flex" alignItems="center">
+        <Box display="flex" alignItems="flex-start" width="100%">
             {/* Контейнер для швартовок */}
-            <Box mt='56px' mr='20px' width="105px" display="flex" flexDirection="column" alignItems="center">
+            <Box mt='56px' mr='20px' width="105px" flexShrink={0} display="flex" flexDirection="column" alignItems="center">
                 {allRows.map(row => (
                     <Box key={row.id} p="16px 24px" width="100px" height="60px" display="flex" alignItems="center" justifyContent="space-between">
                         <Image width="24px" height="24px" src={row.marina?.logo_url || BollaCell} alt="Bolla" />
@@ -337,9 +332,10 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                 ))}
             </Box>
 
-            {/* Таблица */}
+            {/* Grid контейнер вместо таблицы */}
             <Box 
-                width="calc(100% - 50px)" 
+                width="100%"
+                flex="1"
                 overflowX="auto"
                 sx={{
                     '&:focus': {
@@ -353,114 +349,199 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                     }
                 }}
             >
-                <Table
-                    variant="unstyled"
-                    width="100%"
-                    sx={{
-                        borderCollapse: 'separate',
-                        borderSpacing: '2px',
-                        tableLayout: 'fixed',
-                        minWidth: '100%'
-                    }}
+                {/* Заголовок - дни */}
+                <Box 
+                    display="grid" 
+                    gridTemplateColumns={`repeat(${days.length}, minmax(${cellWidth}, 1fr))`}
+                    gap="2px"
+                    minWidth="100%"
                 >
-                    <Thead>
-                        <Tr>
-                            {days.map(day => (
-                                <Th
-                                    key={`date-${day}`}
-                                    width={cellWidth}
-                                    minWidth={cellWidth}
-                                    maxWidth={cellWidth}
-                                    position="relative"
-                                    p={1}
+                    {days.map((day, dayIndex) => (
+                        <Box
+                            key={`date-${day}`}
+                            gridColumn={dayIndex + 1}
+                            width="100%"
+                            position="relative"
+                            p={1}
+                            height="58px"
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="center"
+                        >
+                            {renderHeader(day)}
+                        </Box>
+                    ))}
+                </Box>
+
+                {/* Содержимое таблицы - ячейки с лодками */}
+                <Box width="100%">
+                    {allRows.map(row => {
+                        const occupiedDays = new Array(days.length).fill(false);
+                        
+                        // Первый проход - отмечаем занятые дни
+                        days.forEach((day, dayIndex) => {
+                            if (occupiedDays[dayIndex]) return;
+                            
+                            const boatMatch = boats.find(b => {
+                                try {
+                                    const currentDay = new Date(day + 'T00:00:00.000Z');
+                                    const startDate = new Date(b.startDay + 'T00:00:00.000Z');
+                                    const endDate = new Date(b.endDay + 'T00:00:00.000Z');
+                                    return b.id === row.id && currentDay >= startDate && currentDay <= endDate;
+                                } catch (error) {
+                                    return false;
+                                }
+                            });
+                            
+                            if (boatMatch) {
+                                // Если найдена лодка, отмечаем все дни как занятые
+                                let currentIdx = dayIndex;
+                                while (currentIdx < days.length) {
+                                    const nextDay = new Date(days[currentIdx] + 'T00:00:00.000Z');
+                                    const endDate = new Date(boatMatch.endDay + 'T00:00:00.000Z');
+                                    
+                                    if (nextDay > endDate) break;
+                                    occupiedDays[currentIdx] = true;
+                                    currentIdx++;
+                                }
+                            }
+                        });
+                        
+                        // Второй проход - генерация ячеек
+                        const cellElements: JSX.Element[] = [];
+                        
+                        let dayIndex = 0;
+                        while (dayIndex < days.length) {
+                            const day = days[dayIndex];
+                            
+                            // Если день уже обработан, переходим к следующему
+                            if (!occupiedDays[dayIndex]) {
+                                cellElements.push(
+                                    <Box
+                                        key={`empty-${row.id}-${day}`}
+                                        width="100%"
+                                        height="58px"
+                                        p={1}
+                                        position="relative"
+                                        gridColumn={dayIndex + 1}
+                                        _hover={{
+                                            bg: '#DD660026'
+                                        }}
+                                        cursor="pointer"
+                                        onClick={() => handleCellClick(row.id, day)}
+                                    />
+                                );
+                                dayIndex++;
+                                continue;
+                            }
+                            
+                            // Ищем лодку для этого дня
+                            const currentDay = new Date(day + 'T00:00:00.000Z');
+                            const boatMatch = boats.find(b => {
+                                try {
+                                    const startDate = new Date(b.startDay + 'T00:00:00.000Z');
+                                    const endDate = new Date(b.endDay + 'T00:00:00.000Z');
+                                    return b.id === row.id && currentDay >= startDate && currentDay <= endDate;
+                                } catch (error) {
+                                    return false;
+                                }
+                            });
+                            
+                            if (!boatMatch) {
+                                dayIndex++;
+                                continue;
+                            }
+                            
+                            // Вычисляем, сколько дней занимает эта лодка
+                            let colspan = 1;
+                            let currentDayIndex = dayIndex;
+                            
+                            while (currentDayIndex + 1 < days.length) {
+                                const nextDay = new Date(days[currentDayIndex + 1] + 'T00:00:00.000Z');
+                                const endDate = new Date(boatMatch.endDay + 'T00:00:00.000Z');
+                                
+                                if (nextDay > endDate) break;
+                                colspan++;
+                                currentDayIndex++;
+                            }
+                            
+                            // Определяем границы периода для стилей
+                            const firstVisibleDay = new Date(days[0] + 'T00:00:00.000Z');
+                            const lastVisibleDay = new Date(days[days.length-1] + 'T23:59:59.999Z');
+                            const boatStartDate = new Date(boatMatch.startDay + 'T00:00:00.000Z');
+                            const boatEndDate = new Date(boatMatch.endDay + 'T23:59:59.999Z');
+                            
+                            const startsBeforeVisiblePeriod = boatStartDate < firstVisibleDay;
+                            const endsAfterVisiblePeriod = boatEndDate > lastVisibleDay;
+                            
+                            const isSelected = selectedCell?.rowId === row.id && selectedCell?.day === day;
+                            
+                            cellElements.push(
+                                <Box
+                                    key={`boat-${row.id}-${day}-${boatMatch.id}`}
+                                    bg={getCellColor(boatMatch).bg}
+                                    color={getCellColor(boatMatch).textColor}
+                                    gridColumn={`${dayIndex + 1} / span ${colspan}`}
+                                    width="100%"
                                     height="58px"
-                                    style={{ verticalAlign: 'middle' }}
-                                >
-                                    {renderHeader(day)}
-                                </Th>
-                            ))}
-                        </Tr>
-                    </Thead>
-                    <Tbody>
-                        {allRows.map(row => {
-                            const occupiedDays = new Array(days.length).fill(false);
-                            return (
-                                <Tr key={`row-${row.id}`}>
-                                    {days.map((day, dayIndex) => {
-                                        if (occupiedDays[dayIndex]) return null;
-                                        const boatData = getBoatForDay(row.id, dayIndex, occupiedDays);
-
-                                        const isSelected = selectedCell?.rowId === row.id && selectedCell?.day === day;
-
-                                        if (!boatData) {
-                                            return (
-                                                <Td
-                                                    key={`cell-${row.id}-${day}`}
-                                                    width={cellWidth}
-                                                    minWidth={cellWidth}
-                                                    maxWidth={cellWidth}
-                                                    height="58px"
-                                                    p={1}
-                                                    position="relative"
-                                                    style={{ verticalAlign: 'middle' }}
-                                                    _hover={{
-                                                        bg: '#DD660026'
-                                                    }}
-                                                />
-                                            );
+                                    p={1}
+                                    position="relative"
+                                    display="flex"
+                                    alignItems="center"
+                                    justifyContent="center"
+                                    style={{ 
+                                        verticalAlign: 'middle',
+                                        borderRadius: (() => {
+                                            const isFirstDayOfWeek = dayIndex === 0;
+                                            const isLastDayOfWeek = dayIndex + colspan - 1 === days.length - 1;
+                                            
+                                            if (isFirstDayOfWeek && startsBeforeVisiblePeriod) {
+                                                return '0 30px 30px 0'; // Плоский слева, круглый справа
+                                            } else if (isLastDayOfWeek && endsAfterVisiblePeriod) {
+                                                return '30px 0 0 30px'; // Круглый слева, плоский справа
+                                            }
+                                            
+                                            return '30px'; // По умолчанию полностью скругленный
+                                        })()
+                                    }}
+                                    onClick={() => handleCellClick(row.id, day, boatMatch)}
+                                    cursor="pointer"
+                                    className={isSelected ? 'selected-cell' : ''}
+                                    sx={{
+                                        '&.selected-cell': {
+                                            zIndex: 1000,
                                         }
-
-                                        return (
-                                            <Td
-                                                key={`cell-${row.id}-${day}`}
-                                                bg={getCellColor(boatData.boat).bg}
-                                                color={getCellColor(boatData.boat).textColor}
-                                                colSpan={boatData.colspan}
-                                                width={cellWidth}
-                                                minWidth={cellWidth}
-                                                maxWidth={cellWidth}
-                                                height="58px"
-                                                p={1}
-                                                position="relative"
-                                                style={{ 
-                                                    verticalAlign: 'middle',
-                                                    // Применяем точный borderRadius через inline styles
-                                                    borderRadius: (() => {
-                                                        const isFirstDayOfWeek = dayIndex === 0;
-                                                        const isLastDayOfWeek = dayIndex + boatData.colspan - 1 === days.length - 1;
-                                                        
-                                                        if (isFirstDayOfWeek && boatData.startsBeforeVisiblePeriod) {
-                                                            return '0 30px 30px 0'; // Плоский слева, круглый справа
-                                                        } else if (isLastDayOfWeek && boatData.endsAfterVisiblePeriod) {
-                                                            return '30px 0 0 30px'; // Круглый слева, плоский справа
-                                                        }
-                                                        
-                                                        return '30px'; // По умолчанию полностью скругленный
-                                                    })()
-                                                }}
-                                                onClick={() => handleCellClick(row.id, day, boatData.boat)}
-                                                cursor="pointer"
-                                                className={isSelected ? 'selected-cell' : ''}
-                                                sx={{
-                                                    '&.selected-cell': {
-                                                        zIndex: 1000,
-                                                    }
-                                                }}
-                                            >
-                                                <Box
-                                                    position="relative"
-                                                    height="100%"
-                                                >
-                                                    {renderBoatCell(boatData.boat, boatData.colspan, getCellColor(boatData.boat).textColor)}
-                                                </Box>
-                                            </Td>
-                                        );
-                                    })}
-                                </Tr>
+                                    }}
+                                >
+                                    <Box
+                                        position="relative"
+                                        height="100%"
+                                        width="100%"
+                                    >
+                                        {renderBoatCell(boatMatch, colspan, getCellColor(boatMatch).textColor)}
+                                    </Box>
+                                </Box>
                             );
-                        })}
-                    </Tbody>
-                </Table>
+                            
+                            // Переходим к следующему незанятому дню
+                            dayIndex += colspan;
+                        }
+                        
+                        return (
+                            <Box 
+                                key={`row-${row.id}`}
+                                display="grid" 
+                                gridTemplateColumns={`repeat(${days.length}, minmax(${cellWidth}, 1fr))`}
+                                gap="2px"
+                                mt="2px"
+                                width="100%"
+                                minWidth="100%"
+                            >
+                                {cellElements}
+                            </Box>
+                        );
+                    })}
+                </Box>
             </Box>
             {selectedCell && (
                 <>

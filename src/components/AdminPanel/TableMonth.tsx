@@ -89,14 +89,13 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
         return (
             <Popover trigger="hover" placement="bottom" strategy="fixed">
                 <PopoverTrigger>
-                    <Box
-                        p="5px"
-                        width="fit-content"
+                    <Flex
+                        width="100%"
                         height="100%"
-                        display="flex"
+                        p="5px"
                         gap="8px"
                         alignItems="center"
-                        margin="0 auto"
+                        justifyContent="center"
                         maxWidth="100%"
                         overflow="hidden"
                     >
@@ -139,7 +138,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                                 <Text color={textColor} fontSize="12px" fontWeight="300" opacity="0.8" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.code}</Text>
                             </Box>
                         )}
-                    </Box>
+                    </Flex>
                 </PopoverTrigger>
                 <PopoverContent 
                     width="300px" 

@@ -75,15 +75,13 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
     const renderBoatCell = (boat: Boat, _colspan: number, textColor: string) => (
         <Popover trigger="hover" placement="bottom" strategy="fixed">
             <PopoverTrigger>
-                <Box
-                    borderRadius="5px"
-                    p="5px"
-                    width="fit-content"
+                <Flex
+                    width="100%"
                     height="100%"
-                    display="flex"
+                    p="5px"
                     gap="8px"
                     alignItems="center"
-                    margin="0 auto"
+                    justifyContent="center"
                 >
                     {boat.vessel_type === 'power' ? (
                         <Image
@@ -122,7 +120,7 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
                         <Text color={textColor} fontSize="16px" fontWeight="400">{boat.name}</Text>
                         <Text color={textColor} fontSize="12px" fontWeight="300" opacity="0.8">{boat.code}</Text>
                     </Box>
-                </Box>
+                </Flex>
             </PopoverTrigger>
             <PopoverContent 
                 width="fit-content" 

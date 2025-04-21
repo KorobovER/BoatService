@@ -61,6 +61,12 @@ export const $Boat = {
       maxLength: 64,
       minLength: 3,
     },
+    registration_number: {
+      type: "string",
+      isRequired: true,
+      maxLength: 64,
+      minLength: 3,
+    },
     make: {
       type: "string",
       isRequired: true,
@@ -156,6 +162,12 @@ export const $BoatBase = {
       maxLength: 64,
       minLength: 3,
     },
+    registration_number: {
+      type: "string",
+      isRequired: true,
+      maxLength: 64,
+      minLength: 3,
+    },
     make: {
       type: "string",
       isRequired: true,
@@ -233,6 +245,12 @@ export const $BoatCreate = {
       maxLength: 64,
       minLength: 3,
     },
+    registration_number: {
+      type: "string",
+      isRequired: true,
+      maxLength: 64,
+      minLength: 3,
+    },
     make: {
       type: "string",
       isRequired: true,
@@ -305,6 +323,12 @@ export const $BoatCreate = {
 export const $BoatPublic = {
   properties: {
     boatname: {
+      type: "string",
+      isRequired: true,
+      maxLength: 64,
+      minLength: 3,
+    },
+    registration_number: {
       type: "string",
       isRequired: true,
       maxLength: 64,
@@ -402,6 +426,12 @@ export const $BoatUpdate = {
         },
       ],
       isRequired: true,
+    },
+    registration_number: {
+      type: "string",
+      isRequired: true,
+      maxLength: 64,
+      minLength: 3,
     },
     make: {
       type: "any-of",
@@ -1483,6 +1513,13 @@ export const $MarinaPublic = {
       },
       isRequired: true,
     },
+    active_services: {
+      type: "array",
+      contains: {
+        type: "MarinaServicePublic",
+      },
+      isRequired: true,
+    },
     mooring_balls: {
       type: "array",
       contains: {
@@ -1494,13 +1531,6 @@ export const $MarinaPublic = {
       type: "array",
       contains: {
         type: "MooringBallPricingPublic",
-      },
-      isRequired: true,
-    },
-    active_services: {
-      type: "array",
-      contains: {
-        type: "MarinaServicePublic",
       },
       isRequired: true,
     },
@@ -1636,6 +1666,13 @@ export const $MarinaPublicBase = {
       type: "array",
       contains: {
         type: "AmenityBase",
+      },
+      isRequired: true,
+    },
+    active_services: {
+      type: "array",
+      contains: {
+        type: "MarinaServicePublic",
       },
       isRequired: true,
     },
@@ -2313,6 +2350,49 @@ export const $PaymentMethodPublic = {
   },
 } as const
 
+export const $PaymentReceiptPublic = {
+  properties: {
+    payment_receipt_id: {
+      type: "string",
+      isRequired: true,
+      format: "uuid",
+    },
+    receipt_id: {
+      type: "string",
+      isRequired: true,
+    },
+    total_price: {
+      type: "number",
+      isRequired: true,
+    },
+    created_by_user: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          format: "uuid",
+        },
+        {
+          type: "null",
+        },
+      ],
+      isRequired: true,
+    },
+    payment_details_simple: {
+      type: "any-of",
+      contains: [
+        {
+          type: "PaymentDetailsSimple",
+        },
+        {
+          type: "null",
+        },
+      ],
+      isRequired: true,
+    },
+  },
+} as const
+
 export const $RegionData = {
   properties: {
     name: {
@@ -2558,6 +2638,10 @@ export const $ReservationCreatedPublic = {
       type: "ReservationStatus",
       isRequired: true,
     },
+    admin_status: {
+      type: "string",
+      isRequired: true,
+    },
     is_pending: {
       type: "boolean",
       isRequired: true,
@@ -2635,6 +2719,13 @@ export const $ReservationCreatedPublic = {
       },
       isRequired: true,
     },
+    payment_receipts: {
+      type: "array",
+      contains: {
+        type: "PaymentReceiptPublic",
+      },
+      isRequired: true,
+    },
     stripe_client_secret: {
       type: "any-of",
       contains: [
@@ -2683,6 +2774,10 @@ export const $ReservationPublic = {
     },
     status: {
       type: "ReservationStatus",
+      isRequired: true,
+    },
+    admin_status: {
+      type: "string",
       isRequired: true,
     },
     is_pending: {
@@ -2759,6 +2854,13 @@ export const $ReservationPublic = {
       type: "array",
       contains: {
         type: "ServiceOnReservationPublic",
+      },
+      isRequired: true,
+    },
+    payment_receipts: {
+      type: "array",
+      contains: {
+        type: "PaymentReceiptPublic",
       },
       isRequired: true,
     },
@@ -2869,10 +2971,6 @@ export const $ServiceOnReservation = {
       type: "string",
       format: "uuid",
     },
-    receipt_id: {
-      type: "string",
-      isRequired: true,
-    },
     created_at: {
       type: "string",
       format: "date-time",
@@ -2914,12 +3012,6 @@ export const $ServiceOnReservation = {
       isRequired: true,
       minimum: 0,
     },
-    payment_details: {
-      type: "dictionary",
-      contains: {
-        properties: {},
-      },
-    },
     approved_by_user: {
       type: "any-of",
       contains: [
@@ -2950,6 +3042,19 @@ export const $ServiceOnReservation = {
       type: "string",
       isRequired: true,
       format: "uuid",
+    },
+    payment_receipt_id: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          format: "uuid",
+        },
+        {
+          type: "null",
+        },
+      ],
+      isRequired: true,
     },
   },
 } as const
@@ -2991,10 +3096,6 @@ export const $ServiceOnReservationPublic = {
       isRequired: true,
       format: "uuid",
     },
-    receipt_id: {
-      type: "string",
-      isRequired: true,
-    },
     requested_date: {
       type: "string",
       isRequired: true,
@@ -3035,11 +3136,11 @@ export const $ServiceOnReservationPublic = {
       type: "number",
       isRequired: true,
     },
-    payment_details_simple: {
+    payment_receipt: {
       type: "any-of",
       contains: [
         {
-          type: "PaymentDetailsSimple",
+          type: "PaymentReceiptPublic",
         },
         {
           type: "null",
@@ -3053,8 +3154,9 @@ export const $ServiceOnReservationPublic = {
 export const $ServiceRequestStatus = {
   type: "Enum",
   enum: [
-    "initialized",
+    "pending",
     "confirmed",
+    "approved",
     "en-route",
     "denied",
     "delivered",
@@ -3159,6 +3261,10 @@ export const $SubRegionData = {
 
 export const $SubServiceRequest = {
   properties: {
+    title: {
+      type: "string",
+      isRequired: true,
+    },
     name: {
       type: "string",
       isRequired: true,
@@ -3559,6 +3665,10 @@ export const $UserPublic = {
       isRequired: true,
     },
     display_name: {
+      type: "string",
+      isRequired: true,
+    },
+    display_initials: {
       type: "string",
       isRequired: true,
     },
@@ -4307,6 +4417,10 @@ export const $UserWithPaymentPublic = {
       isRequired: true,
     },
     display_name: {
+      type: "string",
+      isRequired: true,
+    },
+    display_initials: {
       type: "string",
       isRequired: true,
     },

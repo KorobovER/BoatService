@@ -24,7 +24,7 @@ function Dashboard() {
     const getCurrentWeekMonday = useCallback((date = new Date()) => {
         const day = date.getDay();
         const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-        return new Date(date.setDate(diff)).toISOString().split('T')[0];
+        return new Date(date.setDate(diff)).toISOString().split('T')[0];//Разобраться с этим
     }, []);
 
     // Инициализация начальных дат
@@ -39,7 +39,7 @@ function Dashboard() {
         const month = today.getMonth(); // 0-11
         
         // Создаем ISO строку даты первого дня текущего месяца
-        const firstDayOfMonth = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+        const firstDayOfMonth = `${year}-${String(month + 1).padStart(2, '0')}-01`;//Разобраться с этим 
         setCurrentMonthDate(firstDayOfMonth);
     }, [getCurrentWeekMonday]);
 

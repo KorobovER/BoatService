@@ -16,6 +16,7 @@ export type AmenityPublic = {
 
 export type Boat = {
   boatname: string
+  registration_number: string
   make: string
   model: string
   is_default?: boolean
@@ -35,6 +36,7 @@ export type Boat = {
 
 export type BoatBase = {
   boatname: string
+  registration_number: string
   make: string
   model: string
   is_default?: boolean
@@ -50,6 +52,7 @@ export type BoatBase = {
 
 export type BoatCreate = {
   boatname: string
+  registration_number: string
   make: string
   model: string
   is_default?: boolean
@@ -65,6 +68,7 @@ export type BoatCreate = {
 
 export type BoatPublic = {
   boatname: string
+  registration_number: string
   make: string
   model: string
   is_default?: boolean
@@ -82,6 +86,7 @@ export type BoatPublic = {
 
 export type BoatUpdate = {
   boatname: string | null
+  registration_number: string
   make: string | null
   model: string | null
   is_default: boolean | null
@@ -264,9 +269,9 @@ export type MarinaPublic = {
   subregion: SubRegion
   marina_id: string
   amenities: Array<AmenityBase>
+  active_services: Array<MarinaServicePublic>
   mooring_balls: Array<MooringBall>
   min_price: Array<MooringBallPricingPublic>
-  active_services: Array<MarinaServicePublic>
 }
 
 export type MarinaPublicBase = {
@@ -286,6 +291,7 @@ export type MarinaPublicBase = {
   subregion: SubRegion
   marina_id: string
   amenities: Array<AmenityBase>
+  active_services: Array<MarinaServicePublic>
 }
 
 export type MarinaServiceItem = {
@@ -439,6 +445,14 @@ export type PaymentMethodPublic = {
   card: StripeCardPublic
 }
 
+export type PaymentReceiptPublic = {
+  payment_receipt_id: string
+  receipt_id: string
+  total_price: number
+  created_by_user: string | null
+  payment_details_simple: PaymentDetailsSimple | null
+}
+
 export type RegionData = {
   name: string
   subregions: Array<SubRegionData>
@@ -493,6 +507,7 @@ export type ReservationCreatedPublic = {
   end_date: string
   reservation_id: string
   status: ReservationStatus
+  admin_status: string
   is_pending: boolean
   is_completed: boolean
   applied_rate_type: DurationType
@@ -505,6 +520,7 @@ export type ReservationCreatedPublic = {
   boat: BoatBase
   payment_details_simple: PaymentDetailsSimple | null
   service_requests: Array<ServiceOnReservationPublic>
+  payment_receipts: Array<PaymentReceiptPublic>
   stripe_client_secret: string | null
 }
 
@@ -516,6 +532,7 @@ export type ReservationPublic = {
   end_date: string
   reservation_id: string
   status: ReservationStatus
+  admin_status: string
   is_pending: boolean
   is_completed: boolean
   applied_rate_type: DurationType
@@ -528,6 +545,7 @@ export type ReservationPublic = {
   boat: BoatBase
   payment_details_simple: PaymentDetailsSimple | null
   service_requests: Array<ServiceOnReservationPublic>
+  payment_receipts: Array<PaymentReceiptPublic>
 }
 
 export type ReservationStatus =
@@ -555,7 +573,6 @@ export type ReservationsPublic = {
 
 export type ServiceOnReservation = {
   service_reservation_id?: string
-  receipt_id: string
   created_at?: string
   updated_at: string
   requested_date?: string
@@ -563,10 +580,10 @@ export type ServiceOnReservation = {
   services?: Array<SubServiceRequest>
   special_instructions: string | null
   total_price: number
-  payment_details?: Record<string, unknown>
   approved_by_user: string | null
   confirmation_image_url: string | null
   reservation_id: string
+  payment_receipt_id: string | null
 }
 
 export type ServiceOnReservationCreate = {
@@ -577,7 +594,6 @@ export type ServiceOnReservationCreate = {
 
 export type ServiceOnReservationPublic = {
   service_reservation_id: string
-  receipt_id: string
   requested_date: string
   status: ServiceRequestStatus
   is_pending: boolean
@@ -585,12 +601,13 @@ export type ServiceOnReservationPublic = {
   services: Array<SubServiceRequest>
   special_instructions: string | null
   total_price: number
-  payment_details_simple: PaymentDetailsSimple | null
+  payment_receipt: PaymentReceiptPublic | null
 }
 
 export type ServiceRequestStatus =
-  | "initialized"
+  | "pending"
   | "confirmed"
+  | "approved"
   | "en-route"
   | "denied"
   | "delivered"
@@ -633,6 +650,7 @@ export type SubRegionData = {
 }
 
 export type SubServiceRequest = {
+  title: string
   name: string
   quantity: number
   price: number
@@ -691,6 +709,7 @@ export type UserPublic = {
   id: string
   referral_code: string
   display_name: string
+  display_initials: string
   created_at: string
   updated_at: string
   items: Array<Item>
@@ -781,6 +800,7 @@ export type UserWithPaymentPublic = {
   id: string
   referral_code: string
   display_name: string
+  display_initials: string
   created_at: string
   updated_at: string
   items: Array<Item>

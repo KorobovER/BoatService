@@ -117,7 +117,7 @@
         }
       }
     },
-    "/api/v1/reset-password/": {
+    "/api/v1/reset-password": {
       "post": {
         "tags": [
           "login-employees"
@@ -409,7 +409,7 @@
         }
       }
     },
-    "/api/v1/boats/vessel-types": {
+    "/api/v1/boats/vessel-types/": {
       "get": {
         "tags": [
           "boats"
@@ -503,51 +503,6 @@
             }
           }
         }
-      },
-      "post": {
-        "tags": [
-          "boats"
-        ],
-        "summary": "Create Boat",
-        "description": "Create new boat.",
-        "operationId": "create_boat",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BoatCreate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BoatPublic"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/api/v1/boats/me": {
@@ -607,6 +562,53 @@
             }
           }
         }
+      }
+    },
+    "/api/v1/boats": {
+      "post": {
+        "tags": [
+          "boats"
+        ],
+        "summary": "Create Boat",
+        "description": "Create new boat.",
+        "operationId": "create_boat",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BoatCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoatPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/api/v1/boats/docs/{id}": {
@@ -887,7 +889,9 @@
             }
           }
         }
-      },
+      }
+    },
+    "/api/v1/employees": {
       "post": {
         "tags": [
           "employees"
@@ -895,20 +899,15 @@
         "summary": "Create Employee",
         "description": "Create new employee.",
         "operationId": "create_employee",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/EmployeeCreate"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -931,7 +930,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/api/v1/employees/me": {
@@ -1330,51 +1334,6 @@
             }
           }
         }
-      },
-      "post": {
-        "tags": [
-          "items"
-        ],
-        "summary": "Create Item",
-        "description": "Create new item.",
-        "operationId": "create_item",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ItemCreate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ItemPublic"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/api/v1/items/{id}": {
@@ -1530,7 +1489,54 @@
         }
       }
     },
-    "/api/v1/marinas/amenities": {
+    "/api/v1/items": {
+      "post": {
+        "tags": [
+          "items"
+        ],
+        "summary": "Create Item",
+        "description": "Create new item.",
+        "operationId": "create_item",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/marinas/amenities/": {
       "get": {
         "tags": [
           "marinas"
@@ -1557,7 +1563,7 @@
         ]
       }
     },
-    "/api/v1/marinas/services": {
+    "/api/v1/marinas/services/": {
       "get": {
         "tags": [
           "marinas"
@@ -1738,51 +1744,6 @@
             }
           }
         }
-      },
-      "post": {
-        "tags": [
-          "marinas"
-        ],
-        "summary": "Create Marina",
-        "description": "Create new marina.",
-        "operationId": "create_marina",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MarinaCreate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MarinaPublic"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/api/v1/marinas/{id}": {
@@ -1938,7 +1899,54 @@
         }
       }
     },
-    "/api/v1/mooring-balls/illuminate": {
+    "/api/v1/marinas": {
+      "post": {
+        "tags": [
+          "marinas"
+        ],
+        "summary": "Create Marina",
+        "description": "Create new marina.",
+        "operationId": "create_marina",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarinaCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarinaPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/mooring-balls/illuminate/": {
       "get": {
         "tags": [
           "mooring-balls"
@@ -1968,7 +1976,7 @@
         ]
       }
     },
-    "/api/v1/mooring-balls/sound": {
+    "/api/v1/mooring-balls/sound/": {
       "get": {
         "tags": [
           "mooring-balls"
@@ -2247,51 +2255,6 @@
             }
           }
         }
-      },
-      "post": {
-        "tags": [
-          "mooring-balls"
-        ],
-        "summary": "Create Mooring Ball",
-        "description": "Create new mooring_ball.",
-        "operationId": "create_mooring_ball",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MooringBallCreate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MooringBallPublic"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/api/v1/mooring-balls/{id}": {
@@ -2444,6 +2407,53 @@
         }
       }
     },
+    "/api/v1/mooring-balls": {
+      "post": {
+        "tags": [
+          "mooring-balls"
+        ],
+        "summary": "Create Mooring Ball",
+        "description": "Create new mooring_ball.",
+        "operationId": "create_mooring_ball",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MooringBallCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MooringBallPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/reservations/": {
       "get": {
         "tags": [
@@ -2553,51 +2563,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ReservationsPublic"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "reservations"
-        ],
-        "summary": "Create Reservation",
-        "description": "Create new reservation.",
-        "operationId": "create_reservation",
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReservationCreate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReservationCreatedPublic"
                 }
               }
             }
@@ -2825,6 +2790,53 @@
             }
           }
         }
+      }
+    },
+    "/api/v1/reservations": {
+      "post": {
+        "tags": [
+          "reservations"
+        ],
+        "summary": "Create Reservation",
+        "description": "Create new reservation.",
+        "operationId": "create_reservation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationCreatedPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/api/v1/reservations/{id}/request-service": {
@@ -3110,7 +3122,7 @@
         }
       }
     },
-    "/api/v1/users/payment-method": {
+    "/api/v1/users/payment-method/": {
       "get": {
         "tags": [
           "users"
@@ -3135,7 +3147,9 @@
             "OAuth2PasswordBearer": []
           }
         ]
-      },
+      }
+    },
+    "/api/v1/users/payment-method": {
       "post": {
         "tags": [
           "users"
@@ -4006,6 +4020,66 @@
         ]
       }
     },
+    "/api/v1/utils/send-support-email/": {
+      "post": {
+        "tags": [
+          "utils"
+        ],
+        "summary": "Send Support Email",
+        "description": "Send support email.",
+        "operationId": "send_support_email",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "email_text",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "email",
+              "title": "Email Text"
+            }
+          },
+          {
+            "name": "email_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "email",
+              "default": "support@bolabuddy.com",
+              "title": "Email To"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/utils/test-email/": {
       "post": {
         "tags": [
@@ -4029,8 +4103,38 @@
               "format": "email",
               "title": "Email To"
             }
+          },
+          {
+            "name": "template_name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "test_email.html",
+              "title": "Template Name"
+            }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Context"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": "Successful Response",
@@ -4183,6 +4287,12 @@
             "minLength": 3,
             "title": "Boatname"
           },
+          "registration_number": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 3,
+            "title": "Registration Number"
+          },
           "make": {
             "type": "string",
             "maxLength": 64,
@@ -4272,6 +4382,7 @@
         "type": "object",
         "required": [
           "boatname",
+          "registration_number",
           "make",
           "model",
           "loa",
@@ -4294,6 +4405,12 @@
             "minLength": 3,
             "title": "Boatname"
           },
+          "registration_number": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 3,
+            "title": "Registration Number"
+          },
           "make": {
             "type": "string",
             "maxLength": 64,
@@ -4363,6 +4480,7 @@
         "type": "object",
         "required": [
           "boatname",
+          "registration_number",
           "make",
           "model",
           "loa",
@@ -4383,6 +4501,12 @@
             "minLength": 3,
             "title": "Boatname"
           },
+          "registration_number": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 3,
+            "title": "Registration Number"
+          },
           "make": {
             "type": "string",
             "maxLength": 64,
@@ -4452,6 +4576,7 @@
         "type": "object",
         "required": [
           "boatname",
+          "registration_number",
           "make",
           "model",
           "loa",
@@ -4471,6 +4596,12 @@
             "maxLength": 64,
             "minLength": 3,
             "title": "Boatname"
+          },
+          "registration_number": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 3,
+            "title": "Registration Number"
           },
           "make": {
             "type": "string",
@@ -4551,6 +4682,7 @@
         "type": "object",
         "required": [
           "boatname",
+          "registration_number",
           "make",
           "model",
           "loa",
@@ -4577,6 +4709,12 @@
               }
             ],
             "title": "Boatname"
+          },
+          "registration_number": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 3,
+            "title": "Registration Number"
           },
           "make": {
             "anyOf": [
@@ -4698,6 +4836,7 @@
         "type": "object",
         "required": [
           "boatname",
+          "registration_number",
           "make",
           "model",
           "is_default",
@@ -5766,6 +5905,13 @@
             "type": "array",
             "title": "Amenities"
           },
+          "active_services": {
+            "items": {
+              "$ref": "#/components/schemas/MarinaServicePublic"
+            },
+            "type": "array",
+            "title": "Active Services"
+          },
           "mooring_balls": {
             "items": {
               "$ref": "#/components/schemas/MooringBall"
@@ -5779,13 +5925,6 @@
             },
             "type": "array",
             "title": "Min Price"
-          },
-          "active_services": {
-            "items": {
-              "$ref": "#/components/schemas/MarinaServicePublic"
-            },
-            "type": "array",
-            "title": "Active Services"
           }
         },
         "type": "object",
@@ -5806,9 +5945,9 @@
           "subregion",
           "marina_id",
           "amenities",
+          "active_services",
           "mooring_balls",
-          "min_price",
-          "active_services"
+          "min_price"
         ],
         "title": "MarinaPublic"
       },
@@ -5937,6 +6076,13 @@
             },
             "type": "array",
             "title": "Amenities"
+          },
+          "active_services": {
+            "items": {
+              "$ref": "#/components/schemas/MarinaServicePublic"
+            },
+            "type": "array",
+            "title": "Active Services"
           }
         },
         "type": "object",
@@ -5956,7 +6102,8 @@
           "logo_url",
           "subregion",
           "marina_id",
-          "amenities"
+          "amenities",
+          "active_services"
         ],
         "title": "MarinaPublicBase"
       },
@@ -6765,6 +6912,54 @@
         ],
         "title": "PaymentMethodPublic"
       },
+      "PaymentReceiptPublic": {
+        "properties": {
+          "payment_receipt_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Payment Receipt Id"
+          },
+          "receipt_id": {
+            "type": "string",
+            "title": "Receipt Id"
+          },
+          "total_price": {
+            "type": "number",
+            "title": "Total Price"
+          },
+          "created_by_user": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By User"
+          },
+          "payment_details_simple": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PaymentDetailsSimple"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "payment_receipt_id",
+          "receipt_id",
+          "total_price",
+          "created_by_user",
+          "payment_details_simple"
+        ],
+        "title": "PaymentReceiptPublic"
+      },
       "RegionData": {
         "properties": {
           "name": {
@@ -7044,6 +7239,10 @@
           "status": {
             "$ref": "#/components/schemas/ReservationStatus"
           },
+          "admin_status": {
+            "type": "string",
+            "title": "Admin Status"
+          },
           "is_pending": {
             "type": "boolean",
             "title": "Is Pending"
@@ -7112,6 +7311,13 @@
             "type": "array",
             "title": "Service Requests"
           },
+          "payment_receipts": {
+            "items": {
+              "$ref": "#/components/schemas/PaymentReceiptPublic"
+            },
+            "type": "array",
+            "title": "Payment Receipts"
+          },
           "stripe_client_secret": {
             "anyOf": [
               {
@@ -7133,6 +7339,7 @@
           "end_date",
           "reservation_id",
           "status",
+          "admin_status",
           "is_pending",
           "is_completed",
           "applied_rate_type",
@@ -7145,6 +7352,7 @@
           "boat",
           "payment_details_simple",
           "service_requests",
+          "payment_receipts",
           "stripe_client_secret"
         ],
         "title": "ReservationCreatedPublic"
@@ -7183,6 +7391,10 @@
           "status": {
             "$ref": "#/components/schemas/ReservationStatus"
           },
+          "admin_status": {
+            "type": "string",
+            "title": "Admin Status"
+          },
           "is_pending": {
             "type": "boolean",
             "title": "Is Pending"
@@ -7250,6 +7462,13 @@
             },
             "type": "array",
             "title": "Service Requests"
+          },
+          "payment_receipts": {
+            "items": {
+              "$ref": "#/components/schemas/PaymentReceiptPublic"
+            },
+            "type": "array",
+            "title": "Payment Receipts"
           }
         },
         "type": "object",
@@ -7261,6 +7480,7 @@
           "end_date",
           "reservation_id",
           "status",
+          "admin_status",
           "is_pending",
           "is_completed",
           "applied_rate_type",
@@ -7272,7 +7492,8 @@
           "user",
           "boat",
           "payment_details_simple",
-          "service_requests"
+          "service_requests",
+          "payment_receipts"
         ],
         "title": "ReservationPublic"
       },
@@ -7388,10 +7609,6 @@
             "format": "uuid",
             "title": "Service Reservation Id"
           },
-          "receipt_id": {
-            "type": "string",
-            "title": "Receipt Id"
-          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -7434,10 +7651,6 @@
             "minimum": 0,
             "title": "Total Price"
           },
-          "payment_details": {
-            "type": "object",
-            "title": "Payment Details"
-          },
           "approved_by_user": {
             "anyOf": [
               {
@@ -7466,18 +7679,30 @@
             "type": "string",
             "format": "uuid",
             "title": "Reservation Id"
+          },
+          "payment_receipt_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payment Receipt Id"
           }
         },
         "type": "object",
         "required": [
-          "receipt_id",
           "updated_at",
           "status",
           "special_instructions",
           "total_price",
           "approved_by_user",
           "confirmation_image_url",
-          "reservation_id"
+          "reservation_id",
+          "payment_receipt_id"
         ],
         "title": "ServiceOnReservation"
       },
@@ -7523,10 +7748,6 @@
             "format": "uuid",
             "title": "Service Reservation Id"
           },
-          "receipt_id": {
-            "type": "string",
-            "title": "Receipt Id"
-          },
           "requested_date": {
             "type": "string",
             "format": "date-time",
@@ -7565,10 +7786,10 @@
             "type": "number",
             "title": "Total Price"
           },
-          "payment_details_simple": {
+          "payment_receipt": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/PaymentDetailsSimple"
+                "$ref": "#/components/schemas/PaymentReceiptPublic"
               },
               {
                 "type": "null"
@@ -7579,7 +7800,6 @@
         "type": "object",
         "required": [
           "service_reservation_id",
-          "receipt_id",
           "requested_date",
           "status",
           "is_pending",
@@ -7587,15 +7807,16 @@
           "services",
           "special_instructions",
           "total_price",
-          "payment_details_simple"
+          "payment_receipt"
         ],
         "title": "ServiceOnReservationPublic"
       },
       "ServiceRequestStatus": {
         "type": "string",
         "enum": [
-          "initialized",
+          "pending",
           "confirmed",
+          "approved",
           "en-route",
           "denied",
           "delivered",
@@ -7711,6 +7932,10 @@
       },
       "SubServiceRequest": {
         "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
           "name": {
             "type": "string",
             "title": "Name"
@@ -7726,6 +7951,7 @@
         },
         "type": "object",
         "required": [
+          "title",
           "name",
           "quantity",
           "price"
@@ -8141,6 +8367,10 @@
             "type": "string",
             "title": "Display Name"
           },
+          "display_initials": {
+            "type": "string",
+            "title": "Display Initials"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -8188,6 +8418,7 @@
           "id",
           "referral_code",
           "display_name",
+          "display_initials",
           "created_at",
           "updated_at",
           "items",
@@ -8927,6 +9158,10 @@
             "type": "string",
             "title": "Display Name"
           },
+          "display_initials": {
+            "type": "string",
+            "title": "Display Initials"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -8981,6 +9216,7 @@
           "id",
           "referral_code",
           "display_name",
+          "display_initials",
           "created_at",
           "updated_at",
           "items",

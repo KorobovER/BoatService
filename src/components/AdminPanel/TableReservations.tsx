@@ -300,6 +300,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         return { bg: "#007A7B", textColor: "white" }; // green (default)
     };
 
+    console.log(getBoatForDay);  // todo: print until we use this function
+
     const isLoading = isLoadingMooringBalls || isLoadingReservations;
 
     if (isLoading) return (

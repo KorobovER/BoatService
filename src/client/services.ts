@@ -139,7 +139,7 @@ export class LoginEmployeesService {
     const { requestBody } = data
     return __request(OpenAPI, {
       method: "POST",
-      url: "/api/v1/reset-password/",
+      url: "/api/v1/reset-password",
       body: requestBody,
       mediaType: "application/json",
       errors: {
@@ -290,12 +290,12 @@ export type TDataReadBoats = {
   marinaId: string
   skip?: number
 }
-export type TDataCreateBoat = {
-  requestBody: BoatCreate
-}
 export type TDataReadBoatsMe = {
   limit?: number
   skip?: number
+}
+export type TDataCreateBoat = {
+  requestBody: BoatCreate
 }
 export type TDataUpdateBoatDocs = {
   formData?: Body_boats_update_boat_docs
@@ -322,7 +322,7 @@ export class BoatsService {
   public static getAllVesselTypes(): CancelablePromise<VesselTypesPublic> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/api/v1/boats/vessel-types",
+      url: "/api/v1/boats/vessel-types/",
     })
   }
 
@@ -351,27 +351,6 @@ export class BoatsService {
   }
 
   /**
-   * Create Boat
-   * Create new boat.
-   * @returns BoatPublic Successful Response
-   * @throws ApiError
-   */
-  public static createBoat(
-    data: TDataCreateBoat,
-  ): CancelablePromise<BoatPublic> {
-    const { requestBody } = data
-    return __request(OpenAPI, {
-      method: "POST",
-      url: "/api/v1/boats/",
-      body: requestBody,
-      mediaType: "application/json",
-      errors: {
-        422: `Validation Error`,
-      },
-    })
-  }
-
-  /**
    * Read Boats Me
    * Retrieve boats for user.
    * @returns BoatsPublic Successful Response
@@ -388,6 +367,27 @@ export class BoatsService {
         skip,
         limit,
       },
+      errors: {
+        422: `Validation Error`,
+      },
+    })
+  }
+
+  /**
+   * Create Boat
+   * Create new boat.
+   * @returns BoatPublic Successful Response
+   * @throws ApiError
+   */
+  public static createBoat(
+    data: TDataCreateBoat,
+  ): CancelablePromise<BoatPublic> {
+    const { requestBody } = data
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/boats",
+      body: requestBody,
+      mediaType: "application/json",
       errors: {
         422: `Validation Error`,
       },
@@ -548,7 +548,7 @@ export class EmployeesService {
     const { requestBody } = data
     return __request(OpenAPI, {
       method: "POST",
-      url: "/api/v1/employees/",
+      url: "/api/v1/employees",
       body: requestBody,
       mediaType: "application/json",
       errors: {
@@ -719,9 +719,6 @@ export type TDataReadItems = {
   limit?: number
   skip?: number
 }
-export type TDataCreateItem = {
-  requestBody: ItemCreate
-}
 export type TDataReadItem = {
   id: string
 }
@@ -731,6 +728,9 @@ export type TDataUpdateItem = {
 }
 export type TDataDeleteItem = {
   id: string
+}
+export type TDataCreateItem = {
+  requestBody: ItemCreate
 }
 
 export class ItemsService {
@@ -751,27 +751,6 @@ export class ItemsService {
         skip,
         limit,
       },
-      errors: {
-        422: `Validation Error`,
-      },
-    })
-  }
-
-  /**
-   * Create Item
-   * Create new item.
-   * @returns ItemPublic Successful Response
-   * @throws ApiError
-   */
-  public static createItem(
-    data: TDataCreateItem,
-  ): CancelablePromise<ItemPublic> {
-    const { requestBody } = data
-    return __request(OpenAPI, {
-      method: "POST",
-      url: "/api/v1/items/",
-      body: requestBody,
-      mediaType: "application/json",
       errors: {
         422: `Validation Error`,
       },
@@ -841,6 +820,27 @@ export class ItemsService {
       },
     })
   }
+
+  /**
+   * Create Item
+   * Create new item.
+   * @returns ItemPublic Successful Response
+   * @throws ApiError
+   */
+  public static createItem(
+    data: TDataCreateItem,
+  ): CancelablePromise<ItemPublic> {
+    const { requestBody } = data
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/items",
+      body: requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: `Validation Error`,
+      },
+    })
+  }
 }
 
 export type TDataReadServices = {
@@ -855,9 +855,6 @@ export type TDataReadMarinas = {
   skip?: number
   subregion?: SubRegion | null
 }
-export type TDataCreateMarina = {
-  requestBody: MarinaCreate
-}
 export type TDataReadMarina = {
   id: string
 }
@@ -867,6 +864,9 @@ export type TDataUpdateMarina = {
 }
 export type TDataDeleteMarina = {
   id: string
+}
+export type TDataCreateMarina = {
+  requestBody: MarinaCreate
 }
 
 export class MarinasService {
@@ -879,7 +879,7 @@ export class MarinasService {
   public static readAmenities(): CancelablePromise<AmenitiesPublic> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/api/v1/marinas/amenities",
+      url: "/api/v1/marinas/amenities/",
     })
   }
 
@@ -895,7 +895,7 @@ export class MarinasService {
     const { limit = 100, skip = 0 } = data
     return __request(OpenAPI, {
       method: "GET",
-      url: "/api/v1/marinas/services",
+      url: "/api/v1/marinas/services/",
       query: {
         skip,
         limit,
@@ -946,27 +946,6 @@ export class MarinasService {
         skip,
         limit,
       },
-      errors: {
-        422: `Validation Error`,
-      },
-    })
-  }
-
-  /**
-   * Create Marina
-   * Create new marina.
-   * @returns MarinaPublic Successful Response
-   * @throws ApiError
-   */
-  public static createMarina(
-    data: TDataCreateMarina,
-  ): CancelablePromise<MarinaPublic> {
-    const { requestBody } = data
-    return __request(OpenAPI, {
-      method: "POST",
-      url: "/api/v1/marinas/",
-      body: requestBody,
-      mediaType: "application/json",
       errors: {
         422: `Validation Error`,
       },
@@ -1040,6 +1019,27 @@ export class MarinasService {
       },
     })
   }
+
+  /**
+   * Create Marina
+   * Create new marina.
+   * @returns MarinaPublic Successful Response
+   * @throws ApiError
+   */
+  public static createMarina(
+    data: TDataCreateMarina,
+  ): CancelablePromise<MarinaPublic> {
+    const { requestBody } = data
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/marinas",
+      body: requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: `Validation Error`,
+      },
+    })
+  }
 }
 
 export type TDataIlluminateMooringBall = {
@@ -1058,9 +1058,6 @@ export type TDataReadMooringBalls = {
   startDate?: string | null
   subregion?: SubRegion | null
 }
-export type TDataCreateMooringBall = {
-  requestBody: MooringBallCreate
-}
 export type TDataReadMooringBall = {
   id: string
 }
@@ -1070,6 +1067,9 @@ export type TDataUpdateMooringBall = {
 }
 export type TDataDeleteMooringBall = {
   id: string
+}
+export type TDataCreateMooringBall = {
+  requestBody: MooringBallCreate
 }
 
 export class MooringBallsService {
@@ -1081,7 +1081,7 @@ export class MooringBallsService {
   public static illuminateSequenceOptions(): CancelablePromise<Array<string>> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/api/v1/mooring-balls/illuminate",
+      url: "/api/v1/mooring-balls/illuminate/",
     })
   }
 
@@ -1093,7 +1093,7 @@ export class MooringBallsService {
   public static soundSequenceOptions(): CancelablePromise<Array<string>> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/api/v1/mooring-balls/sound",
+      url: "/api/v1/mooring-balls/sound/",
     })
   }
 
@@ -1180,27 +1180,6 @@ export class MooringBallsService {
   }
 
   /**
-   * Create Mooring Ball
-   * Create new mooring_ball.
-   * @returns MooringBallPublic Successful Response
-   * @throws ApiError
-   */
-  public static createMooringBall(
-    data: TDataCreateMooringBall,
-  ): CancelablePromise<MooringBallPublic> {
-    const { requestBody } = data
-    return __request(OpenAPI, {
-      method: "POST",
-      url: "/api/v1/mooring-balls/",
-      body: requestBody,
-      mediaType: "application/json",
-      errors: {
-        422: `Validation Error`,
-      },
-    })
-  }
-
-  /**
    * Read Mooring Ball
    * Get mooring_ball by ID.
    * @returns MooringBallWithReservationsPublic Successful Response
@@ -1267,6 +1246,27 @@ export class MooringBallsService {
       },
     })
   }
+
+  /**
+   * Create Mooring Ball
+   * Create new mooring_ball.
+   * @returns MooringBallPublic Successful Response
+   * @throws ApiError
+   */
+  public static createMooringBall(
+    data: TDataCreateMooringBall,
+  ): CancelablePromise<MooringBallPublic> {
+    const { requestBody } = data
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/mooring-balls",
+      body: requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: `Validation Error`,
+      },
+    })
+  }
 }
 
 export type TDataReadReservations = {
@@ -1276,9 +1276,6 @@ export type TDataReadReservations = {
   mooringBallId?: string | null
   skip?: number
   startDate?: string | null
-}
-export type TDataCreateReservation = {
-  requestBody: ReservationCreate
 }
 export type TDataReadReservationsMe = {
   limit?: number
@@ -1293,6 +1290,9 @@ export type TDataUpdateReservation = {
 }
 export type TDataDeleteReservation = {
   id: string
+}
+export type TDataCreateReservation = {
+  requestBody: ReservationCreate
 }
 export type TDataRequestReservationService = {
   id: string
@@ -1339,27 +1339,6 @@ export class ReservationsService {
         start_date: startDate,
         end_date: endDate,
       },
-      errors: {
-        422: `Validation Error`,
-      },
-    })
-  }
-
-  /**
-   * Create Reservation
-   * Create new reservation.
-   * @returns ReservationCreatedPublic Successful Response
-   * @throws ApiError
-   */
-  public static createReservation(
-    data: TDataCreateReservation,
-  ): CancelablePromise<ReservationCreatedPublic> {
-    const { requestBody } = data
-    return __request(OpenAPI, {
-      method: "POST",
-      url: "/api/v1/reservations/",
-      body: requestBody,
-      mediaType: "application/json",
       errors: {
         422: `Validation Error`,
       },
@@ -1451,6 +1430,27 @@ export class ReservationsService {
       path: {
         id,
       },
+      errors: {
+        422: `Validation Error`,
+      },
+    })
+  }
+
+  /**
+   * Create Reservation
+   * Create new reservation.
+   * @returns ReservationCreatedPublic Successful Response
+   * @throws ApiError
+   */
+  public static createReservation(
+    data: TDataCreateReservation,
+  ): CancelablePromise<ReservationCreatedPublic> {
+    const { requestBody } = data
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/reservations",
+      body: requestBody,
+      mediaType: "application/json",
       errors: {
         422: `Validation Error`,
       },
@@ -1648,7 +1648,7 @@ export class UsersService {
   public static readCustomerPaymentMethods(): CancelablePromise<unknown> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/api/v1/users/payment-method",
+      url: "/api/v1/users/payment-method/",
     })
   }
 
@@ -1996,8 +1996,14 @@ export class UsersService {
 export type TDataGetRegionStateInitWithCoordinates = {
   requestBody?: Coordinate | null
 }
+export type TDataSendSupportEmail = {
+  emailText: string
+  emailTo?: string
+}
 export type TDataTestEmail = {
   emailTo: string
+  requestBody?: Record<string, string> | null
+  templateName?: string
 }
 
 export class UtilsService {
@@ -2063,19 +2069,45 @@ export class UtilsService {
   }
 
   /**
+   * Send Support Email
+   * Send support email.
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static sendSupportEmail(
+    data: TDataSendSupportEmail,
+  ): CancelablePromise<Message> {
+    const { emailText, emailTo = "support@bolabuddy.com" } = data
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/utils/send-support-email/",
+      query: {
+        email_text: emailText,
+        email_to: emailTo,
+      },
+      errors: {
+        422: `Validation Error`,
+      },
+    })
+  }
+
+  /**
    * Test Email
    * Test emails.
    * @returns Message Successful Response
    * @throws ApiError
    */
   public static testEmail(data: TDataTestEmail): CancelablePromise<Message> {
-    const { emailTo } = data
+    const { emailTo, requestBody, templateName = "test_email.html" } = data
     return __request(OpenAPI, {
       method: "POST",
       url: "/api/v1/utils/test-email/",
       query: {
         email_to: emailTo,
+        template_name: templateName,
       },
+      body: requestBody,
+      mediaType: "application/json",
       errors: {
         422: `Validation Error`,
       },

@@ -44,7 +44,7 @@ interface TableReservationsProps {
     renderHeader: (day: string) => React.ReactNode;
     renderBoatCell: (boat: Boat, colspan: number, textColor: string) => React.ReactNode;
     currentDate: string;
-    onReservationClick: (rowId: string, day: string, boat?: Boat) => void;
+    onReservationClick: (rowId: string, day: string, boat?: Boat, timeOfDay?: 'AM' | 'PM') => void;
 }
 
 const TableReservations: React.FC<TableReservationsProps> = ({
@@ -60,7 +60,12 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     const [allRows, setAllRows] = useState<Row[]>([]);
     const { isOpen: isFreeCellOpen, onClose: onFreeCellClose } = useDisclosure();
     const { isOpen: isReservedOpen, onClose: onReservedClose } = useDisclosure();
-    const [selectedCell, setSelectedCell] = useState<{ rowId: string; day: string; boat?: Boat } | null>(null);
+    const [selectedCell, setSelectedCell] = useState<{ 
+        rowId: string; 
+        day: string; 
+        boat?: Boat;
+        timeOfDay?: 'AM' | 'PM';
+    } | null>(null);
 
     // Запрос швартовок (общий для обоих компонентов)
     const { data: mooringBalls, isLoading: isLoadingMooringBalls } = useQuery({
@@ -244,9 +249,9 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         }
     };
 
-    const handleCellClick = (rowId: string, day: string, boat?: Boat) => {
-        setSelectedCell({ rowId, day, boat });
-        onReservationClick(rowId, day, boat);
+    const handleCellClick = (rowId: string, day: string, boat?: Boat, timeOfDay?: 'AM' | 'PM') => {
+        setSelectedCell({ rowId, day, boat, timeOfDay });
+        onReservationClick(rowId, day, boat, timeOfDay);
     };
 
     const getCellColor = (boat: Boat) => {
@@ -423,15 +428,37 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                         key={`empty-${row.id}-${day}`}
                                         width="100%"
                                         height="58px"
-                                        p={1}
                                         position="relative"
                                         gridColumn={dayIndex + 1}
-                                        _hover={{
-                                            bg: '#DD660026'
-                                        }}
-                                        cursor="pointer"
-                                        onClick={() => handleCellClick(row.id, day)}
-                                    />
+                                        display="flex"
+                                        flexDirection="row"
+                                    >
+                                        <Box
+                                            width="50%"
+                                            height="100%"
+                                            borderRight="1px dashed #E2E8F0"
+                                            _hover={{
+                                                bg: '#DD660026'
+                                            }}
+                                            cursor="pointer"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleCellClick(row.id, day, undefined, 'AM');
+                                            }}
+                                        />
+                                        <Box
+                                            width="50%"
+                                            height="100%"
+                                            _hover={{
+                                                bg: '#DD660026'
+                                            }}
+                                            cursor="pointer"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleCellClick(row.id, day, undefined, 'PM');
+                                            }}
+                                        />
+                                    </Box>
                                 );
                                 dayIndex++;
                                 continue;
@@ -486,7 +513,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                     gridColumn={`${dayIndex + 1} / span ${colspan}`}
                                     width="100%"
                                     height="58px"
-                                    p={1}
                                     position="relative"
                                     display="flex"
                                     alignItems="center"
@@ -498,12 +524,12 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                             const isLastDayOfWeek = dayIndex + colspan - 1 === days.length - 1;
                                             
                                             if (isFirstDayOfWeek && startsBeforeVisiblePeriod) {
-                                                return '0 30px 30px 0'; // Плоский слева, круглый справа
+                                                return '0 30px 30px 0';
                                             } else if (isLastDayOfWeek && endsAfterVisiblePeriod) {
-                                                return '30px 0 0 30px'; // Круглый слева, плоский справа
+                                                return '30px 0 0 30px';
                                             }
                                             
-                                            return '30px'; // По умолчанию полностью скругленный
+                                            return '30px';
                                         })()
                                     }}
                                     onClick={() => handleCellClick(row.id, day, boatMatch)}
@@ -519,6 +545,9 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                         position="relative"
                                         height="100%"
                                         width="100%"
+                                        display="flex"
+                                        alignItems="center"
+                                        justifyContent="center"
                                     >
                                         {renderBoatCell(boatMatch, colspan, getCellColor(boatMatch).textColor)}
                                     </Box>
@@ -552,6 +581,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                         onClose={onFreeCellClose}
                         rowId={selectedCell.rowId}
                         day={selectedCell.day}
+                        timeOfDay={selectedCell.timeOfDay}
                     />
                     <PopupReserved
                         isOpen={isReservedOpen}
@@ -559,6 +589,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                         rowId={selectedCell.rowId}
                         day={selectedCell.day}
                         boat={selectedCell.boat}
+                        timeOfDay={selectedCell.timeOfDay}
                     />
                 </>
             )}

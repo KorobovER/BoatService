@@ -8,12 +8,14 @@ interface PopupReservedProps {
     rowId: string;
     day: string;
     boat?: Boat;
+    timeOfDay?: 'AM' | 'PM';
 }
 
 const PopupReserved: React.FC<PopupReservedProps> = ({
     isOpen,
     rowId,
     boat,
+    timeOfDay
 }) => {
     if (!isOpen || !boat) return null;
 
@@ -47,6 +49,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                     <Box>
                         <Text fontSize="18px" fontWeight="600" color="gray.900">{boat.name}</Text>
                         <Text fontSize="14px" color="gray.500">{boat.code}</Text>
+                        <Text fontSize="14px" color="gray.500">Time: {timeOfDay || 'Full Day'}</Text>
                     </Box>
                 </Flex>
              

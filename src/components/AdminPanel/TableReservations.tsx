@@ -62,7 +62,6 @@ interface TableReservationsProps {
 
 const TableReservations: React.FC<TableReservationsProps> = ({
     days,
-    cellWidth,
     renderHeader,
     renderBoatCell,
     currentDate,
@@ -141,8 +140,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     useEffect(() => {
         if (reservations?.data && days.length > 0) {
             try {
-                console.log('Raw reservations data:', reservations.data);
-                
                 const periodStart = new Date(days[0] + 'T00:00:00.000Z');
                 const periodEnd = new Date(days[days.length - 1] + 'T23:59:59.999Z');
 
@@ -189,15 +186,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 service_requests: reservation.service_requests,
                                 is_completed: reservation.is_completed,
                             };
-                            console.log('Processed boat data with time:', {
-                                boat,
-                                startDateTime: startDate.toISOString(),
-                                endDateTime: endDate.toISOString(),
-                                startTimeHour: parseInt(boat.startTime?.split(':')[0] || '0'),
-                                endTimeHour: parseInt(boat.endTime?.split(':')[0] || '0'),
-                                startsInSecondHalf: parseInt(boat.startTime?.split(':')[0] || '0') >= 12,
-                                endsInFirstHalf: parseInt(boat.endTime?.split(':')[0] || '0') < 12
-                            });
                             return boat;
                         } catch (error) {
                             console.error('Error processing reservation:', reservation);
@@ -213,85 +201,12 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         }
     }, [reservations, days]);
 
-    /**
-     * Определяет лодку для ячейки и вычисляет colspan
-     */
-    const getBoatForDay = (rowId: string, dayIndex: number, occupiedDays: boolean[]) => {
-        if (occupiedDays[dayIndex]) return null;
-        
-        try {
-            const day = new Date(days[dayIndex] + 'T00:00:00.000Z');
-            
-            const boat = boats.find(b => {
-                try {
-                    const startDate = new Date(b.startDay + 'T00:00:00.000Z');
-                    const endDate = new Date(b.endDay + 'T00:00:00.000Z');
-                    return b.id === rowId && day >= startDate && day <= endDate;
-                } catch (error) {
-                    console.error('Invalid date in boat:', b);
-                    return false;
-                }
-            });
-
-            if (!boat) return null;
-
-            // Вычисляем colspan (разное для недели/месяца)
-            let colspan = 1;
-            let currentDayIndex = dayIndex;
-
-            // Проверяем следующие дни в рамках текущего просмотра
-            while (currentDayIndex + 1 < days.length) {
-                try {
-                    const nextDay = new Date(days[currentDayIndex + 1] + 'T00:00:00.000Z');
-                    const endDate = new Date(boat.endDay + 'T00:00:00.000Z');
-                    
-                    // Если следующий день уже занят другой резервацией или выходит за пределы текущей резервации
-                    if (occupiedDays[currentDayIndex + 1] || nextDay > endDate) {
-                        break;
-                    }
-                    
-                    // Увеличиваем colspan и отмечаем день как занятый
-                    colspan++;
-                    occupiedDays[currentDayIndex + 1] = true;
-                    currentDayIndex++;
-                } catch (error) {
-                    console.error('Error processing next day:', error);
-                    break;
-                }
-            }
-
-            // Определение, находится ли резервация на границе периода просмотра
-            const firstVisibleDay = new Date(days[0] + 'T00:00:00.000Z');
-            const lastVisibleDay = new Date(days[days.length-1] + 'T23:59:59.999Z');
-            const boatStartDate = new Date(boat.startDay + 'T00:00:00.000Z');
-            const boatEndDate = new Date(boat.endDay + 'T23:59:59.999Z');
-            
-            // Проверяем, выходит ли начало резервации за пределы видимого периода
-            const startsBeforeVisiblePeriod = boatStartDate < firstVisibleDay;
-            
-            // Проверяем, выходит ли конец резервации за пределы видимого периода
-            const endsAfterVisiblePeriod = boatEndDate > lastVisibleDay;
-
-            return { 
-                boat,
-                colspan,
-                dayIndex, // Добавляем индекс дня для корректного позиционирования
-                // Используем новые названия флагов для большей ясности
-                startsBeforeVisiblePeriod,
-                endsAfterVisiblePeriod
-            };
-        } catch (error) {
-            console.error('Error in getBoatForDay:', error);
-            return null;
-        }
-    };
-
     const handleCellClick = (rowId: string, day: string, boat?: Boat, timeOfDay?: 'AM' | 'PM') => {
         setSelectedCell({ rowId, day, boat, timeOfDay });
         onReservationClick(rowId, day, boat, timeOfDay);
     };
 
-    const getCellColor = (boat: Boat) => {
+    const getCellColor = (boat: Boat): { bg: string; textColor: string } => {
         const today = new Date();
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
@@ -299,46 +214,27 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         const startDate = new Date(boat.startDay);
         const endDate = new Date(boat.endDay);
         
-        console.log('Checking color for boat:', {
-            boat,
-            today: today.toISOString(),
-            tomorrow: tomorrow.toISOString(),
-            startDate: startDate.toISOString(),
-            endDate: endDate.toISOString(),
-            hasUncompletedServices: boat.service_requests?.some(service => !service.is_completed),
-            isToday: startDate.toDateString() === today.toDateString(),
-            hasServices: boat.service_requests?.length,
-            isFuture: startDate >= tomorrow,
-            isPast: endDate < today,
-            isCompleted: boat.is_completed
-        });
-        
         // Если есть незавершенные сервисы и дата начала сегодня
         if (boat.service_requests?.some(service => !service.is_completed) && 
             startDate.toDateString() === today.toDateString()) {
-            console.log('Color: Red (uncompleted services today)');
             return { bg: "#A85555", textColor: "white" }; // red
         }
         
         // Если есть сервисы и дата начала в будущем
         if (boat.service_requests?.length && startDate >= tomorrow) {
-            console.log('Color: Yellow (future services)');
             return { bg: "#FEA02F", textColor: "white" }; // yellow
         }
         
         // Если резервация завершена и дата окончания в прошлом
         if (endDate < today && boat.is_completed) {
-            console.log('Color: Light Green (completed past)');
             return { bg: "#E5F2F2", textColor: "black" }; // light green
         }
         
         // Если резервация не завершена и дата окончания в прошлом
         if (endDate < today && !boat.is_completed) {
-            console.log('Color: Red (uncompleted past)');
             return { bg: "#A85555", textColor: "white" }; // red
         }
         
-        console.log('Color: Green (default)');
         return { bg: "#007A7B", textColor: "white" }; // green (default)
     };
 
@@ -398,7 +294,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                 <Table variant="unstyled" width="100%">
                     <Thead>
                         <Tr>
-                            {days.map((day, dayIndex) => (
+                            {days.map((day) => (
                                 <Th 
                                     key={`date-${day}`}
                                     p={1}
@@ -596,10 +492,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 }
                                 
                                 // Определяем границы этой резервации для стилей
-                                const startHalfDayIndex = halfDayIndex;
                                 const endHalfDayIndex = halfDayIndex + halfDayColspan - 1;
-                                const isFirstHalfDay = startHalfDayIndex === 0;
-                                const isLastHalfDay = endHalfDayIndex === occupiedHalfDays.length - 1;
                                 
                                 const isStartDay = boatMatch.startDay === day;
                                 const isEndDay = boatMatch.endDay === days[Math.floor(endHalfDayIndex / 2)];
@@ -623,8 +516,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 let needsLeftRadius = true;  // По умолчанию скругляем
                                 let needsRightRadius = true; // По умолчанию скругляем
                                 
-                                // Проверяем, является ли это резервацией, переходящей через границу недели
-                                const isPartOfCrossingReservation = startsBeforeVisiblePeriod || endsAfterVisiblePeriod;
                                 
                                 // 1. Обработка левого края
                                 if (isFirstDayOfWeek && startsBeforeVisiblePeriod) {
@@ -682,25 +573,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                     borderRadius = "30px";
                                 }
                                 
-                                // Для отладки: логирование параметров скругления
-                                console.log('Border Radius Details:', {
-                                    day,
-                                    timeOfDay,
-                                    halfDayColspan,
-                                    isStartDay,
-                                    isEndDay,
-                                    startsBeforeVisiblePeriod,
-                                    endsAfterVisiblePeriod,
-                                    isFirstDayOfWeek,
-                                    isLastDayOfWeek,
-                                    isPartOfCrossingReservation,
-                                    needsLeftRadius,
-                                    needsRightRadius,
-                                    borderRadius,
-                                    startMatch: boatMatch.startDay,
-                                    endMatch: boatMatch.endDay
-                                });
-                                
                                 // Добавляем ячейку для резервации
                                 cells.push(
                                     <Td
@@ -711,7 +583,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                         height="58px"
                                         p={0}
                                         textAlign="center"
-                                        onClick={(e) => handleCellClick(row.id, day, boatMatch, timeOfDay)}
+                                        onClick={() => handleCellClick(row.id, day, boatMatch, timeOfDay)}
                                         cursor="pointer"
                                         className={isSelected ? 'selected-cell' : ''}
                                         sx={{

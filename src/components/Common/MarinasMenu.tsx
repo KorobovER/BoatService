@@ -24,6 +24,23 @@ interface Marina {
     subregion: string;
 }
 
+// Добавляем функцию преобразования URL в начало файла, перед компонентом
+const transformS3Url = (url: string): string => {
+    if (!url) return '';
+    
+    // Преобразование URL из формата s3://bola-public-assets/... 
+    // в https://s3.amazonaws.com/bola-public-assets/...
+    if (url.startsWith('s3://')) {
+        const path = url.substring(5); // Убираем 's3://'
+        const parts = path.split('/');
+        const bucket = parts[0];
+        const key = parts.slice(1).join('/');
+        return `https://s3.amazonaws.com/${bucket}/${key}`;
+    }
+    
+    return url;
+};
+
 const MarinasMenu = () => {
     const { selectedMarina, setSelectedMarina, setFullMarinaData } = useMarina();
     const [marinas, setMarinas] = useState<Marina[]>([]);
@@ -124,9 +141,9 @@ const MarinasMenu = () => {
                     >
                         <Image
                             rounded='full'
-                            src={selectedMarina?.logo_url ?? undefined}
+                            src={selectedMarina?.logo_url ? transformS3Url(selectedMarina.logo_url) : undefined}
                             boxSize="35px"
-                            fallbackSrc={PLACE}
+                            fallbackSrc={selectedMarina?.logo_url ? transformS3Url(selectedMarina.logo_url) : undefined}
                             alt={selectedMarina?.name || "Marina"}
                         />
                         <Flex align='center' gap='sm'>
@@ -152,10 +169,10 @@ const MarinasMenu = () => {
                         >
                             <HStack gap='sm'>
                                 <Image
-                                    src={marina.logo_url ?? undefined}
+                                    src={marina.logo_url ? transformS3Url(marina.logo_url) : undefined}
                                     boxSize="35px"
                                     rounded="full"
-                                    fallbackSrc={PLACE}
+                                    fallbackSrc={marina.logo_url ? transformS3Url(marina.logo_url) : undefined}
                                     alt={marina.name}
                                 />
                                 <Box>

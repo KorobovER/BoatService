@@ -21,6 +21,23 @@ import { useMarina } from '../../context/MarinaContext';
 import PopupFreeCell from './PopupFreeCell';
 import PopupReserved from './PopupReserved';
 
+// Функция для преобразования S3 URL
+const transformS3Url = (url: string): string => {
+    if (!url) return '';
+    
+    // Преобразование URL из формата s3://bola-public-assets/... 
+    // в https://s3.amazonaws.com/bola-public-assets/...
+    if (url.startsWith('s3://')) {
+        const path = url.substring(5); // Убираем 's3://'
+        const parts = path.split('/');
+        const bucket = parts[0];
+        const key = parts.slice(1).join('/');
+        return `https://s3.amazonaws.com/${bucket}/${key}`;
+    }
+    
+    return url;
+};
+
 interface Row {
     id: string;
     label: string;
@@ -252,7 +269,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
             <Box mt='56px' mr='20px' width="105px" flexShrink={0} display="flex" flexDirection="column" alignItems="center">
                 {allRows.map(row => (
                     <Box key={row.id} p="16px 24px" width="100px" height="60px" display="flex" alignItems="center" justifyContent="space-between">
-                        <Image width="24px" height="24px" src={row.marina?.logo_url || BollaCell} alt="Bolla" />
+                        <Image width="24px" height="24px" src={row.marina?.logo_url ? transformS3Url(row.marina.logo_url) : BollaCell} alt="Bolla" />
                         <Text fontSize="16px" lineHeight="52px">{row.label}</Text>
                     </Box>
                 ))}

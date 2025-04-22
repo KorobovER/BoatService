@@ -234,6 +234,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
             renderBoatCell={renderBoatCell}
             currentDate={currentMonthDate}
             onReservationClick={onReservationClick}
+            isMonthView={true}
         />
     );
 };

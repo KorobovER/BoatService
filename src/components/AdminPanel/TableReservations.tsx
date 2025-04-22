@@ -57,6 +57,7 @@ interface TableReservationsProps {
     renderBoatCell: (boat: Boat, colspan: number, textColor: string) => React.ReactNode;
     currentDate: string;
     onReservationClick: (rowId: string, day: string, boat?: Boat, timeOfDay?: 'AM' | 'PM') => void;
+    isMonthView?: boolean;
 }
 
 const TableReservations: React.FC<TableReservationsProps> = ({
@@ -66,6 +67,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     renderBoatCell,
     currentDate,
     onReservationClick,
+    isMonthView = false,
 }) => {
     const { selectedMarina } = useMarina();
     const [boats, setBoats] = useState<Boat[]>([]);
@@ -404,6 +406,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                     textAlign="center"
                                     fontWeight="normal"
                                     colSpan={2} // Каждый день занимает 2 ячейки (AM и PM)
+                                    position="relative" // Добавляем относительное позиционирование
                                 >
                                     {renderHeader(day)}
                                 </Th>
@@ -429,6 +432,14 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                         const endDate = new Date(b.endDay + 'T00:00:00.000Z');
                                         const isStartDay = b.startDay === day;
                                         const isEndDay = b.endDay === day;
+                                        
+                                        // Если это месячное представление и резервация занимает только половину дня, 
+                                        // и начинается и заканчивается в один день, пропускаем ее
+                                        if (isMonthView && isStartDay && isEndDay) {
+                                            if ((isStartDay && b.startsInSecondHalf) || (isEndDay && b.endsInFirstHalf)) {
+                                                return false;
+                                            }
+                                        }
                                         
                                         // Если это день начала и лодка начинается после полудня, 
                                         // то первая половина дня свободна
@@ -514,6 +525,14 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                         const endDate = new Date(b.endDay + 'T00:00:00.000Z');
                                         const isStartDay = b.startDay === day;
                                         const isEndDay = b.endDay === day;
+                                        
+                                        // Если это месячное представление и резервация занимает только половину дня, 
+                                        // и начинается и заканчивается в один день, пропускаем ее
+                                        if (isMonthView && isStartDay && isEndDay) {
+                                            if ((isStartDay && b.startsInSecondHalf) || (isEndDay && b.endsInFirstHalf)) {
+                                                return false;
+                                            }
+                                        }
                                         
                                         if (isStartDay && b.startsInSecondHalf && isAM) {
                                             // Если это день начала, лодка начинается после полудня, и мы проверяем AM

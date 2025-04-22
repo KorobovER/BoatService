@@ -48,6 +48,7 @@ export interface Boat {
     rawEndTime: string;
     startsInSecondHalf: boolean;
     endsInFirstHalf: boolean;
+    admin_status?: string;
 }
 
 interface TableReservationsProps {
@@ -185,6 +186,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 vessel_type: reservation.boat?.vessel_type,
                                 service_requests: reservation.service_requests,
                                 is_completed: reservation.is_completed,
+                                admin_status: reservation.admin_status,
                             };
                             return boat;
                         } catch (error) {
@@ -207,35 +209,21 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     };
 
     const getCellColor = (boat: Boat): { bg: string; textColor: string } => {
-        const today = new Date();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        
-        const startDate = new Date(boat.startDay);
-        const endDate = new Date(boat.endDay);
-        
-        // Если есть незавершенные сервисы и дата начала сегодня
-        if (boat.service_requests?.some(service => !service.is_completed) && 
-            startDate.toDateString() === today.toDateString()) {
-            return { bg: "#A85555", textColor: "white" }; // red
+        // Используем статусы из API через поле admin_status
+        if (boat.admin_status === 'require_action') {
+            return { bg: "#A85555", textColor: "white" }; // red - требует действия
         }
         
-        // Если есть сервисы и дата начала в будущем
-        if (boat.service_requests?.length && startDate >= tomorrow) {
-            return { bg: "#FEA02F", textColor: "white" }; // yellow
+        if (boat.admin_status === 'future_action') {
+            return { bg: "#FEA02F", textColor: "white" }; // yellow - будущее действие
         }
         
-        // Если резервация завершена и дата окончания в прошлом
-        if (endDate < today && boat.is_completed) {
-            return { bg: "#E5F2F2", textColor: "black" }; // light green
+        if (boat.admin_status === 'completed') {
+            return { bg: "#E5F2F2", textColor: "black" }; // light green - завершено
         }
         
-        // Если резервация не завершена и дата окончания в прошлом
-        if (endDate < today && !boat.is_completed) {
-            return { bg: "#A85555", textColor: "white" }; // red
-        }
-        
-        return { bg: "#007A7B", textColor: "white" }; // green (default)
+        // По умолчанию - нормальное состояние
+        return { bg: "#007A7B", textColor: "white" }; // green (default) - нормальное состояние
     };
 
     const isLoading = isLoadingMooringBalls || isLoadingReservations;

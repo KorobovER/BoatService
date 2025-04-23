@@ -10,7 +10,6 @@ import {
     HStack,
     Spinner,
 } from "@chakra-ui/react";
-import PLACE from '../../../public/assets/images/place.png';
 import { useState, useEffect } from "react";
 import { EmployeesService, MarinasService } from '../../client';
 import { useMarina } from '../../context/MarinaContext';

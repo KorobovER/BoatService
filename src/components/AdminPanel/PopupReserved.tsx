@@ -38,10 +38,10 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 <Flex align="center" gap="12px">
                     <Image
                         src={boat.vessel_type === 'power' 
-                            ? "/assets/images/power-boat.png"
+                            ? "/assets/images/power-boat.svg"
                             : boat.vessel_type === 'catamaran'
-                            ? "/assets/images/catamaran-boat.png"
-                            : "/assets/images/monohul-boat.png"}
+                            ? "/assets/images/catamaran-boat.svg"
+                            : "/assets/images/monohul-boat.svg"}
                         alt={boat.name}
                         width="32px"
                         height="32px"

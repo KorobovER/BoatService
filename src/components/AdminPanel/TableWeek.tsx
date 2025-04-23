@@ -85,7 +85,7 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
                 >
                     {boat.vessel_type === 'power' ? (
                         <Image
-                            src="/assets/images/power-boat.png"
+                            src="/assets/images/power-boat.svg"
                             alt={boat.name}
                             width="22px"
                             height="22px"
@@ -95,7 +95,7 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
                         />
                     ) : boat.vessel_type === 'catamaran' ? (
                         <Image
-                            src="/assets/images/catamaran-boat.png"
+                            src="/assets/images/catamaran-boat.svg"
                             alt={boat.name}
                             width="22px"
                             height="22px"
@@ -105,7 +105,7 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
                         />
                     ) : boat.vessel_type === 'monohull' ? (
                         <Image
-                            src="/assets/images/monohul-boat.png"
+                            src="/assets/images/monohul-boat.svg"
                             alt={boat.name}
                             width="22px"
                             height="22px"
@@ -134,7 +134,7 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
                             <Flex gap='8px' alignItems='center'>
                                 {boat.vessel_type === 'power' ? (
                                     <Image
-                                        src="/assets/images/power-boat.png"
+                                        src="/assets/images/power-boat.svg"
                                         alt={boat.name}
                                         width="22px"
                                         height="22px"
@@ -144,7 +144,7 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
                                     />
                                 ) : boat.vessel_type === 'catamaran' ? (
                                     <Image
-                                        src="/assets/images/catamaran-boat.png"
+                                        src="/assets/images/catamaran-boat.svg"
                                         alt={boat.name}
                                         width="22px"
                                         height="22px"
@@ -154,7 +154,7 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
                                     />
                                 ) : boat.vessel_type === 'monohull' ? (
                                     <Image
-                                        src="/assets/images/monohul-boat.png"
+                                        src="/assets/images/monohul-boat.svg"
                                         alt={boat.name}
                                         width="22px"
                                         height="22px"

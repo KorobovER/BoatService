@@ -70,7 +70,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                     zIndex="1"
                 />
             )}
-            <Text textAlign="center">
+            <Text color="#777777" textAlign="center">
                 {(() => {
                     try {
                         return new Date(day).getDate();
@@ -101,7 +101,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                     >
                         {boat.vessel_type === 'power' ? (
                             <Image
-                                src="/assets/images/power-boat.png"
+                                src="/assets/images/power-boat.svg"
                                 alt={boat.name}
                                 width="22px"
                                 height="22px"
@@ -111,7 +111,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                             />
                         ) : boat.vessel_type === 'catamaran' ? (
                             <Image
-                                src="/assets/images/catamaran-boat.png"
+                                src="/assets/images/catamaran-boat.svg"
                                 alt={boat.name}
                                 width="22px"
                                 height="22px"
@@ -121,7 +121,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                             />
                         ) : boat.vessel_type === 'monohull' ? (
                             <Image
-                                src="/assets/images/monohul-boat.png"
+                                src="/assets/images/monohul-boat.svg"
                                 alt={boat.name}
                                 width="22px"
                                 height="22px"
@@ -153,7 +153,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                                 <Flex gap='8px' alignItems='center'>
                                     {boat.vessel_type === 'power' ? (
                                         <Image
-                                            src="/assets/images/power-boat.png"
+                                            src="/assets/images/power-boat.svg"
                                             alt={boat.name}
                                             width="22px"
                                             height="22px"
@@ -163,7 +163,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                                         />
                                     ) : boat.vessel_type === 'catamaran' ? (
                                         <Image
-                                            src="/assets/images/catamaran-boat.png"
+                                            src="/assets/images/catamaran-boat.svg"
                                             alt={boat.name}
                                             width="22px"
                                             height="22px"
@@ -173,7 +173,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                                         />
                                     ) : boat.vessel_type === 'monohull' ? (
                                         <Image
-                                            src="/assets/images/monohul-boat.png"
+                                            src="/assets/images/monohul-boat.svg"
                                             alt={boat.name}
                                             width="22px"
                                             height="22px"

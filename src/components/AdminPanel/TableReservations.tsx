@@ -266,11 +266,20 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     return (
         <Box display="flex" alignItems="flex-start" width="100%">
             {/* Контейнер для швартовок */}
-            <Box mt='56px' mr='20px' width="105px" flexShrink={0} display="flex" flexDirection="column" alignItems="center">
-                {allRows.map(row => (
-                    <Box key={row.id} p="16px 24px" width="100px" height="60px" display="flex" alignItems="center" justifyContent="space-between">
+            <Box mt='82px' mr='20px' width="105px" flexShrink={0} display="flex" flexDirection="column" alignItems="center">
+                {allRows.map((row) => (
+                    <Box 
+                        mt='8px'
+                        mb='8px'
+                        key={row.id} 
+                        width="60px" 
+                        height="60px" 
+                        display="flex" 
+                        alignItems="center" 
+                        justifyContent="space-between"
+                    >
                         <Image width="24px" height="24px" src={row.marina?.logo_url ? transformS3Url(row.marina.logo_url) : BollaCell} alt="Bolla" />
-                        <Text fontSize="16px" lineHeight="52px">{row.label}</Text>
+                        <Text fontSize="16px" lineHeight="24px">{row.label}</Text>
                     </Box>
                 ))}
             </Box>
@@ -292,7 +301,9 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                     },
                     '& table': {
                         tableLayout: 'fixed',
-                        width: '100%'
+                        width: '100%',
+                        borderSpacing: '0 16px',
+                        borderCollapse: 'separate'
                     }
                 }}
             >

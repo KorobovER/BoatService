@@ -277,56 +277,36 @@ const TableReservations: React.FC<TableReservationsProps> = ({
 
     return (
         <Box display="flex" alignItems="flex-start" width="100%">
-            {/* Контейнер для швартовок */}
-            <Box mt='82px' mr='20px' width="105px" flexShrink={0} display="flex" flexDirection="column" alignItems="center">
-                {allRows.map((row) => (
-                    <Box 
-                        mt='8px'
-                        mb='8px'
-                        key={row.id} 
-                        width="60px" 
-                        height="60px" 
-                        display="flex" 
-                        alignItems="center" 
-                        justifyContent="space-between"
-                    >
-                        <Image width="24px" height="24px" src={row.marina?.logo_url ? transformS3Url(row.marina.logo_url) : BollaCell} alt="Bolla" />
-                        <Text fontSize="16px" lineHeight="24px" textOverflow="ellipsis" whiteSpace="nowrap" overflow="hidden">{row.label}</Text>
-                    </Box>
-                ))}
-            </Box>
-
-            {/* Таблица вместо Grid */}
-            <Box 
-                width="100%"
-                flex="1"
-                overflowX="auto"
-                sx={{
-                    '&:focus': {
-                        outline: 'none'
-                    },
-                    '&:focus-visible': {
-                        outline: 'none'
-                    },
-                    '*:focus': {
-                        outline: 'none'
-                    },
-                    '& table': {
-                        tableLayout: 'fixed',
-                        width: '100%',
-                        borderSpacing: '0 16px',
-                        borderCollapse: 'separate'
-                    }
-                }}
-            >
+            <Box flex="1" overflowX="auto" sx={{
+                '&:focus': { outline: 'none' },
+                '&:focus-visible': { outline: 'none' },
+                '*:focus': { outline: 'none' },
+                '& table': {
+                    tableLayout: 'fixed',
+                    width: '100%',
+                    borderSpacing: '0 8px',
+                    borderCollapse: 'separate'
+                }
+            }}>
                 <Table variant="unstyled" width="100%">
                     <Thead>
                         <Tr>
+                            <Th 
+                                w="105px" 
+                                p={1} 
+                                height="60px" 
+                                textAlign="center" 
+                                fontWeight="normal" 
+                                position="sticky" 
+                                left="0" 
+                                bg="white" 
+                                zIndex={2}
+                            />
                             {days.map((day) => (
                                 <Th 
                                     key={`date-${day}`}
                                     p={1}
-                                    height="58px"
+                                    height="60px"
                                     textAlign="center"
                                     fontWeight="normal"
                                     colSpan={2} // Каждый день занимает 2 ячейки (AM и PM)
@@ -626,6 +606,40 @@ const TableReservations: React.FC<TableReservationsProps> = ({
 
                             return (
                                 <Tr key={`row-${row.id}`} height="60px">
+                                    <Td 
+                                        w="105px" 
+                                        height="60px" 
+                                        p={0} 
+                                        position="sticky" 
+                                        left="0" 
+                                        bg="white" 
+                                        zIndex={1}
+                                    >
+                                        <Flex 
+                                            height="100%" 
+                                            alignItems="center" 
+                                            justifyContent="flex-start" 
+                                            pl="8px"
+                                        >
+                                            <Image 
+                                                w="24px" 
+                                                h="24px" 
+                                                src={row.marina?.logo_url ? transformS3Url(row.marina.logo_url) : BollaCell} 
+                                                alt="Bolla" 
+                                                mr="8px"
+                                            />
+                                            <Text 
+                                                fontSize="16px" 
+                                                lineHeight="24px" 
+                                                textOverflow="ellipsis" 
+                                                whiteSpace="nowrap" 
+                                                overflow="hidden"
+                                                flex="1"
+                                            >
+                                                {row.label}
+                                            </Text>
+                                        </Flex>
+                                    </Td>
                                     {cells}
                                 </Tr>
                             );

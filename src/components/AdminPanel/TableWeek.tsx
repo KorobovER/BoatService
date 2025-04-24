@@ -72,139 +72,145 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
         </>
     );
 
-    const renderBoatCell = (boat: Boat, _colspan: number, textColor: string) => (
-        <Popover trigger="hover" placement="bottom" strategy="fixed">
-            <PopoverTrigger>
-                <Flex
-                    width="100%"
-                    height="100%"
-                    p="5px"
-                    gap="8px"
-                    alignItems="center"
-                    justifyContent="center"
-                >
-                    {boat.vessel_type === 'power' ? (
-                        <Image
-                            src="/assets/images/power-boat.svg"
-                            alt={boat.name}
-                            width="22px"
-                            height="22px"
-                            objectFit="cover"
-                            borderRadius="4px"
-                            filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
-                        />
-                    ) : boat.vessel_type === 'catamaran' ? (
-                        <Image
-                            src="/assets/images/catamaran-boat.svg"
-                            alt={boat.name}
-                            width="22px"
-                            height="22px"
-                            objectFit="cover"
-                            borderRadius="4px"
-                            filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
-                        />
-                    ) : boat.vessel_type === 'monohull' ? (
-                        <Image
-                            src="/assets/images/monohul-boat.svg"
-                            alt={boat.name}
-                            width="22px"
-                            height="22px"
-                            objectFit="cover"
-                            borderRadius="4px"
-                            filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
-                        />
-                    ) : (
-                        <Text color={textColor} fontSize="14px" fontWeight="400">{boat.name}</Text>
-                    )}
-                    <Box>
-                        <Text color={textColor} fontSize="16px" fontWeight="400">{boat.name}</Text>
-                        <Text color={textColor} fontSize="12px" fontWeight="300" opacity="0.8">{boat.code}</Text>
-                    </Box>
-                </Flex>
-            </PopoverTrigger>
-            <PopoverContent 
-                width="fit-content" 
-                border="1px solid #D2D2D2" 
-                borderRadius="8px"
-                _focus={{ outline: 'none' }}
-            >
-                <PopoverBody p="8px">
-                    <Flex gap='8px' alignItems='center' color="black">
-                        <Box>
-                            <Flex gap='8px' alignItems='center'>
-                                {boat.vessel_type === 'power' ? (
-                                    <Image
-                                        src="/assets/images/power-boat.svg"
-                                        alt={boat.name}
-                                        width="22px"
-                                        height="22px"
-                                        objectFit="cover"
-                                        borderRadius="4px"
-                                        filter="brightness(0)"
-                                    />
-                                ) : boat.vessel_type === 'catamaran' ? (
-                                    <Image
-                                        src="/assets/images/catamaran-boat.svg"
-                                        alt={boat.name}
-                                        width="22px"
-                                        height="22px"
-                                        objectFit="cover"
-                                        borderRadius="4px"
-                                        filter="brightness(0)"
-                                    />
-                                ) : boat.vessel_type === 'monohull' ? (
-                                    <Image
-                                        src="/assets/images/monohul-boat.svg"
-                                        alt={boat.name}
-                                        width="22px"
-                                        height="22px"
-                                        objectFit="cover"
-                                        borderRadius="4px"
-                                        filter="brightness(0)"
-                                    />
-                                ) : (
-                                    <Text color="white" fontSize="14px" fontWeight="500">{boat.name}</Text>
-                                )}
-                                <Text fontSize="14px" fontWeight="500">{boat.name}</Text>
-                                <Text fontSize="14px" fontWeight="300" opacity="0.8">|</Text>
-                                <Text fontSize="14px" fontWeight="300" opacity="0.8">
-                                    {boat.code}
-                                </Text>
-                            </Flex>
-                            <Flex p='8px 0px' gap='16px'>
-                                <Flex gap='4px'>
-                                    <Text fontSize="14px" fontWeight="400" color='white' bg='black' p='0 8px' borderRadius='56px'>In</Text>
-                                    <Text fontSize="14px" fontWeight="400" color='black'>{`${new Date(boat.startDay).getDate()} ${new Date(boat.startDay).toLocaleString('en-US', { month: 'long' })}`}</Text>
-                                </Flex>
-                                <Flex gap='4px'>
-                                    <Text fontSize="14px" fontWeight="400" color='white' bg='black' p='0 8px' borderRadius='56px'>Out</Text>
-                                    <Text fontSize="14px" fontWeight="400" color='black'>{`${new Date(boat.endDay).getDate()} ${new Date(boat.endDay).toLocaleString('en-US', { month: 'long' })}`}</Text>
-                                </Flex>
-                            </Flex>
-                            <Flex gap='24px' alignItems="flex-end">
-                                <Button 
-                                    borderRadius='full' 
-                                    bg='#FEA02F' 
-                                    fontSize='14px' 
-                                    fontWeight='400'
-                                    color='black' 
-                                    sx={{ 
-                                        padding: '4px 8px !important',
-                                        minHeight: 'unset',
-                                        height: 'auto',
-                                        lineHeight: '1.2'
-                                    }}
-                                >
-                                    service request
-                                </Button>
-                                <Link variant="unstyled" textDecoration="underline" fontSize='14px' fontWeight='400'>Open detail view</Link>
-                            </Flex>
+    const renderBoatCell = (boat: Boat, colspan: number, textColor: string) => {
+        const isHalfDay = colspan < 1; // Определяем, что это половина дня или меньше
+        
+        return (
+            <Popover trigger="hover" placement="bottom" strategy="fixed">
+                <PopoverTrigger>
+                    <Flex
+                        width="100%"
+                        height="100%"
+                        p={isHalfDay ? "2px" : "5px"}
+                        gap={isHalfDay ? "2px" : "8px"}
+                        alignItems="center"
+                        justifyContent="center"
+                    >
+                        {boat.vessel_type === 'power' ? (
+                            <Image
+                                src="/assets/images/power-boat.svg"
+                                alt={boat.name}
+                                width="22px"
+                                height="22px"
+                                objectFit="cover"
+                                borderRadius="4px"
+                                filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
+                            />
+                        ) : boat.vessel_type === 'catamaran' ? (
+                            <Image
+                                src="/assets/images/catamaran-boat.svg"
+                                alt={boat.name}
+                                width="22px"
+                                height="22px"
+                                objectFit="cover"
+                                borderRadius="4px"
+                                filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
+                            />
+                        ) : boat.vessel_type === 'monohull' ? (
+                            <Image
+                                src="/assets/images/monohul-boat.svg"
+                                alt={boat.name}
+                                width="22px"
+                                height="22px"
+                                objectFit="cover"
+                                borderRadius="4px"
+                                filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
+                            />
+                        ) : (
+                            <Text color={textColor} fontSize="14px" fontWeight="400">{boat.name[0]}</Text>
+                        )}
+                        {/* Показываем дополнительный текст */}
+                        <Box maxWidth="calc(100% - 30px)" overflow="hidden" textAlign="left">
+                            <Text color={textColor} fontSize="16px" fontWeight="400" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.name}</Text>
+                            <Text color={textColor} fontSize="12px" fontWeight="300" opacity="0.8" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.code}</Text>
                         </Box>
                     </Flex>
-                </PopoverBody>
-            </PopoverContent>
-        </Popover>
-    );
+                </PopoverTrigger>
+                <PopoverContent 
+                    width="auto" 
+                    maxWidth="400px"
+                    border="1px solid #D2D2D2" 
+                    borderRadius="8px"
+                    _focus={{ outline: 'none' }}
+                >
+                    <PopoverBody p="8px">
+                        <Flex gap='8px' alignItems='center' color="black">
+                            <Box>
+                                <Flex gap='8px' alignItems='center'>
+                                    {boat.vessel_type === 'power' ? (
+                                        <Image
+                                            src="/assets/images/power-boat.svg"
+                                            alt={boat.name}
+                                            width="22px"
+                                            height="22px"
+                                            objectFit="cover"
+                                            borderRadius="4px"
+                                            filter="brightness(0)"
+                                        />
+                                    ) : boat.vessel_type === 'catamaran' ? (
+                                        <Image
+                                            src="/assets/images/catamaran-boat.svg"
+                                            alt={boat.name}
+                                            width="22px"
+                                            height="22px"
+                                            objectFit="cover"
+                                            borderRadius="4px"
+                                            filter="brightness(0)"
+                                        />
+                                    ) : boat.vessel_type === 'monohull' ? (
+                                        <Image
+                                            src="/assets/images/monohul-boat.svg"
+                                            alt={boat.name}
+                                            width="22px"
+                                            height="22px"
+                                            objectFit="cover"
+                                            borderRadius="4px"
+                                            filter="brightness(0)"
+                                        />
+                                    ) : (
+                                        <Text color="white" fontSize="14px" fontWeight="500">{boat.name}</Text>
+                                    )}
+                                    <Text fontSize="14px" fontWeight="500" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.name}</Text>
+                                    <Text fontSize="14px" fontWeight="300" opacity="0.8">|</Text>
+                                    <Text fontSize="14px" fontWeight="300" opacity="0.8" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
+                                        {boat.code}
+                                    </Text>
+                                </Flex>
+                                <Flex p='8px 0px' gap='16px'>
+                                    <Flex gap='4px' whiteSpace="nowrap">
+                                        <Text fontSize="14px" fontWeight="400" color='white' bg='black' p='0 8px' borderRadius='56px'>In</Text>
+                                        <Text fontSize="14px" fontWeight="400" color='black' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{`${new Date(boat.startDay).getDate()} ${new Date(boat.startDay).toLocaleString('en-US', { month: 'long' })} • ${boat.startTime || '--:--'}`} <Text as="span" fontSize="10px" fontWeight="bold">{parseInt(boat.startTime?.split(':')[0] || '0') < 12 ? 'AM' : 'PM'}</Text></Text>
+                                    </Flex>
+                                    <Flex gap='4px' whiteSpace="nowrap">
+                                        <Text fontSize="14px" fontWeight="400" color='white' bg='black' p='0 8px' borderRadius='56px'>Out</Text>
+                                        <Text fontSize="14px" fontWeight="400" color='black' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{`${new Date(boat.endDay).getDate()} ${new Date(boat.endDay).toLocaleString('en-US', { month: 'long' })} • ${boat.endTime || '--:--'}`} <Text as="span" fontSize="10px" fontWeight="bold">{parseInt(boat.endTime?.split(':')[0] || '0') < 12 ? 'AM' : 'PM'}</Text></Text>
+                                    </Flex>
+                                </Flex>
+                                <Flex gap='24px' alignItems="flex-end">
+                                    <Button 
+                                        borderRadius='full' 
+                                        bg='#FEA02F' 
+                                        fontSize='14px' 
+                                        fontWeight='400'
+                                        color='black' 
+                                        sx={{ 
+                                            padding: '4px 8px !important',
+                                            minHeight: 'unset',
+                                            height: 'auto',
+                                            lineHeight: '1.2'
+                                        }}
+                                    >
+                                        service request
+                                    </Button>
+                                    <Link variant="unstyled" textDecoration="underline" fontSize='14px' fontWeight='400'>Open detail view</Link>
+                                </Flex>
+                            </Box>
+                        </Flex>
+                    </PopoverBody>
+                </PopoverContent>
+            </Popover>
+        );
+    };
 
     return (
         <TableReservations

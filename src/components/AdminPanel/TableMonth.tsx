@@ -84,7 +84,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
     );
 
     const renderBoatCell = (boat: Boat, colspan: number, textColor: string) => {
-        const isSingleDay = colspan === 1;
+        const isHalfDay = colspan < 1; // Определяем, что это половина дня или меньше
         
         return (
             <Popover trigger="hover" placement="bottom" strategy="fixed">
@@ -92,12 +92,10 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                     <Flex
                         width="100%"
                         height="100%"
-                        p="5px"
-                        gap="8px"
+                        p={isHalfDay ? "2px" : "5px"}
+                        gap={isHalfDay ? "2px" : "8px"}
                         alignItems="center"
                         justifyContent="center"
-                        maxWidth="100%"
-                        overflow="hidden"
                     >
                         {boat.vessel_type === 'power' ? (
                             <Image
@@ -130,14 +128,13 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                                 filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
                             />
                         ) : (
-                            <Text color={textColor} fontSize="10px">{boat.name[0]}</Text>
+                            <Text color={textColor} fontSize="14px" fontWeight="400">{boat.name[0]}</Text>
                         )}
-                        {!isSingleDay && (
-                            <Box maxWidth="calc(100% - 30px)" overflow="hidden">
-                                <Text color={textColor} fontSize="16px" fontWeight="400" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.name}</Text>
-                                <Text color={textColor} fontSize="12px" fontWeight="300" opacity="0.8" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.code}</Text>
-                            </Box>
-                        )}
+                        {/* Показываем дополнительный текст */}
+                        <Box maxWidth="calc(100% - 30px)" overflow="hidden" textAlign="left">
+                            <Text color={textColor} fontSize={isHalfDay ? "12px" : "16px"} fontWeight="400" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.name}</Text>
+                            <Text color={textColor} fontSize={isHalfDay ? "8px" : "12px"} fontWeight="300" opacity="0.8" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.code}</Text>
+                        </Box>
                     </Flex>
                 </PopoverTrigger>
                 <PopoverContent 
@@ -182,22 +179,26 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                                             filter="brightness(0)"
                                         />
                                     ) : (
-                                        <Text color="white" fontSize="14px" fontWeight="500" whiteSpace="nowrap">{boat.name}</Text>
+                                        <Text color="white" fontSize="14px" fontWeight="500" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.name}</Text>
                                     )}
-                                    <Text fontSize="14px" fontWeight="500" whiteSpace="nowrap">{boat.name}</Text>
+                                    <Text fontSize="14px" fontWeight="500" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.name}</Text>
                                     <Text fontSize="14px" fontWeight="300" opacity="0.8">|</Text>
-                                    <Text fontSize="14px" fontWeight="300" opacity="0.8" whiteSpace="nowrap">
+                                    <Text fontSize="14px" fontWeight="300" opacity="0.8" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
                                         {boat.code}
                                     </Text>
                                 </Flex>
                                 <Flex p='8px 0px' gap='16px'>
                                     <Flex gap='4px'>
                                         <Text fontSize="14px" fontWeight="400" color='white' bg='black' p='0 8px' borderRadius='56px'>In</Text>
-                                        <Text fontSize="14px" fontWeight="400" color='black' whiteSpace="nowrap">{`${new Date(boat.startDay).getDate()} ${new Date(boat.startDay).toLocaleString('en-US', { month: 'long' })}`}</Text>
+                                        <Text fontSize="14px" fontWeight="400" color='black' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
+                                            {`${new Date(boat.startDay).getDate()} ${new Date(boat.startDay).toLocaleString('en-US', { month: 'long' })}${boat.startTime ? ` ${boat.startTime}` : ''}`}
+                                        </Text>
                                     </Flex>
                                     <Flex gap='4px'>
                                         <Text fontSize="14px" fontWeight="400" color='white' bg='black' p='0 8px' borderRadius='56px'>Out</Text>
-                                        <Text fontSize="14px" fontWeight="400" color='black' whiteSpace="nowrap">{`${new Date(boat.endDay).getDate()} ${new Date(boat.endDay).toLocaleString('en-US', { month: 'long' })}`}</Text>
+                                        <Text fontSize="14px" fontWeight="400" color='black' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
+                                            {`${new Date(boat.endDay).getDate()} ${new Date(boat.endDay).toLocaleString('en-US', { month: 'long' })}${boat.endTime ? ` ${boat.endTime}` : ''}`}
+                                        </Text>
                                     </Flex>
                                 </Flex>
                                 <Flex gap='24px' alignItems="flex-end">
@@ -216,7 +217,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                                     >
                                         service request
                                     </Button>
-                                    <Link variant="unstyled" textDecoration="underline" fontSize='14px' fontWeight='400' whiteSpace="nowrap">Open detail view</Link>
+                                    <Link variant="unstyled" textDecoration="underline" fontSize='14px' fontWeight='400' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">Open detail view</Link>
                                 </Flex>
                             </Box>
                         </Flex>

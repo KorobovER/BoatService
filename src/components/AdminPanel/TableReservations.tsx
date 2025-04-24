@@ -289,7 +289,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                         justifyContent="space-between"
                     >
                         <Image width="24px" height="24px" src={row.marina?.logo_url ? transformS3Url(row.marina.logo_url) : BollaCell} alt="Bolla" />
-                        <Text fontSize="16px" lineHeight="24px">{row.label}</Text>
+                        <Text fontSize="16px" lineHeight="24px" textOverflow="ellipsis" whiteSpace="nowrap" overflow="hidden">{row.label}</Text>
                     </Box>
                 ))}
             </Box>
@@ -354,14 +354,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                         const endDate = new Date(b.endDay + 'T00:00:00.000Z');
                                         const isStartDay = b.startDay === day;
                                         const isEndDay = b.endDay === day;
-                                        
-                                        // Если это месячное представление и резервация занимает только половину дня, 
-                                        // и начинается и заканчивается в один день, пропускаем ее
-                                        if (isMonthView && isStartDay && isEndDay) {
-                                            if ((isStartDay && b.startsInSecondHalf) || (isEndDay && b.endsInFirstHalf)) {
-                                                return false;
-                                            }
-                                        }
                                         
                                         // Если это день начала и лодка начинается после полудня, 
                                         // то первая половина дня свободна
@@ -448,14 +440,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                         const isStartDay = b.startDay === day;
                                         const isEndDay = b.endDay === day;
                                         
-                                        // Если это месячное представление и резервация занимает только половину дня, 
-                                        // и начинается и заканчивается в один день, пропускаем ее
-                                        if (isMonthView && isStartDay && isEndDay) {
-                                            if ((isStartDay && b.startsInSecondHalf) || (isEndDay && b.endsInFirstHalf)) {
-                                                return false;
-                                            }
-                                        }
-                                        
+                                        // Если это день начала и лодка начинается после полудня, 
+                                        // то первая половина дня свободна
                                         if (isStartDay && b.startsInSecondHalf && isAM) {
                                             // Если это день начала, лодка начинается после полудня, и мы проверяем AM
                                             return false;
@@ -626,11 +612,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                             alignItems="center"
                                             justifyContent="center"
                                         >
-                                            {/* Показываем информацию только в центре резервации или если это единственная ячейка */}
-                                            {halfDayColspan >= 2 || (halfDayColspan === 1 && ((isStartDay && !boatMatch.startsInSecondHalf) || (isEndDay && boatMatch.endsInFirstHalf))) ?
-                                                renderBoatCell(boatMatch, halfDayColspan / 2, getCellColor(boatMatch).textColor) :
-                                                null
-                                            }
+                                            {/* Всегда показываем информацию о лодке */}
+                                            {renderBoatCell(boatMatch, halfDayColspan / 2, getCellColor(boatMatch).textColor)}
                                         </Flex>
                                     </Td>
                                 );

@@ -158,18 +158,23 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     useEffect(() => {
         if (reservations?.data && days.length > 0) {
             try {
-                const periodStart = new Date(days[0] + 'T00:00:00.000Z');
-                const periodEnd = new Date(days[days.length - 1] + 'T23:59:59.999Z');
+                // Создаем даты для начала и конца периода, избегая проблем с часовыми поясами
+                const [startYear, startMonth, startDay] = days[0].split('-').map(Number);
+                const periodStartDate = new Date(startYear, startMonth - 1, startDay, 0, 0, 0);
+                
+                const [endYear, endMonth, endDay] = days[days.length - 1].split('-').map(Number);
+                const periodEndDate = new Date(endYear, endMonth - 1, endDay, 23, 59, 59);
 
                 const apiBoats = reservations.data
                     .filter(reservation => {
                         try {
+                            // Переводим даты резервации в локальный формат, избегая проблем с часовыми поясами
                             const resStart = new Date(reservation.start_date);
                             const resEnd = new Date(reservation.end_date);
                             
                             // Проверяем, если хотя бы часть резервации попадает в видимый период
                             // Резервация начинается до конца периода И заканчивается после начала периода
-                            return resStart <= periodEnd && resEnd >= periodStart;
+                            return resStart <= periodEndDate && resEnd >= periodStartDate;
                         } catch (error) {
                             console.error('Invalid date in reservation:', reservation);
                             return false;
@@ -185,14 +190,19 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                             const rawStartTime = startDate.toLocaleTimeString('en-US', dateOptions as any);
                             const rawEndTime = endDate.toLocaleTimeString('en-US', dateOptions as any);
                             
+                            // Форматируем даты в строки в формате YYYY-MM-DD
+                            const formatLocalDate = (date: Date) => {
+                                return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                            };
+
                             const boat = {
                                 id: reservation.mooring_ball.ball_number.toString(),
                                 name: reservation.boat?.boatname || 'N/A',
                                 code: reservation.boat?.model || 'N/A',
-                                startDay: startDate.toISOString().split('T')[0],
-                                endDay: endDate.toISOString().split('T')[0],
-                                startTime: startDate.toISOString().split('T')[1].substring(0, 5),
-                                endTime: endDate.toISOString().split('T')[1].substring(0, 5),
+                                startDay: formatLocalDate(startDate),
+                                endDay: formatLocalDate(endDate),
+                                startTime: `${String(startDate.getHours()).padStart(2, '0')}:${String(startDate.getMinutes()).padStart(2, '0')}`,
+                                endTime: `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`,
                                 // Добавляем дополнительные поля для более точного определения
                                 rawStartTime,
                                 rawEndTime,

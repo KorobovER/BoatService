@@ -11,24 +11,24 @@ interface TableMonthProps {
 const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservationClick }) => {
     const getMonthDates = (dateString: string) => {
         try {
-            // Создаем дату в UTC
-            const date = new Date(dateString + 'T00:00:00.000Z');
-            const year = date.getUTCFullYear();
-            const month = date.getUTCMonth();
+            // Parse the year and month from the date string
+            const [year, month] = dateString.split('-').map(Number);
             
-            // Получаем первый день месяца в UTC
-            const firstDay = new Date(Date.UTC(year, month, 1));
-            // Получаем последний день месяца в UTC
-            const lastDay = new Date(Date.UTC(year, month + 1, 0));
+            // Create a date for the first day of the month
+            // Month in JavaScript is 0-indexed (0 = January)
+            const firstDay = new Date(year, month - 1, 1);
+            
+            // Get last day of the month by getting day 0 of the next month
+            const lastDay = new Date(year, month, 0);
             
             const datesArray = [];
-            // Начинаем с первого дня месяца
-            const currentDate = new Date(firstDay);
+            const totalDays = lastDay.getDate();
             
-            // Добавляем дни до последнего дня месяца включительно
-            while (currentDate <= lastDay) {
-                datesArray.push(currentDate.toISOString().split('T')[0]);
-                currentDate.setUTCDate(currentDate.getUTCDate() + 1);
+            // Generate all dates from 1 to the last day of the month
+            for (let day = 1; day <= totalDays; day++) {
+                // Format date consistently: YYYY-MM-DD
+                const formattedDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                datesArray.push(formattedDate);
             }
             
             return datesArray;

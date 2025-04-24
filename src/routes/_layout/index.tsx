@@ -24,7 +24,10 @@ function Dashboard() {
     const getCurrentWeekMonday = useCallback((date = new Date()) => {
         const day = date.getDay();
         const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-        return new Date(date.setDate(diff)).toISOString().split('T')[0];//Разобраться с этим
+        const monday = new Date(date);
+        monday.setDate(diff);
+        // Return date in local timezone without any timezone conversion
+        return `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
     }, []);
 
     // Инициализация начальных дат
@@ -34,12 +37,12 @@ function Dashboard() {
         // Устанавливаем текущую неделю
         setCurrentWeekStart(getCurrentWeekMonday(today));
         
-        // Устанавливаем текущий месяц
+        // Устанавливаем текущий месяц - явно указываем год и месяц
         const year = today.getFullYear();
-        const month = today.getMonth(); // 0-11
+        const month = today.getMonth() + 1; // +1 потому что месяцы в JS начинаются с 0
         
-        // Создаем ISO строку даты первого дня текущего месяца
-        const firstDayOfMonth = `${year}-${String(month + 1).padStart(2, '0')}-01`;//Разобраться с этим 
+        // Формируем дату в формате YYYY-MM-DD
+        const firstDayOfMonth = `${year}-${String(month).padStart(2, '0')}-01`;
         setCurrentMonthDate(firstDayOfMonth);
     }, [getCurrentWeekMonday]);
 
@@ -47,26 +50,54 @@ function Dashboard() {
     const handlePrevWeek = () => {
         const date = new Date(currentWeekStart);
         date.setDate(date.getDate() - 7);
-        setCurrentWeekStart(date.toISOString().split('T')[0]);
+        const newDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        setCurrentWeekStart(newDate);
     };
 
     const handleNextWeek = () => {
         const date = new Date(currentWeekStart);
         date.setDate(date.getDate() + 7);
-        setCurrentWeekStart(date.toISOString().split('T')[0]);
+        const newDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        setCurrentWeekStart(newDate);
     };
 
     // Обработчики для месячного представления
     const handlePrevMonth = () => {
-        const date = new Date(currentMonthDate);
-        date.setMonth(date.getMonth() - 1);
-        setCurrentMonthDate(date.toISOString().split('T')[0]);
+        // Разбиваем строку даты на компоненты
+        const [year, month] = currentMonthDate.split('-').map(Number);
+        
+        // Вычисляем предыдущий месяц и год
+        let prevMonth = month - 1;
+        let prevYear = year;
+        
+        // Обрабатываем переход между годами
+        if (prevMonth < 1) {
+            prevMonth = 12;
+            prevYear -= 1;
+        }
+        
+        // Формируем новую дату
+        const newDate = `${prevYear}-${String(prevMonth).padStart(2, '0')}-01`;
+        setCurrentMonthDate(newDate);
     };
 
     const handleNextMonth = () => {
-        const date = new Date(currentMonthDate);
-        date.setMonth(date.getMonth() + 1);
-        setCurrentMonthDate(date.toISOString().split('T')[0]);
+        // Разбиваем строку даты на компоненты
+        const [year, month] = currentMonthDate.split('-').map(Number);
+        
+        // Вычисляем следующий месяц и год
+        let nextMonth = month + 1;
+        let nextYear = year;
+        
+        // Обрабатываем переход между годами
+        if (nextMonth > 12) {
+            nextMonth = 1;
+            nextYear += 1;
+        }
+        
+        // Формируем новую дату
+        const newDate = `${nextYear}-${String(nextMonth).padStart(2, '0')}-01`;
+        setCurrentMonthDate(newDate);
     };
 
     // Обработчик кнопки "Today"
@@ -75,8 +106,8 @@ function Dashboard() {
         
         if (currentView === 'month') {
             const year = today.getFullYear();
-            const month = today.getMonth();
-            const newDate = new Date(Date.UTC(year, month, 1)).toISOString().split('T')[0];
+            const month = today.getMonth() + 1; // +1 потому что месяцы в JS начинаются с 0
+            const newDate = `${year}-${String(month).padStart(2, '0')}-01`;
             setCurrentMonthDate(newDate);
         } else {
             setCurrentWeekStart(getCurrentWeekMonday(today));
@@ -86,11 +117,14 @@ function Dashboard() {
     // Форматирование отображаемого диапазона дат
     const formatDateRange = () => {
         if (currentView === 'month' && currentMonthDate) {
-            const date = new Date(currentMonthDate + 'T00:00:00.000Z');
+            // Разбиваем строку даты на компоненты для форматирования
+            const [year, month] = currentMonthDate.split('-').map(Number);
+            // Создаем объект Date для форматирования названия месяца
+            const date = new Date(year, month - 1); // -1 потому что месяцы в JS начинаются с 0
             return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
         } else if (currentView === 'week' && currentWeekStart) {
-            const start = new Date(currentWeekStart + 'T00:00:00.000Z');
-            const end = new Date(currentWeekStart + 'T00:00:00.000Z');
+            const start = new Date(currentWeekStart);
+            const end = new Date(currentWeekStart);
             end.setDate(end.getDate() + 6);
             return `${start.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
         }

@@ -1,6 +1,6 @@
 // TableWeek.tsx
-import React from 'react';
-import { Box, Text, Image, Flex, Button, Popover, PopoverTrigger, PopoverContent, PopoverBody, Link } from '@chakra-ui/react';
+import React, { useMemo } from 'react';
+import { Box, Text, Image, Flex, Button, Popover, PopoverTrigger, PopoverContent, PopoverBody, Link, Spinner, Center } from '@chakra-ui/react';
 import TableReservations, { Boat } from './TableReservations';
 
 interface TableWeekProps {
@@ -9,13 +9,66 @@ interface TableWeekProps {
 }
 
 const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationClick }) => {
-    const getWeekDates = (startDate: string) => {
+    // Функция для получения текущего понедельника как запасного варианта
+    const getCurrentMonday = (): string => {
+        const today = new Date();
+        const day = today.getDay();
+        const diff = today.getDate() - day + (day === 0 ? -6 : 1); // Корректировка для недели, начинающейся с понедельника
+        
+        const monday = new Date(today);
+        monday.setDate(diff);
+        
+        const year = monday.getFullYear();
+        const month = String(monday.getMonth() + 1).padStart(2, '0');
+        const date = String(monday.getDate()).padStart(2, '0');
+        
+        return `${year}-${month}-${date}`;
+    };
+    
+    const getWeekDates = (startDate: string): string[] => {
         try {
-            const date = new Date(startDate);
+            // Если startDate пустая, используем текущий понедельник
+            const effectiveStartDate = startDate && startDate.trim() !== '' 
+                ? startDate 
+                : getCurrentMonday();
+            
+            // Если всё еще проблемы с датой, логируем и возвращаем пустой массив
+            if (!effectiveStartDate || typeof effectiveStartDate !== 'string' || effectiveStartDate.trim() === '') {
+                console.error('Invalid startDate even after fallback:', effectiveStartDate);
+                return [];
+            }
+
+            // Разбираем дату вручную для избежания проблем с часовыми поясами
+            const [year, month, day] = effectiveStartDate.split('-').map(num => parseInt(num, 10));
+            
+            // Проверяем корректность компонентов даты
+            if (isNaN(year) || isNaN(month) || isNaN(day) || 
+                month < 1 || month > 12 || day < 1 || day > 31) {
+                console.error('Invalid date components:', { year, month, day });
+                return [];
+            }
+            
+            // Создаем дату в локальном часовом поясе
+            const baseDate = new Date(year, month - 1, day);
+            
+            // Проверяем, что baseDate - валидная дата
+            if (isNaN(baseDate.getTime())) {
+                console.error('Invalid date created:', baseDate);
+                return [];
+            }
+
+            // Формируем массив из 7 дней
             return Array.from({ length: 7 }, (_, i) => {
-                const currentDate = new Date(date);
-                currentDate.setDate(date.getDate() + i);
-                return currentDate.toISOString().split('T')[0];
+                // Создаем новую дату для каждого дня недели
+                const currentDate = new Date(baseDate);
+                currentDate.setDate(baseDate.getDate() + i);
+                
+                // Форматируем дату вручную для избежания проблем с toISOString()
+                const currentYear = currentDate.getFullYear();
+                const currentMonth = String(currentDate.getMonth() + 1).padStart(2, '0');
+                const currentDay = String(currentDate.getDate()).padStart(2, '0');
+                
+                return `${currentYear}-${currentMonth}-${currentDay}`;
             });
         } catch (error) {
             console.error('Error in getWeekDates:', error);
@@ -23,7 +76,17 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
         }
     };
 
-    const days = getWeekDates(currentWeekStart);
+    // Используем useMemo для вычисления массива дней только при изменении currentWeekStart
+    const days = useMemo(() => getWeekDates(currentWeekStart), [currentWeekStart]);
+
+    // Если массив дней пуст, показываем спиннер
+    if (days.length === 0) {
+        return (
+            <Center height="100vh">
+                <Spinner size="xl" color="ui.main" />
+            </Center>
+        );
+    }
 
     const isToday = (day: string) => {
         try {

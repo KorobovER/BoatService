@@ -16,7 +16,7 @@ import {
     Td
 } from '@chakra-ui/react';
 import BollaCell from "../../../public/assets/images/bolla-cell.svg";
-import { ReservationsService, MooringBallsService, MarinasService } from '../../client';
+import { ReservationsService, MarinasService } from '../../client';
 import { useMarina } from '../../context/MarinaContext';
 import PopupFreeCell from './PopupFreeCell';
 import PopupReserved from './PopupReserved';
@@ -84,7 +84,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     renderBoatCell,
     currentDate,
     onReservationClick,
-    isMonthView = false,
 }) => {
     const { selectedMarina } = useMarina();
     const [boats, setBoats] = useState<Boat[]>([]);
@@ -106,11 +105,13 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                 let result = { mooring_balls: [] as Array<any> };
                 
                 if (selectedMarina?.marina_id) {
+                    // Если выбрана марина, запрашиваем её данные напрямую
                     const marinaData = await MarinasService.readMarina({ id: selectedMarina.marina_id });
                     if (marinaData.mooring_balls) result.mooring_balls = marinaData.mooring_balls;
                 } else {
-                    const response = await MooringBallsService.readMooringBalls({ limit: 5000 });
-                    if (response.data) result.mooring_balls = Array.isArray(response.data) ? response.data : (response.data as any).data || [];
+                    // Если марина не выбрана, просто возвращаем пустой список без запроса к API
+                    console.warn('No marina selected, skipping mooring balls request.');
+                    return result;
                 }
                 return result;
             } catch (error) {
@@ -118,7 +119,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                 throw error;
             }
         },
-        enabled: true,
+        // Запрос активен только если марина выбрана и есть текущая дата
+        enabled: !!selectedMarina?.marina_id && !!currentDate,
     });
 
     // Запрос резерваций (общий для обоих компонентов)

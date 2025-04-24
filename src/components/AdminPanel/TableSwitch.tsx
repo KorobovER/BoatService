@@ -98,7 +98,7 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
                         <rect
                             x="0.5"
                             y="0.5"
-                            width="3   0"
+                            width="30"
                             height="30"
                             rx="16.5"
                             stroke="#F6F6F6"

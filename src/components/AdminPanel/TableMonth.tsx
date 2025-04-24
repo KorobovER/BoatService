@@ -14,9 +14,6 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
             // Parse the year and month from the date string
             const [year, month] = dateString.split('-').map(Number);
             
-            // Create a date for the first day of the month
-            // Month in JavaScript is 0-indexed (0 = January)
-            const firstDay = new Date(year, month - 1, 1);
             
             // Get last day of the month by getting day 0 of the next month
             const lastDay = new Date(year, month, 0);
@@ -84,24 +81,29 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
     );
 
     const renderBoatCell = (boat: Boat, colspan: number, textColor: string) => {
-        const isHalfDay = colspan < 1; // Определяем, что это половина дня или меньше
-        
+        // Use colspan <= 1 to determine if the reservation is short (<= 24 hours)
+        const isShortReservation = colspan <= 1; 
+        // Keep the existing isHalfDay for potential specific half-day styling if needed elsewhere
+        const isHalfDay = colspan < 1;
+
         return (
             <Popover trigger="hover" placement="bottom" strategy="fixed">
                 <PopoverTrigger>
                     <Flex
                         width="100%"
                         height="100%"
-                        p={isHalfDay ? "2px" : "5px"}
-                        gap={isHalfDay ? "2px" : "8px"}
+                        p={isHalfDay ? "2px" : "5px"} // Padding might still depend on isHalfDay
+                        gap={isShortReservation ? "0" : "8px"} // No gap if only icon
                         alignItems="center"
-                        justifyContent="center"
+                        // Always justify center
+                        justifyContent="center" 
                     >
+                        {/* Boat Icon Logic (Image or Text) */}
                         {boat.vessel_type === 'power' ? (
                             <Image
                                 src="/assets/images/power-boat.svg"
                                 alt={boat.name}
-                                width="22px"
+                                width="22px" // Consistent size
                                 height="22px"
                                 objectFit="cover"
                                 borderRadius="4px"
@@ -111,7 +113,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                             <Image
                                 src="/assets/images/catamaran-boat.svg"
                                 alt={boat.name}
-                                width="22px"
+                                width="22px" // Consistent size
                                 height="22px"
                                 objectFit="cover"
                                 borderRadius="4px"
@@ -121,20 +123,26 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                             <Image
                                 src="/assets/images/monohul-boat.svg"
                                 alt={boat.name}
-                                width="22px"
+                                width="22px" // Consistent size
                                 height="22px"
                                 objectFit="cover"
                                 borderRadius="4px"
                                 filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
                             />
                         ) : (
-                            <Text color={textColor} fontSize="14px" fontWeight="400">{boat.name[0]}</Text>
+                            // Fallback if no specific type, maybe just use first letter if short?
+                            <Text color={textColor} fontSize="14px" fontWeight="400">
+                                {isShortReservation ? boat.name[0] : boat.name} 
+                            </Text>
                         )}
-                        {/* Показываем дополнительный текст */}
-                        <Box maxWidth="calc(100% - 30px)" overflow="hidden" textAlign="left">
-                            <Text color={textColor} fontSize={isHalfDay ? "12px" : "16px"} fontWeight="400" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.name}</Text>
-                            <Text color={textColor} fontSize={isHalfDay ? "8px" : "12px"} fontWeight="300" opacity="0.8" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.code}</Text>
-                        </Box>
+                        
+                        {/* Conditionally render the text block */}
+                        {!isShortReservation && (
+                            <Box maxWidth="calc(100% - 30px)" overflow="hidden" textAlign="left">
+                                <Text color={textColor} fontSize={"16px"} fontWeight="400" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.name}</Text>
+                                <Text color={textColor} fontSize={"12px"} fontWeight="300" opacity="0.8" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.code}</Text>
+                            </Box>
+                        )}
                     </Flex>
                 </PopoverTrigger>
                 <PopoverContent 

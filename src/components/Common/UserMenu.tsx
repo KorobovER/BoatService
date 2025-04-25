@@ -61,8 +61,8 @@ const UserMenu = () => {
                 <Avatar 
                   name={userInitials} 
                   size="sm" 
-                  bg={isActive ? "gray.200" : "none"}
-                  bgGradient={isActive ? "none" : "linear(to-r, #DD6600, #EF5457)"}
+                  bg={isActive ? "basic.grey200" : "none"}
+                  bgGradient={isActive ? "none" : "var(--chakra-colors-gradient-orange)"}
                   color={isActive ? "orange.500" : "white"}
                   fontWeight="500"
                   fontSize="14px"
@@ -74,16 +74,16 @@ const UserMenu = () => {
                 <FaUserAlt color="white" fontSize="18px" />
               )
             }
-            bg={isActive ? "gray.200" : "none"}
-            bgGradient={isActive ? "none" : "linear(to-r, #DD6600, #EF5457)"}
+            bg={isActive ? "basic.grey200" : "none"}
+            bgGradient={isActive ? "none" : "var(--chakra-colors-gradient-orange)"}
             isRound
             data-testid="user-menu"
             _hover={{ 
-              bg: isActive ? "gray.200" : "none",
-              bgGradient: isActive ? "none" : "linear(to-r, #DD6600, #EF5457)"
+              bg: isActive ? "basic.grey200" : "none",
+              bgGradient: isActive ? "none" : "var(--chakra-colors-gradient-orange)"
             }}
             _active={{ 
-              bg: "gray.200",
+              bg: "basic.grey200",
               bgGradient: "none"
             }}
             sx={{
@@ -101,7 +101,7 @@ const UserMenu = () => {
             <MenuItem
               icon={<FiLogOut fontSize="18px" />}
               onClick={handleLogout}
-              color="ui.danger"
+              color="system.errorRed"
               fontWeight="bold"
             >
               Log out

@@ -250,19 +250,19 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     const getCellColor = (boat: Boat): { bg: string; textColor: string } => {
         // Используем статусы из API через поле admin_status
         if (boat.admin_status === 'require_action') {
-            return { bg: "#A85555", textColor: "white" }; // red - требует действия
+            return { bg: "system-error", textColor: "white" }; // red - требует действия
         }
-
+        
         if (boat.admin_status === 'future_action') {
-            return { bg: "#FEA02F", textColor: "white" }; // yellow - будущее действие
+            return { bg: "system.warningYellow", textColor: "white" }; // yellow - будущее действие
         }
-
+        
         if (boat.admin_status === 'completed') {
-            return { bg: "#E5F2F2", textColor: "black" }; // light green - завершено
+            return { bg: "bg.success", textColor: "basic.grey700" }; // light green - завершено
         }
-
+        
         // По умолчанию - нормальное состояние
-        return { bg: "#007A7B", textColor: "white" }; // green (default) - нормальное состояние
+        return { bg: "system.successGreen", textColor: "white" }; // green (default) - нормальное состояние
     };
 
     const isLoading = isLoadingMooringBalls || isLoadingReservations;
@@ -296,7 +296,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                     width: '100%',
                     borderSpacing: '0',
                     borderCollapse: 'collapse',
-                    border: '1px solid #F6F6F6'
+                    border: '1px solid var(--chakra-colors-basic-grey100)'
                 }
             }}>
                 <Table variant="unstyled" width="100%">
@@ -312,8 +312,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 left="0"
                                 bg="white"
                                 zIndex={2}
-                                borderRight="1px solid #F6F6F6"
-                                borderBottom="1px solid #F6F6F6"
+                                borderRight="1px solid var(--chakra-colors-basic-grey100)"
+                                borderBottom="1px solid var(--chakra-colors-basic-grey100)"
                             />
                             {days.map((day, index) => (
                                 <Th
@@ -324,10 +324,10 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                     fontWeight="normal"
                                     colSpan={2} // Каждый день занимает 2 ячейки (AM и PM)
                                     position="relative" // Добавляем относительное позиционирование
-                                    borderRight="1px solid #F6F6F6"
-                                    borderBottom="1px solid #F6F6F6"
-                                    borderTop="1px solid #F6F6F6"
-                                    borderLeft={index === 0 ? "1px solid #F6F6F6" : "none"}
+                                    borderRight="1px solid var(--chakra-colors-basic-grey100)"
+                                    borderBottom="1px solid var(--chakra-colors-basic-grey100)"
+                                    borderTop="1px solid var(--chakra-colors-basic-grey100)"
+                                    borderLeft={index === 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
                                 >
                                     {renderHeader(day)}
                                 </Th>
@@ -424,15 +424,15 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                             padding={0}
                                             position="relative"
                                             _hover={{
-                                                bg: '#DD660026'
+                                                bg: 'brand.primaryOrange26'
                                             }}
                                             cursor="pointer"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 handleCellClick(row.id, day, undefined, timeOfDay);
                                             }}
-                                            borderRight={!isAM ? "1px solid #F6F6F6" : "none"}
-                                            borderBottom="1px solid #F6F6F6"
+                                            borderRight={!isAM ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
+                                            borderBottom="1px solid var(--chakra-colors-basic-grey100)"
                                         >
                                             <Box height="100%" width="100%" display="flex" alignItems="center" justifyContent="center" />
                                         </Td>
@@ -657,28 +657,28 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                             return (
                                 <Tr key={`row-${row.id}`} height="52px">
                                     <Td
-                                        w="105px"
+                                       
                                         height="52px"
                                         p={0}
                                         position="sticky"
                                         left="0"
                                         bg="white"
                                         zIndex={1}
-                                        borderRight="1px solid #F6F6F6"
-                                        borderBottom="1px solid #F6F6F6"
+                                        borderRight="1px solid var(--chakra-colors-basic-grey100)"
+                                        borderBottom="1px solid var(--chakra-colors-basic-grey100)"
                                     >
                                         <Flex
                                             height="44px"
                                             alignItems="center"
                                             justifyContent="flex-start"
-                                            pl="8px"
+                                            gap="8px"
+                                            padding="16px"
                                         >
                                             <Image
                                                 w="24px"
                                                 h="24px"
                                                 src={row.marina?.logo_url ? transformS3Url(row.marina.logo_url) : BollaCell}
                                                 alt="Bolla"
-                                                mr="8px"
                                             />
                                             <Text
                                                 fontSize="16px"
@@ -687,6 +687,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                                 whiteSpace="nowrap"
                                                 overflow="hidden"
                                                 flex="1"
+                                                color="basic.grey900"
+                                                fontWeight="500"
                                             >
                                                 {row.label}
                                             </Text>

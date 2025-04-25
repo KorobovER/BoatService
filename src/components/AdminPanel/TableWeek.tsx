@@ -117,7 +117,9 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
     const renderHeader = (day: string) => (
         <>
             <Text 
-                color={isToday(day) ? "#1F1F1F" : "#777777"} 
+                color={isToday(day) ? "basic.grey900" : "basic.grey600"} 
+                fontSize="14px"
+                fontWeight="500"
                 textAlign="center"
                 position="relative"
                 zIndex="2"
@@ -248,20 +250,20 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
                                     ) : (
                                         <Text color="white" fontSize="14px" fontWeight="500">{boat.name}</Text>
                                     )}
-                                    <Text fontSize="14px" fontWeight="500" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.name}</Text>
-                                    <Text fontSize="14px" fontWeight="300" opacity="0.8">|</Text>
-                                    <Text fontSize="14px" fontWeight="300" opacity="0.8" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
+                                    <Text color='basic.grey900' fontSize="14px" fontWeight="400" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.name}</Text>
+                                    <Text fontSize="14px" fontWeight="400" color='basic.grey600'>|</Text>
+                                    <Text color='basic.grey600' fontSize="14px" fontWeight="400" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
                                         {boat.code}
                                     </Text>
                                 </Flex>
                                 <Flex p='8px 0px' gap='16px'>
                                     <Flex gap='4px' whiteSpace="nowrap">
                                         <Text fontSize="14px" fontWeight="400" color='white' bg='black' p='0 8px' borderRadius='56px'>In</Text>
-                                        <Text fontSize="14px" fontWeight="400" color='black' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{`${new Date(boat.startDay).getUTCDate()} ${new Date(boat.startDay).toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })} • ${boat.startTime || '--:--'}`} <Text as="span" fontSize="10px" fontWeight="bold">{parseInt(boat.startTime?.split(':')[0] || '0') < 12 ? 'AM' : 'PM'}</Text></Text>
+                                        <Text fontSize="14px" fontWeight="400" color='basic.grey700' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{`${new Date(boat.startDay).getUTCDate()} ${new Date(boat.startDay).toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })} • ${boat.startTime || '--:--'}`} <Text as="span" fontSize="10px" fontWeight="bold">{parseInt(boat.startTime?.split(':')[0] || '0') < 12 ? 'AM' : 'PM'}</Text></Text>
                                     </Flex>
                                     <Flex gap='4px' whiteSpace="nowrap">
                                         <Text fontSize="14px" fontWeight="400" color='white' bg='black' p='0 8px' borderRadius='56px'>Out</Text>
-                                        <Text fontSize="14px" fontWeight="400" color='black' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{`${new Date(boat.endDay).getUTCDate()} ${new Date(boat.endDay).toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })} • ${boat.endTime || '--:--'}`} <Text as="span" fontSize="10px" fontWeight="bold">{parseInt(boat.endTime?.split(':')[0] || '0') < 12 ? 'AM' : 'PM'}</Text></Text>
+                                        <Text fontSize="14px" fontWeight="400" color='basic.grey700' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{`${new Date(boat.endDay).getUTCDate()} ${new Date(boat.endDay).toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })} • ${boat.endTime || '--:--'}`} <Text as="span" fontSize="10px" fontWeight="bold">{parseInt(boat.endTime?.split(':')[0] || '0') < 12 ? 'AM' : 'PM'}</Text></Text>
                                     </Flex>
                                 </Flex>
                                 <Flex gap='24px' alignItems="flex-end">

@@ -30,7 +30,7 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
                 <Button
                     display="flex"
                     alignItems="center"
-                    border="1px solid #B7B7B7"
+                    border="1px solid var(--chakra-colors-basic-grey300)"
                     bg="white"
                     width='120px'
                     borderRadius="25px"
@@ -75,7 +75,7 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
                             width="30"
                             height="30"
                             rx="16.5"
-                            stroke="#F6F6F6"
+                            stroke="var(--chakra-colors-basic-grey100)"
                         />
                         <path
                             d="M18.2578 22.4648L13.2539 17.2422C13.1172 17.0781 13.0625 16.9141 13.0625 16.75C13.0625 16.6133 13.1172 16.4492 13.2266 16.3125L18.2305 11.0898C18.4766 10.8164 18.9141 10.8164 19.1602 11.0625C19.4336 11.3086 19.4336 11.7188 19.1875 11.9922L14.6211 16.75L19.2148 21.5625C19.4609 21.8086 19.4609 22.2461 19.1875 22.4922C18.9414 22.7383 18.5039 22.7383 18.2578 22.4648Z"
@@ -101,7 +101,7 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
                             width="30"
                             height="30"
                             rx="16.5"
-                            stroke="#F6F6F6"
+                            stroke="var(--chakra-colors-basic-grey100)"
                         />
                         <path
                             d="M15.7148 11.0625L20.7188 16.2852C20.8281 16.4219 20.9102 16.5859 20.9102 16.75C20.9102 16.9141 20.8281 17.0781 20.7188 17.1875L15.7148 22.4102C15.4688 22.6836 15.0312 22.6836 14.7852 22.4375C14.5117 22.1914 14.5117 21.7812 14.7578 21.5078L19.3516 16.7227L14.7578 11.9648C14.5117 11.7188 14.5117 11.2812 14.7852 11.0352C15.0312 10.7891 15.4688 10.7891 15.7148 11.0625Z"
@@ -115,11 +115,12 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
                 <Button
                     display="flex"
                     alignItems="center"
-                    border="1px solid #B7B7B7"
-                    borderRadius="25px"
-                    padding="10px 25px"
-                    bg={currentView === 'month' ? 'linear-gradient(90deg, #003F5A 0%, #165874 100%)' : 'white'}
-                    color={currentView === 'month' ? 'white' : 'black'}
+                    border="1px solid var(--chakra-colors-basic-grey300)"
+                    borderRadius="full"
+                    px="lg" 
+                    py="sm"
+                    bg={currentView === 'month' ? 'var(--chakra-colors-gradient-blue)' : 'white'}
+                    color={currentView === 'month' ? 'white' : 'var(--chakra-colors-basic-grey700)'}
                     fontSize="12px"
                     fontWeight="400"
                     onClick={() => onViewChange('month')}
@@ -129,11 +130,12 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
                 <Button
                     display="flex"
                     alignItems="center"
-                    border="1px solid #B7B7B7"
-                    borderRadius="25px"
-                    padding="10px 25px"
-                    bg={currentView === 'week' ? 'linear-gradient(90deg, #003F5A 0%, #165874 100%)' : 'white'}
-                    color={currentView === 'week' ? 'white' : 'black'}
+                    border="1px solid var(--chakra-colors-basic-grey300)"
+                    borderRadius="full"
+                    px="lg" 
+                    py="sm"
+                    bg={currentView === 'week' ? 'var(--chakra-colors-gradient-blue)' : 'white'}
+                    color={currentView === 'week' ? 'white' : 'var(--chakra-colors-basic-grey700)'}
                     fontSize="12px"
                     fontWeight="400"
                     onClick={() => onViewChange('week')}
@@ -143,11 +145,12 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
                 <Button
                     display="flex"
                     alignItems="center"
-                    border="1px solid #B7B7B7"
-                    borderRadius="25px"
-                    padding="10px 25px"
-                    bg={currentView === 'day' ? 'linear-gradient(90deg, #003F5A 0%, #165874 100%)' : 'white'}
-                    color={currentView === 'day' ? 'white' : 'black'}
+                    border="1px solid var(--chakra-colors-basic-grey300)"
+                    borderRadius="full"
+                    px="lg" 
+                    py="sm"
+                    bg={currentView === 'day' ? 'var(--chakra-colors-gradient-blue)' : 'white'}
+                    color={currentView === 'day' ? 'white' : 'var(--chakra-colors-basic-grey700)'}
                     fontSize="12px"
                     fontWeight="400"
                     onClick={() => onViewChange('day')}

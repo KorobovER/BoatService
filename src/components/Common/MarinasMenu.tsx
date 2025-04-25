@@ -108,7 +108,7 @@ const MarinasMenu = () => {
 
     if (isError) {
         return (
-            <Flex align="center" justify="center" w="300px" color="red.500">
+            <Flex align="center" justify="center" w="300px" color="bg.error">
                 Failed to load marina information
             </Flex>
         );
@@ -116,7 +116,7 @@ const MarinasMenu = () => {
 
     if (marinas.length === 0) {
         return (
-            <Flex align="center" justify="center" w="300px" color="gray.500">
+            <Flex align="center" justify="center" w="300px" color="basic.grey600">
                 No marinas available
             </Flex>
         );
@@ -134,7 +134,7 @@ const MarinasMenu = () => {
                         pr='lg'
                         bg='white'
                         rounded='full'
-                        border='1px solid #D2D2D2'
+                        border='1px solid var(--chakra-colors-basic-grey200)'
                         _hover={{ bg: 'gray.50' }}
                         cursor="pointer"
                     >
@@ -146,11 +146,11 @@ const MarinasMenu = () => {
                             alt={selectedMarina?.name || "Marina"}
                         />
                         <Flex align='center' gap='sm'>
-                            <Text fontSize='14px' fontWeight="400" noOfLines={1} textAlign="left">
+                            <Text color='basic.grey900' fontSize='14px' fontWeight="400" noOfLines={1} textAlign="left">
                                 {selectedMarina?.name || "Select marina"}
                             </Text>
                             <Box>
-                                <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <svg width="14" height="8" viewBox="0 0 14 8" fill="var(--chakra-colors-basic-grey900)" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M13.0001 1.63461L7.49048 6.91346C7.3174 7.05769 7.14433 7.11538 7.00009 7.11538C6.82702 7.11538 6.65394 7.05769 6.50971 6.94231L0.971248 1.63461C0.682786 1.375 0.682786 0.913461 0.942402 0.653846C1.20202 0.365384 1.66356 0.365384 1.92317 0.624999L7.00009 5.47115L12.0482 0.624999C12.3078 0.365384 12.7693 0.365384 13.0289 0.653846C13.2886 0.913461 13.2886 1.375 13.0001 1.63461Z" fill="#262626" />
                                 </svg>
                             </Box>
@@ -175,7 +175,7 @@ const MarinasMenu = () => {
                                     alt={marina.name}
                                 />
                                 <Box>
-                                    <Text fontSize='14px' fontWeight="400" noOfLines={1}>
+                                    <Text color='basic.grey900' fontSize='14px' fontWeight="400" noOfLines={1}>
                                         {marina.name}
                                     </Text>
                                 </Box>

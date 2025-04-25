@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Box, Flex, Center, Spinner } from '@chakra-ui/react';
+import { Box, Flex} from '@chakra-ui/react';
 import TableWeek from '../../components/AdminPanel/TableWeek';
 import TableSwitch from '../../components/AdminPanel/TableSwitch';
-import { useEffect, useCallback, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import TableDay from '../../components/AdminPanel/TableDay';
 import TableMonth from '../../components/AdminPanel/TableMonth';
 import PopupReserved from '../../components/AdminPanel/PopupReserved';

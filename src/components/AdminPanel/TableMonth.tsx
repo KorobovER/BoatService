@@ -79,7 +79,9 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                 />
             )}
             <Text 
-                color={isToday(day) ? "#1F1F1F" : "#777777"} 
+                color={isToday(day) ? "basic.grey900" : "basic.grey600"} 
+                fontSize="14px"
+                fontWeight="500"
                 textAlign="center"
                 position="relative"
                 zIndex="2"
@@ -99,8 +101,8 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
     );
 
     const renderBoatCell = (boat: Boat, colspan: number, textColor: string) => {
-        // Use colspan <= 1 to determine if the reservation is short (<= 24 hours)
-        const isShortReservation = colspan <= 1; 
+        // Use colspan < 2 to determine if the reservation is short (< 2 days)
+        const isShortReservation = colspan < 2; 
         // Keep the existing isHalfDay for potential specific half-day styling if needed elsewhere
         const isHalfDay = colspan < 1;
 

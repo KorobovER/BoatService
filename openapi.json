@@ -5153,6 +5153,14 @@
             "format": "uuid",
             "title": "Id"
           },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "display_initials": {
+            "type": "string",
+            "title": "Display Initials"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -5175,6 +5183,8 @@
         "required": [
           "email",
           "id",
+          "display_name",
+          "display_initials",
           "created_at",
           "updated_at",
           "marinas"
@@ -7815,12 +7825,11 @@
         "type": "string",
         "enum": [
           "pending",
-          "confirmed",
           "approved",
           "en-route",
-          "denied",
-          "delivered",
           "completed",
+          "paid",
+          "denied",
           "cancelled",
           "failed"
         ],
@@ -7940,21 +7949,26 @@
             "type": "string",
             "title": "Name"
           },
-          "quantity": {
-            "type": "number",
-            "title": "Quantity"
-          },
           "price": {
             "type": "number",
             "title": "Price"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit"
+          },
+          "quantity": {
+            "type": "number",
+            "title": "Quantity"
           }
         },
         "type": "object",
         "required": [
           "title",
           "name",
-          "quantity",
-          "price"
+          "price",
+          "unit",
+          "quantity"
         ],
         "title": "SubServiceRequest"
       },

@@ -824,6 +824,14 @@ export const $EmployeePublic = {
       isRequired: true,
       format: "uuid",
     },
+    display_name: {
+      type: "string",
+      isRequired: true,
+    },
+    display_initials: {
+      type: "string",
+      isRequired: true,
+    },
     created_at: {
       type: "string",
       isRequired: true,
@@ -3155,12 +3163,11 @@ export const $ServiceRequestStatus = {
   type: "Enum",
   enum: [
     "pending",
-    "confirmed",
     "approved",
     "en-route",
-    "denied",
-    "delivered",
     "completed",
+    "paid",
+    "denied",
     "cancelled",
     "failed",
   ],
@@ -3269,11 +3276,15 @@ export const $SubServiceRequest = {
       type: "string",
       isRequired: true,
     },
-    quantity: {
+    price: {
       type: "number",
       isRequired: true,
     },
-    price: {
+    unit: {
+      type: "string",
+      isRequired: true,
+    },
+    quantity: {
       type: "number",
       isRequired: true,
     },

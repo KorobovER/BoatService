@@ -154,6 +154,8 @@ export type EmployeePublic = {
   is_superuser?: boolean
   full_name?: string | null
   id: string
+  display_name: string
+  display_initials: string
   created_at: string
   updated_at: string
   marinas: Array<MarinaPublicBase>
@@ -606,12 +608,11 @@ export type ServiceOnReservationPublic = {
 
 export type ServiceRequestStatus =
   | "pending"
-  | "confirmed"
   | "approved"
   | "en-route"
-  | "denied"
-  | "delivered"
   | "completed"
+  | "paid"
+  | "denied"
   | "cancelled"
   | "failed"
 
@@ -652,8 +653,9 @@ export type SubRegionData = {
 export type SubServiceRequest = {
   title: string
   name: string
-  quantity: number
   price: number
+  unit: string
+  quantity: number
 }
 
 export type Token = {

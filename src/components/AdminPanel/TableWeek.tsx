@@ -116,7 +116,12 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
 
     const renderHeader = (day: string) => (
         <>
-            <Text color="#777777" textAlign="center">
+            <Text 
+                color={isToday(day) ? "#1F1F1F" : "#777777"} 
+                textAlign="center"
+                position="relative"
+                zIndex="2"
+            >
                 {(() => {
                     try {
                         const [year, month, dayOfMonth] = day.split('-').map(Number);
@@ -135,7 +140,7 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
                     top="50%"
                     left="50%"
                     transform="translate(-50%, -50%)"
-                    bg="#DD660026"
+                    bg="#FAE8D9"
                     borderRadius="full"
                     width="150px"
                     height="44px"

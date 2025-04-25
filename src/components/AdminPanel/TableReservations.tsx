@@ -24,7 +24,7 @@ import PopupReserved from './PopupReserved';
 // Функция для преобразования S3 URL
 const transformS3Url = (url: string): string => {
     if (!url) return '';
-    
+
     // Преобразование URL из формата s3://bola-public-assets/... 
     // в https://s3.amazonaws.com/bola-public-assets/...
     if (url.startsWith('s3://')) {
@@ -34,7 +34,7 @@ const transformS3Url = (url: string): string => {
         const key = parts.slice(1).join('/');
         return `https://s3.amazonaws.com/${bucket}/${key}`;
     }
-    
+
     return url;
 };
 
@@ -90,9 +90,9 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     const [allRows, setAllRows] = useState<Row[]>([]);
     const { isOpen: isFreeCellOpen, onClose: onFreeCellClose } = useDisclosure();
     const { isOpen: isReservedOpen, onClose: onReservedClose } = useDisclosure();
-    const [selectedCell, setSelectedCell] = useState<{ 
-        rowId: string; 
-        day: string; 
+    const [selectedCell, setSelectedCell] = useState<{
+        rowId: string;
+        day: string;
         boat?: Boat;
         timeOfDay?: 'AM' | 'PM';
     } | null>(null);
@@ -103,7 +103,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         queryFn: async () => {
             try {
                 let result = { mooring_balls: [] as Array<any> };
-                
+
                 if (selectedMarina?.marina_id) {
                     // Если выбрана марина, запрашиваем её данные напрямую
                     const marinaData = await MarinasService.readMarina({ id: selectedMarina.marina_id });
@@ -126,7 +126,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     // Запрос резерваций (общий для обоих компонентов)
     const { data: reservations, isLoading: isLoadingReservations, isError } = useQuery({
         queryKey: ['reservations', currentDate, selectedMarina?.marina_id],
-        queryFn: () => ReservationsService.readReservations({ 
+        queryFn: () => ReservationsService.readReservations({
             limit: 500,
             marinaId: selectedMarina?.marina_id || undefined,
         }),
@@ -147,7 +147,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                 if (apiMooringBalls[0].number) numberField = 'number';
                 else if (apiMooringBalls[0].id) numberField = 'id';
             }
-            
+
             const rows = apiMooringBalls
                 .filter(ball => ball && ball[numberField])
                 .map(ball => ({
@@ -156,7 +156,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                     marina: ball.marina
                 }))
                 .sort((a, b) => parseInt(a.id) - parseInt(b.id));
-            
+
             setAllRows(rows);
         }
     }, [mooringBalls]);
@@ -169,7 +169,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                 // Create date ranges using UTC to avoid timezone issues
                 const [startYear, startMonth, startDay] = days[0].split('-').map(Number);
                 const periodStartDate = new Date(Date.UTC(startYear, startMonth - 1, startDay, 0, 0, 0));
-                
+
                 const [endYear, endMonth, endDay] = days[days.length - 1].split('-').map(Number);
                 const periodEndDate = new Date(Date.UTC(endYear, endMonth - 1, endDay, 23, 59, 59));
 
@@ -179,11 +179,11 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                             // Convert reservation dates to UTC for consistent comparison
                             const resStartStr = reservation.start_date;
                             const resEndStr = reservation.end_date;
-                            
+
                             // Parse the date strings directly to UTC
                             const resStart = new Date(resStartStr);
                             const resEnd = new Date(resEndStr);
-                            
+
                             // Проверяем, если хотя бы часть резервации попадает в видимый период
                             // Резервация начинается до конца периода И заканчивается после начала периода
                             return resStart <= periodEndDate && resEnd >= periodStartDate;
@@ -196,12 +196,12 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                         try {
                             const startDate = new Date(reservation.start_date);
                             const endDate = new Date(reservation.end_date);
-                            
+
                             // Additional check for debugging
                             const dateOptions = { hour: 'numeric', minute: 'numeric', hour12: false };
                             const rawStartTime = startDate.toLocaleTimeString('en-US', dateOptions as any);
                             const rawEndTime = endDate.toLocaleTimeString('en-US', dateOptions as any);
-                            
+
                             // Format dates as strings in YYYY-MM-DD format using UTC
                             const formatUTCDate = (date: Date) => {
                                 return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
@@ -252,15 +252,15 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         if (boat.admin_status === 'require_action') {
             return { bg: "#A85555", textColor: "white" }; // red - требует действия
         }
-        
+
         if (boat.admin_status === 'future_action') {
             return { bg: "#FEA02F", textColor: "white" }; // yellow - будущее действие
         }
-        
+
         if (boat.admin_status === 'completed') {
             return { bg: "#E5F2F2", textColor: "black" }; // light green - завершено
         }
-        
+
         // По умолчанию - нормальное состояние
         return { bg: "#007A7B", textColor: "white" }; // green (default) - нормальное состояние
     };
@@ -294,33 +294,40 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                 '& table': {
                     tableLayout: 'fixed',
                     width: '100%',
-                    borderSpacing: '0 8px',
-                    borderCollapse: 'separate'
+                    borderSpacing: '0',
+                    borderCollapse: 'collapse',
+                    border: '1px solid #F6F6F6'
                 }
             }}>
                 <Table variant="unstyled" width="100%">
                     <Thead>
                         <Tr>
-                            <Th 
-                                w="105px" 
-                                p={1} 
-                                height="60px" 
-                                textAlign="center" 
-                                fontWeight="normal" 
-                                position="sticky" 
-                                left="0" 
-                                bg="white" 
+                            <Th
+                                w="105px"
+                                p={1}
+                                height="52px"
+                                textAlign="center"
+                                fontWeight="normal"
+                                position="sticky"
+                                left="0"
+                                bg="white"
                                 zIndex={2}
+                                borderRight="1px solid #F6F6F6"
+                                borderBottom="1px solid #F6F6F6"
                             />
-                            {days.map((day) => (
-                                <Th 
+                            {days.map((day, index) => (
+                                <Th
                                     key={`date-${day}`}
                                     p={1}
-                                    height="60px"
+                                    height="52px"
                                     textAlign="center"
                                     fontWeight="normal"
                                     colSpan={2} // Каждый день занимает 2 ячейки (AM и PM)
                                     position="relative" // Добавляем относительное позиционирование
+                                    borderRight="1px solid #F6F6F6"
+                                    borderBottom="1px solid #F6F6F6"
+                                    borderTop="1px solid #F6F6F6"
+                                    borderLeft={index === 0 ? "1px solid #F6F6F6" : "none"}
                                 >
                                     {renderHeader(day)}
                                 </Th>
@@ -332,28 +339,28 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                             // Первый проход - отмечаем занятые дни и половины дней
                             // Изменяем массив с boolean на массив с 'AM' | 'PM' | 'FULL' | null
                             const occupiedHalfDays = Array(days.length * 2).fill(null);
-                            
+
                             days.forEach((day, dayIndex) => {
                                 const amIndex = dayIndex * 2;
                                 const pmIndex = dayIndex * 2 + 1;
-                                
+
                                 if (occupiedHalfDays[amIndex] !== null && occupiedHalfDays[pmIndex] !== null) return;
-                                
+
                                 const boatMatch = boats.find(b => {
                                     try {
                                         // Parse the date components and create UTC dates
                                         const [curYear, curMonth, curDay] = day.split('-').map(Number);
                                         const currentDay = new Date(Date.UTC(curYear, curMonth - 1, curDay));
-                                        
+
                                         const [startYear, startMonth, startDay] = b.startDay.split('-').map(Number);
                                         const startDate = new Date(Date.UTC(startYear, startMonth - 1, startDay));
-                                        
+
                                         const [endYear, endMonth, endDay] = b.endDay.split('-').map(Number);
                                         const endDate = new Date(Date.UTC(endYear, endMonth - 1, endDay));
-                                        
+
                                         const isStartDay = b.startDay === day;
                                         const isEndDay = b.endDay === day;
-                                        
+
                                         // Если это день начала и лодка начинается после полудня, 
                                         // то первая половина дня свободна
                                         if (isStartDay && b.startsInSecondHalf) {
@@ -362,7 +369,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                             }
                                             return false;
                                         }
-                                        
+
                                         // Если это день окончания и лодка заканчивается до полудня, 
                                         // то вторая половина дня свободна
                                         if (isEndDay && b.endsInFirstHalf) {
@@ -371,17 +378,17 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                             }
                                             return false;
                                         }
-                                        
+
                                         return b.id === row.id && currentDay >= startDate && currentDay <= endDate;
                                     } catch (error) {
                                         return false;
                                     }
                                 });
-                                
+
                                 if (boatMatch) {
                                     const isStartDay = boatMatch.startDay === day;
                                     const isEndDay = boatMatch.endDay === day;
-                                    
+
                                     // Отмечаем занятые половины дня
                                     if (isStartDay && boatMatch.startsInSecondHalf) {
                                         // Если лодка начинается во второй половине дня, отмечаем только PM
@@ -396,10 +403,10 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                     }
                                 }
                             });
-                            
+
                             // Готовим массив ячеек для строки
                             const cells: JSX.Element[] = [];
-                            
+
                             // Проходим по половинам дней
                             let halfDayIndex = 0;
                             while (halfDayIndex < occupiedHalfDays.length) {
@@ -407,13 +414,13 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 const day = days[dayIndex];
                                 const isAM = halfDayIndex % 2 === 0;
                                 const timeOfDay = isAM ? 'AM' : 'PM';
-                                
+
                                 // Если половина дня не занята, добавляем пустую ячейку
                                 if (occupiedHalfDays[halfDayIndex] === null) {
                                     cells.push(
-                                        <Td 
+                                        <Td
                                             key={`empty-${row.id}-${day}-${timeOfDay}`}
-                                            height="58px"
+                                            height="52px"
                                             padding={0}
                                             position="relative"
                                             _hover={{
@@ -424,131 +431,135 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                                 e.stopPropagation();
                                                 handleCellClick(row.id, day, undefined, timeOfDay);
                                             }}
-                                        />
+                                            borderRight={!isAM ? "1px solid #F6F6F6" : "none"}
+                                            borderBottom="1px solid #F6F6F6"
+                                        >
+                                            <Box height="100%" width="100%" display="flex" alignItems="center" justifyContent="center" />
+                                        </Td>
                                     );
                                     halfDayIndex++;
                                     continue;
                                 }
-                                
+
                                 // Ищем лодку для этой половины дня
                                 const boatMatch = boats.find(b => {
                                     try {
                                         // Parse the date components and create UTC dates
                                         const [curYear, curMonth, curDay] = day.split('-').map(Number);
                                         const currentDay = new Date(Date.UTC(curYear, curMonth - 1, curDay));
-                                        
+
                                         const [startYear, startMonth, startDay] = b.startDay.split('-').map(Number);
                                         const startDate = new Date(Date.UTC(startYear, startMonth - 1, startDay));
-                                        
+
                                         const [endYear, endMonth, endDay] = b.endDay.split('-').map(Number);
                                         const endDate = new Date(Date.UTC(endYear, endMonth - 1, endDay));
-                                        
+
                                         const isStartDay = b.startDay === day;
                                         const isEndDay = b.endDay === day;
-                                        
+
                                         // Если это день начала и лодка начинается после полудня, 
                                         // то первая половина дня свободна
                                         if (isStartDay && b.startsInSecondHalf && isAM) {
                                             // Если это день начала, лодка начинается после полудня, и мы проверяем AM
                                             return false;
                                         }
-                                        
+
                                         if (isEndDay && b.endsInFirstHalf && !isAM) {
                                             // Если это день окончания, лодка заканчивается до полудня, и мы проверяем PM
                                             return false;
                                         }
-                                        
+
                                         return b.id === row.id && currentDay >= startDate && currentDay <= endDate;
                                     } catch (error) {
                                         return false;
                                     }
                                 });
-                                
+
                                 if (!boatMatch) {
                                     halfDayIndex++;
                                     continue;
                                 }
-                                
+
                                 // Определяем, сколько половин дней занимает эта резервация
                                 let halfDayColspan = 1;
                                 let currentHalfDayIndex = halfDayIndex;
-                                
+
                                 while (currentHalfDayIndex + 1 < occupiedHalfDays.length) {
                                     const nextHalfDayIndex = currentHalfDayIndex + 1;
                                     const nextDayIndex = Math.floor(nextHalfDayIndex / 2);
                                     const nextDay = days[nextDayIndex];
                                     const nextIsAM = nextHalfDayIndex % 2 === 0;
-                                    
+
                                     // Проверяем, принадлежит ли следующая половина дня той же резервации
                                     const belongsToSameReservation = boats.some(b => {
                                         if (b.id !== row.id) return false;
-                                        
+
                                         // Parse the date components and create UTC dates
                                         const [nextDayYear, nextDayMonth, nextDayOfMonth] = nextDay.split('-').map(Number);
                                         const nextDayDate = new Date(Date.UTC(nextDayYear, nextDayMonth - 1, nextDayOfMonth));
-                                        
+
                                         const [startYear, startMonth, startDay] = b.startDay.split('-').map(Number);
                                         const startDate = new Date(Date.UTC(startYear, startMonth - 1, startDay));
-                                        
+
                                         const [endYear, endMonth, endDay] = b.endDay.split('-').map(Number);
                                         const endDate = new Date(Date.UTC(endYear, endMonth - 1, endDay));
-                                        
+
                                         const isStartDay = b.startDay === nextDay;
                                         const isEndDay = b.endDay === nextDay;
-                                        
+
                                         if (isStartDay && b.startsInSecondHalf && nextIsAM) {
                                             // Если это день начала, лодка начинается после полудня, и мы проверяем AM
                                             return false;
                                         }
-                                        
+
                                         if (isEndDay && b.endsInFirstHalf && !nextIsAM) {
                                             // Если это день окончания, лодка заканчивается до полудня, и мы проверяем PM
                                             return false;
                                         }
-                                        
+
                                         return nextDayDate >= startDate && nextDayDate <= endDate;
                                     });
-                                    
+
                                     if (!belongsToSameReservation) break;
-                                    
+
                                     halfDayColspan++;
                                     occupiedHalfDays[nextHalfDayIndex] = null; // Помечаем как обработанную
                                     currentHalfDayIndex++;
                                 }
-                                
+
                                 // Определяем границы этой резервации для стилей
                                 const endHalfDayIndex = halfDayIndex + halfDayColspan - 1;
-                                
+
                                 const isStartDay = boatMatch.startDay === day;
                                 const isEndDay = boatMatch.endDay === days[Math.floor(endHalfDayIndex / 2)];
-                                
+
                                 // Проверка границ видимого периода
                                 const [firstDay, firstMonth, firstYear] = days[0].split('-').map(Number);
                                 const firstVisibleDay = new Date(Date.UTC(firstYear, firstMonth - 1, firstDay));
-                                
-                                const [lastDay, lastMonth, lastYear] = days[days.length-1].split('-').map(Number);
+
+                                const [lastDay, lastMonth, lastYear] = days[days.length - 1].split('-').map(Number);
                                 const lastVisibleDay = new Date(Date.UTC(lastYear, lastMonth - 1, lastDay, 23, 59, 59));
-                                
+
                                 const [boatStartDay, boatStartMonth, boatStartYear] = boatMatch.startDay.split('-').map(Number);
                                 const boatStartDate = new Date(Date.UTC(boatStartYear, boatStartMonth - 1, boatStartDay));
-                                
+
                                 const [boatEndDay, boatEndMonth, boatEndYear] = boatMatch.endDay.split('-').map(Number);
                                 const boatEndDate = new Date(Date.UTC(boatEndYear, boatEndMonth - 1, boatEndDay, 23, 59, 59));
-                                
+
                                 const startsBeforeVisiblePeriod = boatStartDate < firstVisibleDay;
                                 const endsAfterVisiblePeriod = boatEndDate > lastVisibleDay;
-                                
+
                                 const isSelected = selectedCell?.rowId === row.id && selectedCell?.day === day;
-                                
+
                                 // Определяем, находится ли ячейка на границе недели (первый или последний день)
                                 const isFirstDayOfWeek = dayIndex === 0;
                                 const isLastDayOfWeek = dayIndex === days.length - 1;
-                                
+
                                 // Определяем, нужно ли скруглять каждый из краев
                                 let needsLeftRadius = true;  // По умолчанию скругляем
                                 let needsRightRadius = true; // По умолчанию скругляем
-                                
-                                
+
+
                                 // 1. Обработка левого края
                                 if (isFirstDayOfWeek && startsBeforeVisiblePeriod) {
                                     // Плоский левый край только для первого дня недели, если резервация переходит с прошлой недели
@@ -560,7 +571,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                     // Для внутренних ячеек резервации (но не первый день недели)
                                     needsLeftRadius = false;
                                 }
-                                
+
                                 // 2. Обработка правого края
                                 if (isLastDayOfWeek && endsAfterVisiblePeriod) {
                                     // Плоский правый край только для последнего дня недели, если резервация переходит на следующую неделю
@@ -572,21 +583,21 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                     // Для внутренних ячеек резервации (но не последний день недели)
                                     needsRightRadius = false;
                                 }
-                                
+
                                 // 3. Обработка случая, когда резервация попадает на первый или последний день,
                                 // но находится полностью внутри видимого периода (не переходит через границу недели)
                                 if (isFirstDayOfWeek && isStartDay && !startsBeforeVisiblePeriod) {
                                     needsLeftRadius = true; // Скругляем левый край, так как это настоящее начало резервации
                                 }
-                                
+
                                 // Явно обеспечиваем скругление для правого края, если:
                                 // 1. Это последний день видимого периода И конец резервации
                                 // 2. ИЛИ это конец резервации внутри видимого периода
-                                if ((isLastDayOfWeek && isEndDay && !endsAfterVisiblePeriod) || 
+                                if ((isLastDayOfWeek && isEndDay && !endsAfterVisiblePeriod) ||
                                     (isEndDay && !endsAfterVisiblePeriod)) {
                                     needsRightRadius = true;
                                 }
-                                
+
                                 // Определяем итоговый borderRadius
                                 let borderRadius = "0";
                                 if (needsLeftRadius && needsRightRadius) {
@@ -596,30 +607,28 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 } else if (needsRightRadius) {
                                     borderRadius = "0 30px 30px 0";
                                 }
-                                
+
                                 // Специальный случай для однодневных резерваций - всегда скругленные,
                                 // кроме случаев, когда они на границе недели и переходят через неё
-                                const isOnWeekBoundary = (isFirstDayOfWeek && startsBeforeVisiblePeriod) || 
-                                                         (isLastDayOfWeek && endsAfterVisiblePeriod);
+                                const isOnWeekBoundary = (isFirstDayOfWeek && startsBeforeVisiblePeriod) ||
+                                    (isLastDayOfWeek && endsAfterVisiblePeriod);
                                 if (halfDayColspan === 1 && isStartDay && isEndDay && !isOnWeekBoundary) {
                                     borderRadius = "30px";
                                 }
-                                
+
                                 // Добавляем ячейку для резервации
                                 cells.push(
                                     <Td
+                                        height="52px"
                                         key={`boat-${row.id}-${day}-${boatMatch.id}-${timeOfDay}`}
-                                        bg={getCellColor(boatMatch).bg}
                                         color={getCellColor(boatMatch).textColor}
                                         colSpan={halfDayColspan}
-                                        height="58px"
-                                        p={0}
+                                        p="0px 2px"
                                         textAlign="center"
                                         onClick={() => handleCellClick(row.id, day, boatMatch, timeOfDay)}
                                         cursor="pointer"
                                         className={isSelected ? 'selected-cell' : ''}
                                         sx={{
-                                            borderRadius,
                                             overflow: "hidden",
                                             '&.selected-cell': {
                                                 zIndex: 1000,
@@ -627,50 +636,55 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                         }}
                                     >
                                         <Flex
-                                            height="100%"
+                                            p="0px var(--md, 12px)"
+                                            height="44px"
                                             width="100%"
                                             alignItems="center"
                                             justifyContent="center"
+                                            bg={getCellColor(boatMatch).bg}
+                                            borderRadius={borderRadius}
                                         >
                                             {/* Всегда показываем информацию о лодке */}
                                             {renderBoatCell(boatMatch, halfDayColspan / 2, getCellColor(boatMatch).textColor)}
                                         </Flex>
                                     </Td>
                                 );
-                                
+
                                 // Переходим к следующей необработанной половине дня
                                 halfDayIndex += halfDayColspan;
                             }
 
                             return (
-                                <Tr key={`row-${row.id}`} height="60px">
-                                    <Td 
-                                        w="105px" 
-                                        height="60px" 
-                                        p={0} 
-                                        position="sticky" 
-                                        left="0" 
-                                        bg="white" 
+                                <Tr key={`row-${row.id}`} height="52px">
+                                    <Td
+                                        w="105px"
+                                        height="52px"
+                                        p={0}
+                                        position="sticky"
+                                        left="0"
+                                        bg="white"
                                         zIndex={1}
+                                        borderRight="1px solid #F6F6F6"
+                                        borderBottom="1px solid #F6F6F6"
                                     >
-                                        <Flex 
-                                            height="100%" 
-                                            alignItems="center" 
-                                            justifyContent="flex-start" 
+                                        <Flex
+                                            height="44px"
+                                            alignItems="center"
+                                            justifyContent="flex-start"
                                             pl="8px"
                                         >
-                                            <Image 
-                                                w="24px" 
-                                                h="24px" 
-                                                src={row.marina?.logo_url ? transformS3Url(row.marina.logo_url) : BollaCell} 
-                                                alt="Bolla" 
+                                            <Image
+                                                w="24px"
+                                                h="24px"
+                                                src={row.marina?.logo_url ? transformS3Url(row.marina.logo_url) : BollaCell}
+                                                alt="Bolla"
                                                 mr="8px"
                                             />
-                                            <Text 
-                                                fontSize="16px" 
-                                                lineHeight="24px" 
-                                                textOverflow="ellipsis" 
-                                                whiteSpace="nowrap" 
+                                            <Text
+                                                fontSize="16px"
+                                                lineHeight="24px"
+                                                textOverflow="ellipsis"
+                                                whiteSpace="nowrap"
                                                 overflow="hidden"
                                                 flex="1"
                                             >

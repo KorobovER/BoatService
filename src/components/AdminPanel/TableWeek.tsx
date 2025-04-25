@@ -12,15 +12,17 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
     // Функция для получения текущего понедельника как запасного варианта
     const getCurrentMonday = (): string => {
         const today = new Date();
-        const day = today.getDay();
-        const diff = today.getDate() - day + (day === 0 ? -6 : 1); // Корректировка для недели, начинающейся с понедельника
+        // Используем UTC для избежания проблем с часовыми поясами
+        const utcToday = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+        const day = utcToday.getUTCDay();
+        const diff = utcToday.getUTCDate() - day + (day === 0 ? -6 : 1); // Корректировка для недели, начинающейся с понедельника
         
-        const monday = new Date(today);
-        monday.setDate(diff);
+        const monday = new Date(utcToday);
+        monday.setUTCDate(diff);
         
-        const year = monday.getFullYear();
-        const month = String(monday.getMonth() + 1).padStart(2, '0');
-        const date = String(monday.getDate()).padStart(2, '0');
+        const year = monday.getUTCFullYear();
+        const month = String(monday.getUTCMonth() + 1).padStart(2, '0');
+        const date = String(monday.getUTCDate()).padStart(2, '0');
         
         return `${year}-${month}-${date}`;
     };
@@ -48,8 +50,8 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
                 return [];
             }
             
-            // Создаем дату в локальном часовом поясе
-            const baseDate = new Date(year, month - 1, day);
+            // Создаем дату в UTC
+            const baseDate = new Date(Date.UTC(year, month - 1, day));
             
             // Проверяем, что baseDate - валидная дата
             if (isNaN(baseDate.getTime())) {
@@ -61,12 +63,12 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
             return Array.from({ length: 7 }, (_, i) => {
                 // Создаем новую дату для каждого дня недели
                 const currentDate = new Date(baseDate);
-                currentDate.setDate(baseDate.getDate() + i);
+                currentDate.setUTCDate(baseDate.getUTCDate() + i);
                 
-                // Форматируем дату вручную для избежания проблем с toISOString()
-                const currentYear = currentDate.getFullYear();
-                const currentMonth = String(currentDate.getMonth() + 1).padStart(2, '0');
-                const currentDay = String(currentDate.getDate()).padStart(2, '0');
+                // Форматируем дату в UTC
+                const currentYear = currentDate.getUTCFullYear();
+                const currentMonth = String(currentDate.getUTCMonth() + 1).padStart(2, '0');
+                const currentDay = String(currentDate.getUTCDate()).padStart(2, '0');
                 
                 return `${currentYear}-${currentMonth}-${currentDay}`;
             });
@@ -90,12 +92,21 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
 
     const isToday = (day: string) => {
         try {
+            // Получаем текущую системную дату
             const today = new Date();
-            const date = new Date(day);
+            const todayYear = today.getFullYear();
+            const todayMonth = today.getMonth() + 1; // +1 потому что в JS месяцы от 0 до 11
+            const todayDay = today.getDate();
+            
+            // Парсим дату из строки
+            const [year, month, dayOfMonth] = day.split('-').map(Number);
+            if (isNaN(year) || isNaN(month) || isNaN(dayOfMonth)) return false;
+            
+            // Сравниваем компоненты даты с системными
             return (
-                date.getDate() === today.getDate() &&
-                date.getMonth() === today.getMonth() &&
-                date.getFullYear() === today.getFullYear()
+                dayOfMonth === todayDay &&
+                month === todayMonth &&
+                year === todayYear
             );
         } catch (error) {
             console.error('Error in isToday:', error);
@@ -108,10 +119,9 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
             <Text color="#777777" textAlign="center">
                 {(() => {
                     try {
-                        const date = new Date(day);
-                        const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'short' });
-                        const month = date.getMonth() + 1;
-                        const dayOfMonth = date.getDate();
+                        const [year, month, dayOfMonth] = day.split('-').map(Number);
+                        const date = new Date(Date.UTC(year, month - 1, dayOfMonth));
+                        const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
                         return `${dayOfWeek} ${month}/${dayOfMonth}`;
                     } catch (error) {
                         console.error('Error in renderHeader:', error);
@@ -242,11 +252,11 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
                                 <Flex p='8px 0px' gap='16px'>
                                     <Flex gap='4px' whiteSpace="nowrap">
                                         <Text fontSize="14px" fontWeight="400" color='white' bg='black' p='0 8px' borderRadius='56px'>In</Text>
-                                        <Text fontSize="14px" fontWeight="400" color='black' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{`${new Date(boat.startDay).getDate()} ${new Date(boat.startDay).toLocaleString('en-US', { month: 'long' })} • ${boat.startTime || '--:--'}`} <Text as="span" fontSize="10px" fontWeight="bold">{parseInt(boat.startTime?.split(':')[0] || '0') < 12 ? 'AM' : 'PM'}</Text></Text>
+                                        <Text fontSize="14px" fontWeight="400" color='black' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{`${new Date(boat.startDay).getUTCDate()} ${new Date(boat.startDay).toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })} • ${boat.startTime || '--:--'}`} <Text as="span" fontSize="10px" fontWeight="bold">{parseInt(boat.startTime?.split(':')[0] || '0') < 12 ? 'AM' : 'PM'}</Text></Text>
                                     </Flex>
                                     <Flex gap='4px' whiteSpace="nowrap">
                                         <Text fontSize="14px" fontWeight="400" color='white' bg='black' p='0 8px' borderRadius='56px'>Out</Text>
-                                        <Text fontSize="14px" fontWeight="400" color='black' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{`${new Date(boat.endDay).getDate()} ${new Date(boat.endDay).toLocaleString('en-US', { month: 'long' })} • ${boat.endTime || '--:--'}`} <Text as="span" fontSize="10px" fontWeight="bold">{parseInt(boat.endTime?.split(':')[0] || '0') < 12 ? 'AM' : 'PM'}</Text></Text>
+                                        <Text fontSize="14px" fontWeight="400" color='black' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{`${new Date(boat.endDay).getUTCDate()} ${new Date(boat.endDay).toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })} • ${boat.endTime || '--:--'}`} <Text as="span" fontSize="10px" fontWeight="bold">{parseInt(boat.endTime?.split(':')[0] || '0') < 12 ? 'AM' : 'PM'}</Text></Text>
                                     </Flex>
                                 </Flex>
                                 <Flex gap='24px' alignItems="flex-end">

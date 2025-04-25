@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Box, Flex } from '@chakra-ui/react';
+import { Box, Flex, Center, Spinner } from '@chakra-ui/react';
 import TableWeek from '../../components/AdminPanel/TableWeek';
 import TableSwitch from '../../components/AdminPanel/TableSwitch';
 import { useEffect, useCallback, useState, useRef } from 'react';
@@ -16,19 +16,22 @@ export const Route = createFileRoute("/_layout/")({
 
 function Dashboard() {
     const [currentWeekStart, setCurrentWeekStart] = useState<string>('');
-    const [currentMonthDate, setCurrentMonthDate] = useState<string>('');
+    // Use separate month and year for simplicity
+    const [currentMonth, setCurrentMonth] = useState<number>(0);
+    const [currentYear, setCurrentYear] = useState<number>(0);
     const [currentView, setCurrentView] = useState<TableView>('week');
     const [selectedReservation, setSelectedReservation] = useState<{rowId: string; day: string; boat?: Boat} | null>(null);
     const tableContainerRef = useRef<HTMLDivElement>(null);
 
-    const getCurrentWeekMonday = useCallback((date = new Date()) => {
-        const day = date.getDay();
-        const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-        const monday = new Date(date);
-        monday.setDate(diff);
-        // Return date in local timezone without any timezone conversion
-        return `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
-    }, []);
+    const getCurrentWeekMonday = (date: Date = new Date()) => {
+        // Create a copy of the date to avoid modifying the original
+        const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+        const day = d.getUTCDay();
+        // If it's Sunday (0), go back 6 days, otherwise go back (day-1) days
+        const diff = day === 0 ? 6 : day - 1;
+        d.setUTCDate(d.getUTCDate() - diff);
+        return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+    };
 
     // Инициализация начальных дат
     useEffect(() => {
@@ -37,67 +40,50 @@ function Dashboard() {
         // Устанавливаем текущую неделю
         setCurrentWeekStart(getCurrentWeekMonday(today));
         
-        // Устанавливаем текущий месяц - явно указываем год и месяц
-        const year = today.getFullYear();
-        const month = today.getMonth() + 1; // +1 потому что месяцы в JS начинаются с 0
-        
-        // Формируем дату в формате YYYY-MM-DD
-        const firstDayOfMonth = `${year}-${String(month).padStart(2, '0')}-01`;
-        setCurrentMonthDate(firstDayOfMonth);
-    }, [getCurrentWeekMonday]);
+        // Устанавливаем текущий месяц и год напрямую (1-12 для месяца)
+        setCurrentMonth(today.getUTCMonth() + 1);
+        setCurrentYear(today.getUTCFullYear());
+    }, []);
+
+    // Simple function to get date string from month/year 
+    const getMonthDateString = () => {
+        return `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
+    };
 
     // Обработчики для недельного представления
     const handlePrevWeek = () => {
-        const date = new Date(currentWeekStart);
-        date.setDate(date.getDate() - 7);
-        const newDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        const [year, month, day] = currentWeekStart.split('-').map(Number);
+        const date = new Date(Date.UTC(year, month - 1, day));
+        date.setUTCDate(date.getUTCDate() - 7);
+        const newDate = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
         setCurrentWeekStart(newDate);
     };
 
     const handleNextWeek = () => {
-        const date = new Date(currentWeekStart);
-        date.setDate(date.getDate() + 7);
-        const newDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        const [year, month, day] = currentWeekStart.split('-').map(Number);
+        const date = new Date(Date.UTC(year, month - 1, day));
+        date.setUTCDate(date.getUTCDate() + 7);
+        const newDate = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
         setCurrentWeekStart(newDate);
     };
 
-    // Обработчики для месячного представления
+    // Simplified month navigation - just increment/decrement numbers
     const handlePrevMonth = () => {
-        // Разбиваем строку даты на компоненты
-        const [year, month] = currentMonthDate.split('-').map(Number);
-        
-        // Вычисляем предыдущий месяц и год
-        let prevMonth = month - 1;
-        let prevYear = year;
-        
-        // Обрабатываем переход между годами
-        if (prevMonth < 1) {
-            prevMonth = 12;
-            prevYear -= 1;
+        if (currentMonth === 1) {
+            setCurrentMonth(12);
+            setCurrentYear(currentYear - 1);
+        } else {
+            setCurrentMonth(currentMonth - 1);
         }
-        
-        // Формируем новую дату
-        const newDate = `${prevYear}-${String(prevMonth).padStart(2, '0')}-01`;
-        setCurrentMonthDate(newDate);
     };
 
     const handleNextMonth = () => {
-        // Разбиваем строку даты на компоненты
-        const [year, month] = currentMonthDate.split('-').map(Number);
-        
-        // Вычисляем следующий месяц и год
-        let nextMonth = month + 1;
-        let nextYear = year;
-        
-        // Обрабатываем переход между годами
-        if (nextMonth > 12) {
-            nextMonth = 1;
-            nextYear += 1;
+        if (currentMonth === 12) {
+            setCurrentMonth(1);
+            setCurrentYear(currentYear + 1);
+        } else {
+            setCurrentMonth(currentMonth + 1);
         }
-        
-        // Формируем новую дату
-        const newDate = `${nextYear}-${String(nextMonth).padStart(2, '0')}-01`;
-        setCurrentMonthDate(newDate);
     };
 
     // Обработчик кнопки "Today"
@@ -105,10 +91,8 @@ function Dashboard() {
         const today = new Date();
         
         if (currentView === 'month') {
-            const year = today.getFullYear();
-            const month = today.getMonth() + 1; // +1 потому что месяцы в JS начинаются с 0
-            const newDate = `${year}-${String(month).padStart(2, '0')}-01`;
-            setCurrentMonthDate(newDate);
+            setCurrentMonth(today.getUTCMonth() + 1);
+            setCurrentYear(today.getUTCFullYear());
         } else {
             setCurrentWeekStart(getCurrentWeekMonday(today));
         }
@@ -116,17 +100,16 @@ function Dashboard() {
 
     // Форматирование отображаемого диапазона дат
     const formatDateRange = () => {
-        if (currentView === 'month' && currentMonthDate) {
-            // Разбиваем строку даты на компоненты для форматирования
-            const [year, month] = currentMonthDate.split('-').map(Number);
-            // Создаем объект Date для форматирования названия месяца
-            const date = new Date(year, month - 1); // -1 потому что месяцы в JS начинаются с 0
-            return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        if (currentView === 'month' && currentMonth > 0) {
+            // Create date for formatting month name
+            const date = new Date(Date.UTC(currentYear, currentMonth - 1, 1));
+            return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
         } else if (currentView === 'week' && currentWeekStart) {
-            const start = new Date(currentWeekStart);
-            const end = new Date(currentWeekStart);
-            end.setDate(end.getDate() + 6);
-            return `${start.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
+            const [year, month, day] = currentWeekStart.split('-').map(Number);
+            const start = new Date(Date.UTC(year, month - 1, day));
+            const end = new Date(Date.UTC(year, month - 1, day));
+            end.setUTCDate(end.getUTCDate() + 6);
+            return `${start.toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' })} - ${end.toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' })}`;
         }
         return '';
     };
@@ -219,10 +202,10 @@ function Dashboard() {
                                 onReservationClick={handleReservationClick}
                             />
                         )}
-                        {currentView === 'month' && (
+                        {currentView === 'month' && currentMonth > 0 && (
                             <TableMonth 
-                                key={currentMonthDate} 
-                                currentMonthDate={currentMonthDate}
+                                key={`month-${currentYear}-${currentMonth}`} 
+                                currentMonthDate={getMonthDateString()}
                                 onReservationClick={handleReservationClick}
                             />
                         )}

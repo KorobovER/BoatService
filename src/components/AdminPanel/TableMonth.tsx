@@ -9,42 +9,53 @@ interface TableMonthProps {
 }
 
 const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservationClick }) => {
-    const getMonthDates = (dateString: string) => {
+    // Simple function to generate month dates
+    const getMonthDates = () => {
         try {
             // Parse the year and month from the date string
-            const [year, month] = dateString.split('-').map(Number);
+            const parts = currentMonthDate.split('-');
+            if (parts.length < 2) return [];
             
+            const year = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10);
             
-            // Get last day of the month by getting day 0 of the next month
-            const lastDay = new Date(year, month, 0);
+            if (isNaN(year) || isNaN(month)) return [];
             
-            const datesArray = [];
-            const totalDays = lastDay.getDate();
+            // Get last day of month using UTC (day 0 of next month)
+            const lastDayDate = new Date(Date.UTC(year, month, 0));
+            const lastDay = lastDayDate.getUTCDate();
             
-            // Generate all dates from 1 to the last day of the month
-            for (let day = 1; day <= totalDays; day++) {
-                // Format date consistently: YYYY-MM-DD
-                const formattedDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                datesArray.push(formattedDate);
+            // Generate dates array - ALWAYS starting from 1st day
+            const dates = [];
+            for (let day = 1; day <= lastDay; day++) {
+                const formatted = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                dates.push(formatted);
             }
             
-            return datesArray;
+            return dates;
         } catch (error) {
-            console.error('Error in getMonthDates:', error);
+            console.error('Error generating month dates:', error);
             return [];
         }
     };
 
-    const days = getMonthDates(currentMonthDate);
-
     const isToday = (day: string) => {
         try {
+            // Получаем текущую системную дату
             const today = new Date();
-            const date = new Date(day);
+            const todayYear = today.getFullYear();
+            const todayMonth = today.getMonth() + 1; // +1 потому что в JS месяцы от 0 до 11
+            const todayDay = today.getDate();
+            
+            // Парсим дату из строки
+            const [year, month, dayOfMonth] = day.split('-').map(Number);
+            if (isNaN(year) || isNaN(month) || isNaN(dayOfMonth)) return false;
+            
+            // Сравниваем компоненты даты с системными
             return (
-                date.getDate() === today.getDate() &&
-                date.getMonth() === today.getMonth() &&
-                date.getFullYear() === today.getFullYear()
+                dayOfMonth === todayDay &&
+                month === todayMonth &&
+                year === todayYear
             );
         } catch (error) {
             console.error('Error in isToday:', error);
@@ -70,9 +81,11 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
             <Text color="#777777" textAlign="center">
                 {(() => {
                     try {
-                        return new Date(day).getDate();
+                        const [year, month, dayOfMonth] = day.split('-').map(Number);
+                        const date = new Date(Date.UTC(year, month - 1, dayOfMonth));
+                        return date.getUTCDate();
                     } catch (error) {
-                        console.error('Error in renderHeader:', error);
+                        console.error('Error parsing date:', error);
                         return '?';
                     }
                 })()}
@@ -199,13 +212,27 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                                     <Flex gap='4px'>
                                         <Text fontSize="14px" fontWeight="400" color='white' bg='black' p='0 8px' borderRadius='56px'>In</Text>
                                         <Text fontSize="14px" fontWeight="400" color='black' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
-                                            {`${new Date(boat.startDay).getDate()} ${new Date(boat.startDay).toLocaleString('en-US', { month: 'long' })}${boat.startTime ? ` ${boat.startTime}` : ''}`}
+                                            {(() => {
+                                                try {
+                                                    const date = new Date(boat.startDay);
+                                                    return `${date.getUTCDate()} ${date.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })}${boat.startTime ? ` ${boat.startTime}` : ''}`;
+                                                } catch (error) {
+                                                    return boat.startDay;
+                                                }
+                                            })()}
                                         </Text>
                                     </Flex>
                                     <Flex gap='4px'>
                                         <Text fontSize="14px" fontWeight="400" color='white' bg='black' p='0 8px' borderRadius='56px'>Out</Text>
                                         <Text fontSize="14px" fontWeight="400" color='black' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
-                                            {`${new Date(boat.endDay).getDate()} ${new Date(boat.endDay).toLocaleString('en-US', { month: 'long' })}${boat.endTime ? ` ${boat.endTime}` : ''}`}
+                                            {(() => {
+                                                try {
+                                                    const date = new Date(boat.endDay);
+                                                    return `${date.getUTCDate()} ${date.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })}${boat.endTime ? ` ${boat.endTime}` : ''}`;
+                                                } catch (error) {
+                                                    return boat.endDay;
+                                                }
+                                            })()}
                                         </Text>
                                     </Flex>
                                 </Flex>
@@ -235,9 +262,12 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
         );
     };
 
+    // Get the dates once
+    const monthDays = getMonthDates();
+
     return (
         <TableReservations
-            days={days}
+            days={monthDays}
             cellWidth="32px"
             renderHeader={renderHeader}
             renderBoatCell={renderBoatCell}

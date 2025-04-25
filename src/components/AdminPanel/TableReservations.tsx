@@ -133,6 +133,11 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         enabled: !!currentDate,
     });
 
+    // Debugging for days array
+    useEffect(() => {
+        console.log('TableReservations: days array changed:', days);
+    }, [days]);
+
     // Обработка швартовок (общая логика)
     useEffect(() => {
         if (mooringBalls?.mooring_balls) {
@@ -160,19 +165,24 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     useEffect(() => {
         if (reservations?.data && days.length > 0) {
             try {
-                // Создаем даты для начала и конца периода, избегая проблем с часовыми поясами
+                console.log('TableReservations: Processing reservations for days:', days);
+                // Create date ranges using UTC to avoid timezone issues
                 const [startYear, startMonth, startDay] = days[0].split('-').map(Number);
-                const periodStartDate = new Date(startYear, startMonth - 1, startDay, 0, 0, 0);
+                const periodStartDate = new Date(Date.UTC(startYear, startMonth - 1, startDay, 0, 0, 0));
                 
                 const [endYear, endMonth, endDay] = days[days.length - 1].split('-').map(Number);
-                const periodEndDate = new Date(endYear, endMonth - 1, endDay, 23, 59, 59);
+                const periodEndDate = new Date(Date.UTC(endYear, endMonth - 1, endDay, 23, 59, 59));
 
                 const apiBoats = reservations.data
                     .filter(reservation => {
                         try {
-                            // Переводим даты резервации в локальный формат, избегая проблем с часовыми поясами
-                            const resStart = new Date(reservation.start_date);
-                            const resEnd = new Date(reservation.end_date);
+                            // Convert reservation dates to UTC for consistent comparison
+                            const resStartStr = reservation.start_date;
+                            const resEndStr = reservation.end_date;
+                            
+                            // Parse the date strings directly to UTC
+                            const resStart = new Date(resStartStr);
+                            const resEnd = new Date(resEndStr);
                             
                             // Проверяем, если хотя бы часть резервации попадает в видимый период
                             // Резервация начинается до конца периода И заканчивается после начала периода
@@ -187,29 +197,29 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                             const startDate = new Date(reservation.start_date);
                             const endDate = new Date(reservation.end_date);
                             
-                            // Добавляем дополнительную проверку для отладки
+                            // Additional check for debugging
                             const dateOptions = { hour: 'numeric', minute: 'numeric', hour12: false };
                             const rawStartTime = startDate.toLocaleTimeString('en-US', dateOptions as any);
                             const rawEndTime = endDate.toLocaleTimeString('en-US', dateOptions as any);
                             
-                            // Форматируем даты в строки в формате YYYY-MM-DD
-                            const formatLocalDate = (date: Date) => {
-                                return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                            // Format dates as strings in YYYY-MM-DD format using UTC
+                            const formatUTCDate = (date: Date) => {
+                                return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
                             };
 
                             const boat = {
                                 id: reservation.mooring_ball.ball_number.toString(),
                                 name: reservation.boat?.boatname || 'N/A',
                                 code: reservation.boat?.model || 'N/A',
-                                startDay: formatLocalDate(startDate),
-                                endDay: formatLocalDate(endDate),
-                                startTime: `${String(startDate.getHours()).padStart(2, '0')}:${String(startDate.getMinutes()).padStart(2, '0')}`,
-                                endTime: `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`,
-                                // Добавляем дополнительные поля для более точного определения
+                                startDay: formatUTCDate(startDate),
+                                endDay: formatUTCDate(endDate),
+                                startTime: `${String(startDate.getUTCHours()).padStart(2, '0')}:${String(startDate.getUTCMinutes()).padStart(2, '0')}`,
+                                endTime: `${String(endDate.getUTCHours()).padStart(2, '0')}:${String(endDate.getUTCMinutes()).padStart(2, '0')}`,
+                                // Add additional fields for more precise determination
                                 rawStartTime,
                                 rawEndTime,
-                                startsInSecondHalf: startDate.getHours() >= 12,
-                                endsInFirstHalf: endDate.getHours() < 12,
+                                startsInSecondHalf: startDate.getUTCHours() >= 12,
+                                endsInFirstHalf: endDate.getUTCHours() < 12,
                                 marina_id: reservation.marina?.marina_id,
                                 registration_image_url: (reservation.boat as any)?.registration_image_url,
                                 vessel_type: reservation.boat?.vessel_type,
@@ -331,9 +341,16 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 
                                 const boatMatch = boats.find(b => {
                                     try {
-                                        const currentDay = new Date(day + 'T00:00:00.000Z');
-                                        const startDate = new Date(b.startDay + 'T00:00:00.000Z');
-                                        const endDate = new Date(b.endDay + 'T00:00:00.000Z');
+                                        // Parse the date components and create UTC dates
+                                        const [curYear, curMonth, curDay] = day.split('-').map(Number);
+                                        const currentDay = new Date(Date.UTC(curYear, curMonth - 1, curDay));
+                                        
+                                        const [startYear, startMonth, startDay] = b.startDay.split('-').map(Number);
+                                        const startDate = new Date(Date.UTC(startYear, startMonth - 1, startDay));
+                                        
+                                        const [endYear, endMonth, endDay] = b.endDay.split('-').map(Number);
+                                        const endDate = new Date(Date.UTC(endYear, endMonth - 1, endDay));
+                                        
                                         const isStartDay = b.startDay === day;
                                         const isEndDay = b.endDay === day;
                                         
@@ -416,9 +433,16 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 // Ищем лодку для этой половины дня
                                 const boatMatch = boats.find(b => {
                                     try {
-                                        const currentDay = new Date(day + 'T00:00:00.000Z');
-                                        const startDate = new Date(b.startDay + 'T00:00:00.000Z');
-                                        const endDate = new Date(b.endDay + 'T00:00:00.000Z');
+                                        // Parse the date components and create UTC dates
+                                        const [curYear, curMonth, curDay] = day.split('-').map(Number);
+                                        const currentDay = new Date(Date.UTC(curYear, curMonth - 1, curDay));
+                                        
+                                        const [startYear, startMonth, startDay] = b.startDay.split('-').map(Number);
+                                        const startDate = new Date(Date.UTC(startYear, startMonth - 1, startDay));
+                                        
+                                        const [endYear, endMonth, endDay] = b.endDay.split('-').map(Number);
+                                        const endDate = new Date(Date.UTC(endYear, endMonth - 1, endDay));
+                                        
                                         const isStartDay = b.startDay === day;
                                         const isEndDay = b.endDay === day;
                                         
@@ -459,9 +483,16 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                     const belongsToSameReservation = boats.some(b => {
                                         if (b.id !== row.id) return false;
                                         
-                                        const nextDayDate = new Date(nextDay + 'T00:00:00.000Z');
-                                        const startDate = new Date(b.startDay + 'T00:00:00.000Z');
-                                        const endDate = new Date(b.endDay + 'T00:00:00.000Z');
+                                        // Parse the date components and create UTC dates
+                                        const [nextDayYear, nextDayMonth, nextDayOfMonth] = nextDay.split('-').map(Number);
+                                        const nextDayDate = new Date(Date.UTC(nextDayYear, nextDayMonth - 1, nextDayOfMonth));
+                                        
+                                        const [startYear, startMonth, startDay] = b.startDay.split('-').map(Number);
+                                        const startDate = new Date(Date.UTC(startYear, startMonth - 1, startDay));
+                                        
+                                        const [endYear, endMonth, endDay] = b.endDay.split('-').map(Number);
+                                        const endDate = new Date(Date.UTC(endYear, endMonth - 1, endDay));
+                                        
                                         const isStartDay = b.startDay === nextDay;
                                         const isEndDay = b.endDay === nextDay;
                                         
@@ -492,10 +523,17 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 const isEndDay = boatMatch.endDay === days[Math.floor(endHalfDayIndex / 2)];
                                 
                                 // Проверка границ видимого периода
-                                const firstVisibleDay = new Date(days[0] + 'T00:00:00.000Z');
-                                const lastVisibleDay = new Date(days[days.length-1] + 'T23:59:59.999Z');
-                                const boatStartDate = new Date(boatMatch.startDay + 'T00:00:00.000Z');
-                                const boatEndDate = new Date(boatMatch.endDay + 'T23:59:59.999Z');
+                                const [firstDay, firstMonth, firstYear] = days[0].split('-').map(Number);
+                                const firstVisibleDay = new Date(Date.UTC(firstYear, firstMonth - 1, firstDay));
+                                
+                                const [lastDay, lastMonth, lastYear] = days[days.length-1].split('-').map(Number);
+                                const lastVisibleDay = new Date(Date.UTC(lastYear, lastMonth - 1, lastDay, 23, 59, 59));
+                                
+                                const [boatStartDay, boatStartMonth, boatStartYear] = boatMatch.startDay.split('-').map(Number);
+                                const boatStartDate = new Date(Date.UTC(boatStartYear, boatStartMonth - 1, boatStartDay));
+                                
+                                const [boatEndDay, boatEndMonth, boatEndYear] = boatMatch.endDay.split('-').map(Number);
+                                const boatEndDate = new Date(Date.UTC(boatEndYear, boatEndMonth - 1, boatEndDay, 23, 59, 59));
                                 
                                 const startsBeforeVisiblePeriod = boatStartDate < firstVisibleDay;
                                 const endsAfterVisiblePeriod = boatEndDate > lastVisibleDay;

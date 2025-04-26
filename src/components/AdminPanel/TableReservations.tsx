@@ -210,7 +210,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                             const boat = {
                                 id: reservation.mooring_ball.ball_number.toString(),
                                 name: reservation.boat?.boatname || 'N/A',
-                                code: reservation.boat?.model || 'N/A',
+                                code: reservation.boat?.registration_number || 'N/A',
                                 startDay: formatUTCDate(startDate),
                                 endDay: formatUTCDate(endDate),
                                 startTime: `${String(startDate.getUTCHours()).padStart(2, '0')}:${String(startDate.getUTCMinutes()).padStart(2, '0')}`,

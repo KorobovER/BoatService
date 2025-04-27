@@ -18,9 +18,6 @@ import { useState } from 'react'
 
 import useAuth from "../../hooks/useAuth"
 
-interface EmployeeWithDisplayName {
-  display_name?: string;
-}
 
 const UserMenu = () => {
   const { logout } = useAuth()
@@ -35,7 +32,7 @@ const UserMenu = () => {
     queryKey: ['employee'],
     queryFn: async () => {
       const result = await EmployeesService.readEmployeeMe();
-      return result as unknown as EmployeeWithDisplayName;
+      return result;
     }
   });
 
@@ -44,7 +41,7 @@ const UserMenu = () => {
   }
 
   // Получаем инициалы пользователя из display_name
-  const userInitials = data?.display_name || '';
+  const userInitials = data?.display_initials;
 
   return (
     <>
@@ -69,6 +66,7 @@ const UserMenu = () => {
                   onMouseEnter={() => setIsHovered(true)}
                   onMouseLeave={() => setIsHovered(false)}
                   transition="all 0.2s ease-in-out"
+                  getInitials={(name) => name}
                 />
               ) : (
                 <FaUserAlt color="white" fontSize="18px" />

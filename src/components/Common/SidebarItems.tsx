@@ -3,7 +3,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import {
   FiCalendar,
-  FiHome,
   FiUsers,
 } from "react-icons/fi";
 import UserMenu from "../Common/UserMenu";
@@ -12,7 +11,7 @@ import { GiHomeGarage, GiMooringBollard } from "react-icons/gi";
 import type { EmployeePublic } from "../../client";
 
 const items = [
-  { icon: FiHome, title: "Scheduling", path: "/" },
+  { icon: FiCalendar, title: "Scheduling", path: "/" },
   { icon: GiHomeGarage, title: "Marinas", path: "/marinas" },
   { icon: GiMooringBollard, title: "MooringBalls", path: "/mooringballs" },
   { icon: FiCalendar, title: "Reservations", path: "/reservations" },

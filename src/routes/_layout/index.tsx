@@ -130,6 +130,9 @@ function Dashboard() {
 
     const handleReservationClick = (rowId: string, day: string, boat?: Boat) => {
         setSelectedReservation({ rowId, day, boat });
+        if (!boat) {
+            setSelectedReservation(null);
+        }
     };
 
     const handleClosePopup = () => {
@@ -138,17 +141,19 @@ function Dashboard() {
 
     return (
         <Box 
-            position="relative" 
-            bg="white" 
+            bg="var(--chakra-colors-ui-light)"
+            padding="var(--chakra-space-xl)"
             minH="100vh"
-            transition="all 0.3s ease"
         >
-            <Flex w='100%' p='24px' gap='24px' position="relative">
-                <Box 
+            <Flex direction="row">
+                <Box
                     width={selectedReservation ? "70%" : "100%"}
                     transition="all 0.3s ease"
+                    padding="var(--chakra-space-xl)"
+                    bg="white"
+                    borderRadius="var(--chakra-space-xl)"
                 >
-                    <Box mb="24px">
+                    <Box mb="var(--chakra-space-xl)">
                         <TableSwitch
                             onPrevWeek={() => handleNavigation('prev')}
                             onNextWeek={() => handleNavigation('next')}
@@ -158,52 +163,19 @@ function Dashboard() {
                             onViewChange={handleViewChange}
                         />
                     </Box>
-                    <Box 
+                    <Box
                         ref={tableContainerRef}
-                        position="relative"
-                        borderRadius="16px"
                         overflow="hidden"
                         bg="white"
                     >
-                        {selectedReservation && (
-                            <Box
-                                position="absolute"
-                                top="58px"
-                                left="80px"
-                                right="0"
-                                bottom="0"
-                                bg="rgba(255, 255, 255, 0.6)"
-                                backdropFilter="blur(1px)"
-                                zIndex="2"
-                                onClick={handleClosePopup}
-                                cursor="pointer"
-                                transition="all 0.3s ease"
-                                sx={{
-                                    '.selected-cell': {
-                                        position: 'relative',
-                                        zIndex: 3,
-                                        '&::before': {
-                                            content: '""',
-                                            position: 'absolute',
-                                            top: 0,
-                                            left: 0,
-                                            right: 0,
-                                            bottom: 0,
-                                            background: 'transparent',
-                                            zIndex: 3
-                                        }
-                                    }
-                                }}
-                            />
-                        )}
                         {currentView === 'week' && (
-                            <TableWeek 
+                            <TableWeek
                                 currentWeekStart={currentWeekStart} 
                                 onReservationClick={handleReservationClick}
                             />
                         )}
                         {currentView === 'month' && currentMonth > 0 && (
-                            <TableMonth 
+                            <TableMonth
                                 key={`month-${currentYear}-${currentMonth}`} 
                                 currentMonthDate={getMonthDateString()}
                                 onReservationClick={handleReservationClick}
@@ -214,9 +186,8 @@ function Dashboard() {
                 </Box>
                 {selectedReservation && (
                     <Box
-                        position="absolute"
-                        right="24px"
-                        width="25%"
+                        width="30%"
+                        paddingLeft="var(--chakra-space-lg)"
                     >
                         <PopupReserved
                             isOpen={!!selectedReservation}

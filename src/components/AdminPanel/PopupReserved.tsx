@@ -21,14 +21,13 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
 
     return (
         <Box
-            position="relative"
-            height="100%"
             bg="white"
             overflow="hidden"
+            padding="var(--chakra-space-xl)"
+            borderRadius="var(--chakra-space-xl)"
         >
             {/* Header */}
             <Flex 
-                
                 borderBottom="1px solid"
                 borderColor="gray.100"
                 justify="space-between"

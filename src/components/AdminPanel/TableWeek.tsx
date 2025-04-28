@@ -207,7 +207,7 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
                 <PopoverContent 
                     width="auto" 
                     maxWidth="400px"
-                    border="1px solid #D2D2D2" 
+                    border="1px solid basic.grey200"
                     borderRadius="8px"
                     _focus={{ outline: 'none' }}
                 >

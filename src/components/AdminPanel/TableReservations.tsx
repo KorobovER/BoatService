@@ -279,8 +279,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                     .map(reservation => {
                         try {
                             // Получаем даты из API (они в UTC)
-                            const startDateUTC = new Date(reservation.start_date);
-                            const endDateUTC = new Date(reservation.end_date);
+                            const startDateUTC = new Date(reservation.start_date.endsWith('Z') ? reservation.start_date : reservation.start_date + 'Z');
+                            const endDateUTC = new Date(reservation.end_date.endsWith('Z') ? reservation.end_date : reservation.end_date + 'Z');
 
                             // Создаем строки с датами в локальном формате для внутренних расчетов
                             const formatLocalDate = (date: Date) => {

@@ -166,7 +166,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                     </Flex>
                 </PopoverTrigger>
                 <PopoverContent 
-                    width="300px" 
+                    width="fit-content" 
                     border="1px solid #D2D2D2" 
                     borderRadius="8px" 
                     overflow="hidden"
@@ -222,11 +222,11 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                                             {(() => {
                                                 try {
                                                     const date = new Date(boat.startDay);
-                                                    return `${date.getUTCDate()} ${date.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })}${boat.startTime ? ` ${boat.startTime}` : ''}`;
+                                                    return `${date.getUTCDate()} ${date.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })} • ${boat.startTime || '--:--'}`; 
                                                 } catch (error) {
                                                     return boat.startDay;
                                                 }
-                                            })()}
+                                            })()} <Text as="span" fontSize="10px" fontWeight="bold">{parseInt(boat.startTime?.split(':')[0] || '0') < 12 ? 'AM' : 'PM'}</Text>
                                         </Text>
                                     </Flex>
                                     <Flex gap='4px'>
@@ -235,11 +235,11 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                                             {(() => {
                                                 try {
                                                     const date = new Date(boat.endDay);
-                                                    return `${date.getUTCDate()} ${date.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })}${boat.endTime ? ` ${boat.endTime}` : ''}`;
+                                                    return `${date.getUTCDate()} ${date.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })} • ${boat.endTime || '--:--'}`;
                                                 } catch (error) {
                                                     return boat.endDay;
                                                 }
-                                            })()}
+                                            })()} <Text as="span" fontSize="10px" fontWeight="bold">{parseInt(boat.endTime?.split(':')[0] || '0') < 12 ? 'AM' : 'PM'}</Text>
                                         </Text>
                                     </Flex>
                                 </Flex>

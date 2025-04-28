@@ -66,6 +66,8 @@ export interface Boat {
     startsInSecondHalf: boolean;
     endsInFirstHalf: boolean;
     admin_status?: string;
+    selectedTimeOfDay?: 'AM' | 'PM';
+    displayTime?: string;
 }
 
 interface TableReservationsProps {
@@ -243,8 +245,22 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     }, [reservations, days]);
 
     const handleCellClick = (rowId: string, day: string, boat?: Boat, timeOfDay?: 'AM' | 'PM') => {
-        setSelectedCell({ rowId, day, boat, timeOfDay });
-        onReservationClick(rowId, day, boat, timeOfDay);
+        // Добавляем timeOfDay в объект лодки, если он передан
+        if (boat && timeOfDay) {
+            // Создаем обогащенный объект лодки с явным указанием времени дня
+            const enrichedBoat = {
+                ...boat,
+                selectedTimeOfDay: timeOfDay,
+                displayTime: timeOfDay === 'AM' ? 
+                    `${boat.startTime} (AM)` : 
+                    `${boat.endTime} (PM)`
+            };
+            setSelectedCell({ rowId, day, boat: enrichedBoat, timeOfDay });
+            onReservationClick(rowId, day, enrichedBoat, timeOfDay);
+        } else {
+            setSelectedCell({ rowId, day, boat, timeOfDay });
+            onReservationClick(rowId, day, boat, timeOfDay);
+        }
     };
 
     const getCellColor = (boat: Boat): { bg: string; textColor: string } => {
@@ -506,11 +522,11 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 // Определяем итоговый borderRadius
                                 let borderRadius = "0";
                                 if (needsLeftRadius && needsRightRadius) {
-                                    borderRadius = "30px";
+                                    borderRadius = "1000px";
                                 } else if (needsLeftRadius) {
-                                    borderRadius = "30px 0 0 30px";
+                                    borderRadius = "1000px 0 0 1000px";
                                 } else if (needsRightRadius) {
-                                    borderRadius = "0 30px 30px 0";
+                                    borderRadius = "0 1000px 1000px 0";
                                 }
 
                                 cells.push(
@@ -535,13 +551,12 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                     >
                                         <Flex
                                             p="0px var(--md, 12px)"
-                                            height="100%"
+                                            height="44px"
                                             width="100%"
                                             alignItems="center"
                                             justifyContent="center"
                                             bg={getCellColor(boatMatch).bg}
                                             borderRadius={borderRadius}
-                                            mt="4px"
                                         >
                                             {/* Показываем информацию о лодке */}
                                             {renderBoatCell(boatMatch, halfDayColspan / 2, getCellColor(boatMatch).textColor)}

@@ -123,7 +123,7 @@ const MarinasMenu = () => {
     }
 
     return (
-        <Box>
+        <Box position="relative" style={{ zIndex: 9999 }}>
             <Menu>
                 <MenuButton>
                     <Flex

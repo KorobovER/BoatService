@@ -64,7 +64,13 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
     };
 
     const renderHeader = (day: string) => (
-        <>
+        <Flex 
+            position="relative" 
+            width="100%" 
+            height="100%" 
+            alignItems="center" 
+            justifyContent="center"
+        >
             {isToday(day) && (
                 <Box
                     position="absolute"
@@ -73,14 +79,14 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                     transform="translate(-50%, -50%)"
                     bg="#FAE8D9"
                     borderRadius="full"
-                    width="44px"
-                    height="44px"
+                    width={{ base: "30px", sm: "34px", md: "36px" }}
+                    height={{ base: "30px", sm: "34px", md: "36px" }}
                     zIndex="1"
                 />
             )}
             <Text 
                 color={isToday(day) ? "basic.grey900" : "basic.grey600"} 
-                fontSize="14px"
+                fontSize={{ base: "12px", sm: "13px", md: "14px" }}
                 fontWeight="500"
                 textAlign="center"
                 position="relative"
@@ -97,7 +103,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                     }
                 })()}
             </Text>
-        </>
+        </Flex>
     );
 
     const renderBoatCell = (boat: Boat, colspan: number, textColor: string) => {

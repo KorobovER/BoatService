@@ -60,25 +60,25 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
             </Flex>
 
             <Flex padding='8px 10px' alignItems="center"  gap='md' justifyContent='center'>
-                <Button width='34px' height='34px' variant="unstyled" onClick={onPrevWeek}>
+                <Button width='34px' height='34px' variant="unstyled" onClick={onPrevWeek} display="flex" alignItems="center" justifyContent="center">
                     <svg
-                        width="34"
-                        height="34"
-                        viewBox="0 0 30 30"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
                     >
-                        <rect x="0.5" y="0.5" width="33" height="33" rx="16.5" fill="white" />
+                        <rect width="24" height="24" rx="12" fill="white" />
                         <rect
                             x="0.5"
                             y="0.5"
-                            width="30"
-                            height="30"
-                            rx="16.5"
+                            width="23"
+                            height="23"
+                            rx="11.5"
                             stroke="var(--chakra-colors-basic-grey100)"
                         />
                         <path
-                            d="M18.2578 22.4648L13.2539 17.2422C13.1172 17.0781 13.0625 16.9141 13.0625 16.75C13.0625 16.6133 13.1172 16.4492 13.2266 16.3125L18.2305 11.0898C18.4766 10.8164 18.9141 10.8164 19.1602 11.0625C19.4336 11.3086 19.4336 11.7188 19.1875 11.9922L14.6211 16.75L19.2148 21.5625C19.4609 21.8086 19.4609 22.2461 19.1875 22.4922C18.9414 22.7383 18.5039 22.7383 18.2578 22.4648Z"
+                            d="M14.5 17.5L10 13C9.9 12.9 9.86 12.78 9.86 12.66C9.86 12.56 9.9 12.44 9.94 12.34L14.44 7.84C14.62 7.64 14.92 7.64 15.12 7.84C15.32 8.04 15.32 8.34 15.12 8.54L11.08 12.66L15.12 16.8C15.32 17 15.32 17.3 15.12 17.5C14.92 17.7 14.7 17.7 14.5 17.5Z"
                             fill="#777777"
                         />
                     </svg>
@@ -86,25 +86,25 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
 
                 <Text>{weekRange}</Text>
 
-                <Button width='34px' height='34px' variant="unstyled" onClick={onNextWeek}>
+                <Button width='34px' height='34px' variant="unstyled" onClick={onNextWeek} display="flex" alignItems="center" justifyContent="center">
                     <svg
-                        width="34"
-                        height="34"
-                        viewBox="0 0 30 30"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
                     >
-                        <rect x="0.5" y="0.5" width="33" height="33" rx="16.5" fill="white" />
+                        <rect width="24" height="24" rx="12" fill="white" />
                         <rect
                             x="0.5"
                             y="0.5"
-                            width="30"
-                            height="30"
-                            rx="16.5"
+                            width="23"
+                            height="23"
+                            rx="11.5"
                             stroke="var(--chakra-colors-basic-grey100)"
                         />
                         <path
-                            d="M15.7148 11.0625L20.7188 16.2852C20.8281 16.4219 20.9102 16.5859 20.9102 16.75C20.9102 16.9141 20.8281 17.0781 20.7188 17.1875L15.7148 22.4102C15.4688 22.6836 15.0312 22.6836 14.7852 22.4375C14.5117 22.1914 14.5117 21.7812 14.7578 21.5078L19.3516 16.7227L14.7578 11.9648C14.5117 11.7188 14.5117 11.2812 14.7852 11.0352C15.0312 10.7891 15.4688 10.7891 15.7148 11.0625Z"
+                            d="M9.5 7.84L14 12.34C14.1 12.44 14.14 12.56 14.14 12.66C14.14 12.78 14.1 12.9 14 13L9.5 17.5C9.3 17.7 9 17.7 8.8 17.5C8.6 17.3 8.6 17 8.8 16.8L12.84 12.66L8.8 8.54C8.6 8.34 8.6 8.04 8.8 7.84C9 7.64 9.3 7.64 9.5 7.84Z"
                             fill="#777777"
                         />
                     </svg>

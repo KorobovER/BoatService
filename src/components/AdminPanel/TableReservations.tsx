@@ -712,7 +712,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                         }}
                                     >
                                         <Flex
-                                            p="0px var(--md, 12px)"
                                             height="44px"
                                             width="100%"
                                             alignItems="center"

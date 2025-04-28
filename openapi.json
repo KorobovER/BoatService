@@ -3898,26 +3898,6 @@
       }
     },
     "/api/v1/utils/map-region-init/": {
-      "get": {
-        "tags": [
-          "utils"
-        ],
-        "summary": "Get Region State Init",
-        "description": "Show region and subregions for mobile app alongside map and zoom presets for regions",
-        "operationId": "get_region_state_init",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Utils-Get Region State Init"
-                }
-              }
-            }
-          }
-        }
-      },
       "post": {
         "tags": [
           "utils"
@@ -4020,7 +4000,7 @@
         ]
       }
     },
-    "/api/v1/utils/send-support-email/": {
+    "/api/v1/utils/send-support-email": {
       "post": {
         "tags": [
           "utils"
@@ -4040,7 +4020,6 @@
             "required": true,
             "schema": {
               "type": "string",
-              "format": "email",
               "title": "Email Text"
             }
           },
@@ -4080,7 +4059,7 @@
         }
       }
     },
-    "/api/v1/utils/test-email/": {
+    "/api/v1/utils/test-email": {
       "post": {
         "tags": [
           "utils"

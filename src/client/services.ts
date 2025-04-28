@@ -2008,19 +2008,6 @@ export type TDataTestEmail = {
 
 export class UtilsService {
   /**
-   * Get Region State Init
-   * Show region and subregions for mobile app alongside map and zoom presets for regions
-   * @returns unknown Successful Response
-   * @throws ApiError
-   */
-  public static getRegionStateInit(): CancelablePromise<unknown> {
-    return __request(OpenAPI, {
-      method: "GET",
-      url: "/api/v1/utils/map-region-init/",
-    })
-  }
-
-  /**
    * Get Region State Init With Coordinates
    * Show region and subregions for mobile app alongside map and zoom presets for regions.
    * Optionally show the closest subregion to the given coordinates.
@@ -2080,7 +2067,7 @@ export class UtilsService {
     const { emailText, emailTo = "support@bolabuddy.com" } = data
     return __request(OpenAPI, {
       method: "POST",
-      url: "/api/v1/utils/send-support-email/",
+      url: "/api/v1/utils/send-support-email",
       query: {
         email_text: emailText,
         email_to: emailTo,
@@ -2101,7 +2088,7 @@ export class UtilsService {
     const { emailTo, requestBody, templateName = "test_email.html" } = data
     return __request(OpenAPI, {
       method: "POST",
-      url: "/api/v1/utils/test-email/",
+      url: "/api/v1/utils/test-email",
       query: {
         email_to: emailTo,
         template_name: templateName,

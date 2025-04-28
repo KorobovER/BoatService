@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState} from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
     Box,
@@ -13,9 +13,7 @@ import {
     Tbody,
     Tr,
     Th,
-    Td,
-    Button,
-    Tooltip
+    Td
 } from '@chakra-ui/react';
 import BollaCell from "../../../public/assets/images/bolla-cell.svg";
 import { ReservationsService, MarinasService } from '../../client';
@@ -117,15 +115,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         setCurrentTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
     };
 
-    // Функция для принудительного обновления данных
-    const forceRefresh = useCallback(() => {
-        console.log('Forced refresh with timezone:', currentTimeZone);
-        // Инвалидируем все запросы
-        queryClient.invalidateQueries({ queryKey: ['mooringBalls'] });
-        queryClient.invalidateQueries({ queryKey: ['reservations'] });
-        // Обновляем временную зону
-        updateTimeZone();
-    }, [queryClient, currentTimeZone]);
 
     // Эффект для отслеживания изменений временной зоны
     useEffect(() => {

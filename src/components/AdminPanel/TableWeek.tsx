@@ -152,8 +152,7 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
         </>
     );
 
-    const renderBoatCell = (boat: Boat, colspan: number, textColor: string) => {
-        const isHalfDay = colspan < 1; // Определяем, что это половина дня или меньше
+    const renderBoatCell = (boat: Boat, _colspan: number, textColor: string) => {
         
         return (
             <Popover trigger="hover" placement="bottom" strategy="fixed">
@@ -161,8 +160,7 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
                     <Flex
                         width="100%"
                         height="100%"
-                        p={isHalfDay ? "2px" : "5px"}
-                        gap={isHalfDay ? "2px" : "8px"}
+                        gap="8px"
                         alignItems="center"
                         justifyContent="center"
                     >

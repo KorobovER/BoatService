@@ -109,8 +109,6 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
     const renderBoatCell = (boat: Boat, colspan: number, textColor: string) => {
         // Use colspan < 2 to determine if the reservation is short (< 2 days)
         const isShortReservation = colspan < 2; 
-        // Keep the existing isHalfDay for potential specific half-day styling if needed elsewhere
-        const isHalfDay = colspan < 1;
 
         return (
             <Popover trigger="hover" placement="bottom" strategy="fixed">
@@ -118,10 +116,8 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                     <Flex
                         width="100%"
                         height="100%"
-                        p={isHalfDay ? "2px" : "5px"} // Padding might still depend on isHalfDay
                         gap={isShortReservation ? "0" : "8px"} // No gap if only icon
                         alignItems="center"
-                        // Always justify center
                         justifyContent="center" 
                     >
                         {/* Boat Icon Logic (Image or Text) */}
@@ -178,7 +174,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                     overflow="hidden"
                     _focus={{ outline: 'none' }}
                 >
-                    <PopoverBody p="8px">
+                    <PopoverBody>
                         <Flex gap='8px' alignItems='center' color="black">
                             <Box>
                                 <Flex gap='8px' alignItems='center'>

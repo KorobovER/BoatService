@@ -70,21 +70,51 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                         <Box flex="1">
                             <Text fontSize="12px" color="gray.500" mb="4px">Check-in</Text>
                             <Text fontSize="14px" color="gray.900">
-                                {new Date(boat.startDay).toLocaleDateString('en-US', { 
-                                    month: 'short',
-                                    day: 'numeric',
-                                    year: 'numeric'
-                                })}
+                                {(() => {
+                                    try {
+                                        const date = boat.startDateObj || new Date(boat.startDay);
+                                        return date.toLocaleString('en-US', { 
+                                            month: 'short',
+                                            day: 'numeric',
+                                            year: 'numeric',
+                                            hour: 'numeric',
+                                            minute: '2-digit',
+                                            hour12: true,
+                                            timeZoneName: 'short'
+                                        });
+                                    } catch (error) {
+                                        return new Date(boat.startDay).toLocaleDateString('en-US', { 
+                                            month: 'short',
+                                            day: 'numeric',
+                                            year: 'numeric'
+                                        });
+                                    }
+                                })()}
                             </Text>
                         </Box>
                         <Box flex="1">
                             <Text fontSize="12px" color="gray.500" mb="4px">Check-out</Text>
                             <Text fontSize="14px" color="gray.900">
-                                {new Date(boat.endDay).toLocaleDateString('en-US', { 
-                                    month: 'short',
-                                    day: 'numeric',
-                                    year: 'numeric'
-                                })}
+                                {(() => {
+                                    try {
+                                        const date = boat.endDateObj || new Date(boat.endDay);
+                                        return date.toLocaleString('en-US', { 
+                                            month: 'short',
+                                            day: 'numeric',
+                                            year: 'numeric',
+                                            hour: 'numeric',
+                                            minute: '2-digit',
+                                            hour12: true,
+                                            timeZoneName: 'short'
+                                        });
+                                    } catch (error) {
+                                        return new Date(boat.endDay).toLocaleDateString('en-US', { 
+                                            month: 'short',
+                                            day: 'numeric',
+                                            year: 'numeric'
+                                        });
+                                    }
+                                })()}
                             </Text>
                         </Box>
                     </Flex>

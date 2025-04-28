@@ -221,12 +221,19 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                                         <Text fontSize="14px" fontWeight="400" color='black' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
                                             {(() => {
                                                 try {
-                                                    const date = new Date(boat.startDay);
-                                                    return `${date.getUTCDate()} ${date.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })} • ${boat.startTime || '--:--'}`; 
+                                                    const date = boat.startDateObj || new Date(boat.startDay);
+                                                    // Использовать toLocaleString для форматирования даты в локальной временной зоне
+                                                    return date.toLocaleString('en-US', {
+                                                        day: 'numeric',
+                                                        month: 'long',
+                                                        hour: 'numeric',
+                                                        minute: '2-digit',
+                                                        hour12: true,
+                                                    }).replace(',', ' •');
                                                 } catch (error) {
                                                     return boat.startDay;
                                                 }
-                                            })()} <Text as="span" fontSize="10px" fontWeight="bold">{parseInt(boat.startTime?.split(':')[0] || '0') < 12 ? 'AM' : 'PM'}</Text>
+                                            })()}
                                         </Text>
                                     </Flex>
                                     <Flex gap='4px'>
@@ -234,12 +241,19 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                                         <Text fontSize="14px" fontWeight="400" color='black' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
                                             {(() => {
                                                 try {
-                                                    const date = new Date(boat.endDay);
-                                                    return `${date.getUTCDate()} ${date.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })} • ${boat.endTime || '--:--'}`;
+                                                    const date = boat.endDateObj || new Date(boat.endDay);
+                                                    // Использовать toLocaleString для форматирования даты в локальной временной зоне
+                                                    return date.toLocaleString('en-US', {
+                                                        day: 'numeric',
+                                                        month: 'long',
+                                                        hour: 'numeric',
+                                                        minute: '2-digit',
+                                                        hour12: true,
+                                                    }).replace(',', ' •');
                                                 } catch (error) {
                                                     return boat.endDay;
                                                 }
-                                            })()} <Text as="span" fontSize="10px" fontWeight="bold">{parseInt(boat.endTime?.split(':')[0] || '0') < 12 ? 'AM' : 'PM'}</Text>
+                                            })()}
                                         </Text>
                                     </Flex>
                                 </Flex>

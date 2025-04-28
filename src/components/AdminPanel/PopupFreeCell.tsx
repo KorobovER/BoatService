@@ -28,7 +28,18 @@ const PopupFreeCell: React.FC<PopupFreeCellProps> = ({ isOpen, onClose, rowId, d
                 <ModalBody>
                     <Box p={4}>
                         <Text>Mooring Ball: {rowId}</Text>
-                        <Text>Date: {new Date(day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</Text>
+                        <Text>Date: {(() => {
+                            try {
+                                const date = new Date(day);
+                                return date.toLocaleDateString('en-US', { 
+                                    month: 'short', 
+                                    day: 'numeric',
+                                    year: 'numeric'
+                                });
+                            } catch (error) {
+                                return day;
+                            }
+                        })()}</Text>
                         <Text>Time of Day: {timeOfDay || 'Full Day'}</Text>
                         {/* Здесь можно добавить форму для создания резервации */}
                     </Box>

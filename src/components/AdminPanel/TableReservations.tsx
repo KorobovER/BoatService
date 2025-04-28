@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
     Box,
     Text,
@@ -13,7 +13,9 @@ import {
     Tbody,
     Tr,
     Th,
-    Td
+    Td,
+    Button,
+    Tooltip
 } from '@chakra-ui/react';
 import BollaCell from "../../../public/assets/images/bolla-cell.svg";
 import { ReservationsService, MarinasService } from '../../client';
@@ -68,6 +70,10 @@ export interface Boat {
     admin_status?: string;
     selectedTimeOfDay?: 'AM' | 'PM';
     displayTime?: string;
+    startDateObj: Date;
+    endDateObj: Date;
+    startsInSecondHalfLocal: boolean;
+    endsInFirstHalfLocal: boolean;
 }
 
 interface TableReservationsProps {
@@ -98,10 +104,81 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         boat?: Boat;
         timeOfDay?: 'AM' | 'PM';
     } | null>(null);
+    // Добавляем состояние для отслеживания текущей временной зоны
+    const [currentTimeZone, setCurrentTimeZone] = useState<string>(
+        Intl.DateTimeFormat().resolvedOptions().timeZone
+    );
+
+    // Добавляем queryClient для инвалидации запросов
+    const queryClient = useQueryClient();
+    
+    // Функция для обновления временной зоны
+    const updateTimeZone = () => {
+        setCurrentTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+    };
+
+    // Функция для принудительного обновления данных
+    const forceRefresh = useCallback(() => {
+        console.log('Forced refresh with timezone:', currentTimeZone);
+        // Инвалидируем все запросы
+        queryClient.invalidateQueries({ queryKey: ['mooringBalls'] });
+        queryClient.invalidateQueries({ queryKey: ['reservations'] });
+        // Обновляем временную зону
+        updateTimeZone();
+    }, [queryClient, currentTimeZone]);
+
+    // Эффект для отслеживания изменений временной зоны
+    useEffect(() => {
+        // Проверяем доступность API Intl
+        if (typeof window !== 'undefined' && 'Intl' in window) {
+            // Обновляем при загрузке
+            updateTimeZone();
+            
+            // В идеале нужно слушать событие изменения временной зоны,
+            // но такого стандартного события нет. Вместо этого,
+            // мы можем отслеживать другие события, которые могут
+            // указывать на изменение временной зоны.
+            
+            // Слушаем событие изменения языка
+            window.addEventListener('languagechange', updateTimeZone);
+            
+            // Слушаем события фокуса/расфокуса окна
+            window.addEventListener('focus', updateTimeZone);
+            
+            // Периодически проверяем временную зону
+            const intervalId = setInterval(updateTimeZone, 60000); // каждую минуту
+            
+            // Очистка при размонтировании
+            return () => {
+                window.removeEventListener('languagechange', updateTimeZone);
+                window.removeEventListener('focus', updateTimeZone);
+                clearInterval(intervalId);
+            };
+        }
+    }, []);
+
+    // Перезагружаем данные при изменении временной зоны
+    useEffect(() => {
+        if (boats.length > 0) {
+            console.log('Time zone changed to:', currentTimeZone);
+            
+            // Принудительно инвалидируем кэш для обновления данных
+            queryClient.invalidateQueries({ queryKey: ['mooringBalls'] });
+            queryClient.invalidateQueries({ queryKey: ['reservations'] });
+            
+            // Выводим информацию о смене часового пояса для отладки
+            console.log('Timezone change detected:', {
+                newTimezone: currentTimeZone,
+                date: new Date().toString(),
+                utcDate: new Date().toUTCString(),
+                utcOffset: new Date().getTimezoneOffset() / 60
+            });
+        }
+    }, [currentTimeZone, queryClient, boats.length]);
 
     // Запрос швартовок (общий для обоих компонентов)
     const { data: mooringBalls, isLoading: isLoadingMooringBalls } = useQuery({
-        queryKey: ['mooringBalls', selectedMarina?.marina_id],
+        queryKey: ['mooringBalls', selectedMarina?.marina_id, currentTimeZone],
         queryFn: async () => {
             try {
                 let result = { mooring_balls: [] as Array<any> };
@@ -127,7 +204,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
 
     // Запрос резерваций (общий для обоих компонентов)
     const { data: reservations, isLoading: isLoadingReservations, isError } = useQuery({
-        queryKey: ['reservations', currentDate, selectedMarina?.marina_id],
+        queryKey: ['reservations', currentDate, selectedMarina?.marina_id, currentTimeZone],
         queryFn: () => ReservationsService.readReservations({
             limit: 500,
             marinaId: selectedMarina?.marina_id || undefined,
@@ -168,23 +245,39 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         if (reservations?.data && days.length > 0) {
             try {
                 console.log('TableReservations: Processing reservations for days:', days);
-                // Create date ranges using UTC to avoid timezone issues
+                
+                // Создаем диапазон дат в локальной временной зоне
                 const [startYear, startMonth, startDay] = days[0].split('-').map(Number);
-                const periodStartDate = new Date(Date.UTC(startYear, startMonth - 1, startDay, 0, 0, 0));
+                const periodStartDate = new Date(startYear, startMonth - 1, startDay, 0, 0, 0);
 
                 const [endYear, endMonth, endDay] = days[days.length - 1].split('-').map(Number);
-                const periodEndDate = new Date(Date.UTC(endYear, endMonth - 1, endDay, 23, 59, 59));
+                const periodEndDate = new Date(endYear, endMonth - 1, endDay, 23, 59, 59);
+
+                console.log('Period range:', {
+                    start: periodStartDate.toISOString(),
+                    end: periodEndDate.toISOString(),
+                    startLocal: periodStartDate.toString(),
+                    endLocal: periodEndDate.toString()
+                });
 
                 const apiBoats = reservations.data
                     .filter(reservation => {
                         try {
-                            // Convert reservation dates to UTC for consistent comparison
+                            // Создаем даты из строк ISO 8601 (они приходят в UTC из API)
                             const resStartStr = reservation.start_date;
                             const resEndStr = reservation.end_date;
 
-                            // Parse the date strings directly to UTC
+                            // Парсим строки дат - они будут автоматически преобразованы в локальное время
                             const resStart = new Date(resStartStr);
                             const resEnd = new Date(resEndStr);
+
+                            console.log('Reservation dates:', {
+                                id: reservation.mooring_ball?.ball_number.toString(),
+                                startUTC: resStartStr,
+                                endUTC: resEndStr,
+                                startLocal: resStart.toString(),
+                                endLocal: resEnd.toString()
+                            });
 
                             // Проверяем, если хотя бы часть резервации попадает в видимый период
                             // Резервация начинается до конца периода И заканчивается после начала периода
@@ -196,38 +289,61 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                     })
                     .map(reservation => {
                         try {
-                            const startDate = new Date(reservation.start_date);
-                            const endDate = new Date(reservation.end_date);
+                            // Получаем даты из API (они в UTC)
+                            const startDateUTC = new Date(reservation.start_date);
+                            const endDateUTC = new Date(reservation.end_date);
 
-                            // Additional check for debugging
-                            const dateOptions = { hour: 'numeric', minute: 'numeric', hour12: false };
-                            const rawStartTime = startDate.toLocaleTimeString('en-US', dateOptions as any);
-                            const rawEndTime = endDate.toLocaleTimeString('en-US', dateOptions as any);
-
-                            // Format dates as strings in YYYY-MM-DD format using UTC
-                            const formatUTCDate = (date: Date) => {
-                                return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
+                            // Создаем строки с датами в локальном формате для внутренних расчетов
+                            const formatLocalDate = (date: Date) => {
+                                return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
                             };
 
+                            // Для отладки выводим информацию о преобразовании времени
+                            console.log('Converting dates for reservation:', {
+                                id: reservation.mooring_ball.ball_number.toString(),
+                                name: reservation.boat?.boatname || 'N/A',
+                                startUTC: startDateUTC.toISOString(),
+                                endUTC: endDateUTC.toISOString(),
+                                startLocal: startDateUTC.toString(),
+                                endLocal: endDateUTC.toString(),
+                                startLocalHours: startDateUTC.getHours(),
+                                endLocalHours: endDateUTC.getHours(),
+                                startLocalFormatted: formatLocalDate(startDateUTC),
+                                endLocalFormatted: formatLocalDate(endDateUTC),
+                                utcOffset: startDateUTC.getTimezoneOffset() / 60,
+                                startsInSecondHalfLocal: startDateUTC.getHours() >= 12,
+                                endsInFirstHalfLocal: endDateUTC.getHours() < 12,
+                            });
+
+                            // Используем локальное время для всей таблицы
                             const boat = {
                                 id: reservation.mooring_ball.ball_number.toString(),
                                 name: reservation.boat?.boatname || 'N/A',
                                 code: reservation.boat?.registration_number || 'N/A',
-                                startDay: formatUTCDate(startDate),
-                                endDay: formatUTCDate(endDate),
-                                startTime: `${String(startDate.getUTCHours()).padStart(2, '0')}:${String(startDate.getUTCMinutes()).padStart(2, '0')}`,
-                                endTime: `${String(endDate.getUTCHours()).padStart(2, '0')}:${String(endDate.getUTCMinutes()).padStart(2, '0')}`,
-                                // Add additional fields for more precise determination
-                                rawStartTime,
-                                rawEndTime,
-                                startsInSecondHalf: startDate.getUTCHours() >= 12,
-                                endsInFirstHalf: endDate.getUTCHours() < 12,
+                                // Сохраняем даты в локальном формате для внутренних расчетов
+                                startDay: formatLocalDate(startDateUTC),
+                                endDay: formatLocalDate(endDateUTC),
+                                // Сохраняем время в локальном формате с учетом AM/PM
+                                startTime: startDateUTC.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
+                                endTime: endDateUTC.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
+                                // Дополнительные поля для более точного определения
+                                rawStartTime: startDateUTC.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: false }),
+                                rawEndTime: endDateUTC.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: false }),
+                                // ИСПОЛЬЗУЕМ ЛОКАЛЬНОЕ ВРЕМЯ для размещения в таблице
+                                startsInSecondHalf: startDateUTC.getHours() >= 12,
+                                endsInFirstHalf: endDateUTC.getHours() < 12,
+                                // Сохраняем локальные значения
+                                startsInSecondHalfLocal: startDateUTC.getHours() >= 12,
+                                endsInFirstHalfLocal: endDateUTC.getHours() < 12,
                                 marina_id: reservation.marina?.marina_id,
                                 registration_image_url: (reservation.boat as any)?.registration_image_url,
                                 vessel_type: reservation.boat?.vessel_type,
                                 service_requests: reservation.service_requests,
                                 is_completed: reservation.is_completed,
                                 admin_status: reservation.admin_status,
+                                // Сохраняем оригинальные объекты Date для использования в компонентах
+                                startDateObj: startDateUTC,
+                                endDateObj: endDateUTC,
                             };
                             return boat;
                         } catch (error) {
@@ -242,7 +358,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                 console.error('Error processing reservations:', error);
             }
         }
-    }, [reservations, days]);
+    }, [reservations, days, currentTimeZone]);
 
     const handleCellClick = (rowId: string, day: string, boat?: Boat, timeOfDay?: 'AM' | 'PM') => {
         // Добавляем timeOfDay в объект лодки, если он передан
@@ -279,6 +395,68 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         
         // По умолчанию - нормальное состояние
         return { bg: "system.successGreen", textColor: "white" }; // green (default) - нормальное состояние
+    };
+
+    // Функция для локализованного отображения дня недели
+    const getLocalizedDayOfWeek = (dateString: string) => {
+        const [year, month, day] = dateString.split('-').map(Number);
+        
+        // Создаем дату в локальной временной зоне
+        const date = new Date(year, month - 1, day);
+        
+        // Для отладки показываем процесс форматирования
+        console.log(`Formatting day of week for ${dateString}:`, {
+            original: dateString,
+            dateObj: date.toString(),
+            isoString: date.toISOString(),
+            timezone: currentTimeZone,
+            weekday: date.toLocaleDateString(undefined, { weekday: 'short' }),
+            hours: date.getHours(),
+            utcOffset: date.getTimezoneOffset() / 60,
+        });
+        
+        return date.toLocaleDateString(undefined, { weekday: 'short' });
+    };
+
+    // Функция для локализованного отображения дня и месяца
+    const getLocalizedDate = (dateString: string) => {
+        const [year, month, day] = dateString.split('-').map(Number);
+        
+        // Создаем дату в локальной временной зоне
+        const date = new Date(year, month - 1, day);
+        
+        // Для отладки
+        console.log(`Formatting date for ${dateString}:`, {
+            original: dateString,
+            formatted: date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }),
+            timezone: currentTimeZone
+        });
+        
+        return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+    };
+
+    // Добавим отладочное сообщение для контроля временной зоны
+    useEffect(() => {
+        console.log('Current timezone:', currentTimeZone);
+        console.log('Current date format:', new Date().toLocaleString());
+        console.log('Browser timezone offset:', new Date().getTimezoneOffset() / 60);
+    }, [currentTimeZone]);
+
+    // Функция-обертка для renderHeader, которая учитывает локальную временную зону
+    const localizedRenderHeader = (day: string) => {
+        // Если пользовательская функция renderHeader предоставлена, используем ее,
+        // но передаем дополнительные данные о локализованной дате
+        if (typeof renderHeader === 'function') {
+            return renderHeader(day);
+        }
+        
+        // Базовый рендеринг, если пользовательская функция не предоставлена
+        return (
+            <Flex direction="column" alignItems="center">
+                <Text fontWeight="bold">{getLocalizedDayOfWeek(day)}</Text>
+                <Text>{getLocalizedDate(day)}</Text>
+            </Flex>
+        );
     };
 
     const isLoading = isLoadingMooringBalls || isLoadingReservations;
@@ -345,7 +523,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                     borderTop="1px solid var(--chakra-colors-basic-grey100)"
                                     borderLeft={index === 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
                                 >
-                                    {renderHeader(day)}
+                                    {localizedRenderHeader(day)}
                                 </Th>
                             ))}
                         </Tr>
@@ -365,15 +543,15 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 // Находим все лодки для этого дня и стойки
                                 const dayBoats = boats.filter(b => {
                                     try {
-                                        // Parse the date components and create UTC dates
+                                        // Преобразуем компоненты даты и создаем даты в локальной временной зоне
                                         const [curYear, curMonth, curDay] = day.split('-').map(Number);
-                                        const currentDay = new Date(Date.UTC(curYear, curMonth - 1, curDay));
+                                        const currentDay = new Date(curYear, curMonth - 1, curDay);
 
                                         const [startYear, startMonth, startDay] = b.startDay.split('-').map(Number);
-                                        const startDate = new Date(Date.UTC(startYear, startMonth - 1, startDay));
+                                        const startDate = new Date(startYear, startMonth - 1, startDay);
 
                                         const [endYear, endMonth, endDay] = b.endDay.split('-').map(Number);
-                                        const endDate = new Date(Date.UTC(endYear, endMonth - 1, endDay));
+                                        const endDate = new Date(endYear, endMonth - 1, endDay);
 
                                         return b.id === row.id && currentDay >= startDate && currentDay <= endDate;
                                     } catch (error) {
@@ -482,16 +660,16 @@ const TableReservations: React.FC<TableReservationsProps> = ({
 
                                 // Проверка границ видимого периода
                                 const [firstDay, firstMonth, firstYear] = days[0].split('-').map(Number);
-                                const firstVisibleDay = new Date(Date.UTC(firstYear, firstMonth - 1, firstDay));
+                                const firstVisibleDay = new Date(firstYear, firstMonth - 1, firstDay);
 
                                 const [lastDay, lastMonth, lastYear] = days[days.length - 1].split('-').map(Number);
-                                const lastVisibleDay = new Date(Date.UTC(lastYear, lastMonth - 1, lastDay, 23, 59, 59));
+                                const lastVisibleDay = new Date(lastYear, lastMonth - 1, lastDay, 23, 59, 59);
 
                                 const [boatStartDay, boatStartMonth, boatStartYear] = boatMatch.startDay.split('-').map(Number);
-                                const boatStartDate = new Date(Date.UTC(boatStartYear, boatStartMonth - 1, boatStartDay));
+                                const boatStartDate = new Date(boatStartYear, boatStartMonth - 1, boatStartDay);
 
                                 const [boatEndDay, boatEndMonth, boatEndYear] = boatMatch.endDay.split('-').map(Number);
-                                const boatEndDate = new Date(Date.UTC(boatEndYear, boatEndMonth - 1, boatEndDay, 23, 59, 59));
+                                const boatEndDate = new Date(boatEndYear, boatEndMonth - 1, boatEndDay, 23, 59, 59);
 
                                 const startsBeforeVisiblePeriod = boatStartDate < firstVisibleDay;
                                 const endsAfterVisiblePeriod = boatEndDate > lastVisibleDay;

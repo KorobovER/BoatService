@@ -259,11 +259,43 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
                                 <Flex p='8px 0px' gap='16px'>
                                     <Flex gap='4px' whiteSpace="nowrap">
                                         <Text fontSize="14px" fontWeight="400" color='white' bg='black' p='0 8px' borderRadius='56px'>In</Text>
-                                        <Text fontSize="14px" fontWeight="400" color='basic.grey700' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{`${new Date(boat.startDay).getUTCDate()} ${new Date(boat.startDay).toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })} • ${boat.startTime || '--:--'}`} <Text as="span" fontSize="10px" fontWeight="bold">{parseInt(boat.startTime?.split(':')[0] || '0') < 12 ? 'AM' : 'PM'}</Text></Text>
+                                        <Text fontSize="14px" fontWeight="400" color='basic.grey700' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
+                                            {(() => {
+                                                try {
+                                                    const date = boat.startDateObj || new Date(boat.startDay);
+                                                    // Использовать toLocaleString для форматирования даты в локальной временной зоне
+                                                    return date.toLocaleString('en-US', {
+                                                        day: 'numeric',
+                                                        month: 'long',
+                                                        hour: 'numeric',
+                                                        minute: '2-digit',
+                                                        hour12: true,
+                                                    }).replace(',', ' •');
+                                                } catch (error) {
+                                                    return `${boat.startDay} • ${boat.startTime || '--:--'}`;
+                                                }
+                                            })()}
+                                        </Text>
                                     </Flex>
                                     <Flex gap='4px' whiteSpace="nowrap">
                                         <Text fontSize="14px" fontWeight="400" color='white' bg='black' p='0 8px' borderRadius='56px'>Out</Text>
-                                        <Text fontSize="14px" fontWeight="400" color='basic.grey700' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{`${new Date(boat.endDay).getUTCDate()} ${new Date(boat.endDay).toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })} • ${boat.endTime || '--:--'}`} <Text as="span" fontSize="10px" fontWeight="bold">{parseInt(boat.endTime?.split(':')[0] || '0') < 12 ? 'AM' : 'PM'}</Text></Text>
+                                        <Text fontSize="14px" fontWeight="400" color='basic.grey700' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
+                                            {(() => {
+                                                try {
+                                                    const date = boat.endDateObj || new Date(boat.endDay);
+                                                    // Использовать toLocaleString для форматирования даты в локальной временной зоне
+                                                    return date.toLocaleString('en-US', {
+                                                        day: 'numeric',
+                                                        month: 'long',
+                                                        hour: 'numeric',
+                                                        minute: '2-digit',
+                                                        hour12: true,
+                                                    }).replace(',', ' •');
+                                                } catch (error) {
+                                                    return `${boat.endDay} • ${boat.endTime || '--:--'}`;
+                                                }
+                                            })()}
+                                        </Text>
                                     </Flex>
                                 </Flex>
                                 <Flex gap='24px' alignItems="flex-end">

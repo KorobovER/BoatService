@@ -477,9 +477,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                 '& table': {
                     tableLayout: 'fixed',
                     width: '100%',
-                    borderSpacing: '0',
-                    borderCollapse: 'collapse',
-                    border: '1px solid var(--chakra-colors-basic-grey100)'
                 }
             }}>
                 <Table variant="unstyled" width="100%">
@@ -495,10 +492,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 left="0"
                                 bg="white"
                                 zIndex={2}
-                                borderRight="1px solid var(--chakra-colors-basic-grey100)"
-                                borderBottom="1px solid var(--chakra-colors-basic-grey100)"
                             />
-                            {days.map((day, index) => (
+                            {days.map((day, _) => (
                                 <Th
                                     key={`date-${day}`}
                                     p={1}
@@ -507,10 +502,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                     fontWeight="normal"
                                     colSpan={2} // Каждый день занимает 2 ячейки (AM и PM)
                                     position="relative" // Добавляем относительное позиционирование
-                                    borderRight="1px solid var(--chakra-colors-basic-grey100)"
                                     borderBottom="1px solid var(--chakra-colors-basic-grey100)"
-                                    borderTop="1px solid var(--chakra-colors-basic-grey100)"
-                                    borderLeft={index === 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
+                                    borderLeft="1px solid var(--chakra-colors-basic-grey100)"
                                 >
                                     {localizedRenderHeader(day)}
                                 </Th>
@@ -607,8 +600,9 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                                 e.stopPropagation();
                                                 handleCellClick(row.id, day, undefined, timeOfDay);
                                             }}
+                                            // todo: remove borderRight from last cell
                                             borderRight={!isAM ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
-                                            borderBottom="1px solid var(--chakra-colors-basic-grey100)"
+                                            borderTop="1px solid var(--chakra-colors-basic-grey100)"
                                         >
                                             <Box height="100%" width="100%" display="flex" alignItems="center" justifyContent="center" />
                                         </Td>
@@ -707,8 +701,9 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                         onClick={() => handleCellClick(row.id, day, boatMatch, timeOfDay)}
                                         cursor="pointer"
                                         className={isSelected ? 'selected-cell' : ''}
+                                        // todo: remove borderRight from half day
                                         borderRight={isAM && halfDayColspan === 1 ? "none" : "1px solid var(--chakra-colors-basic-grey100)"}
-                                        borderBottom="1px solid var(--chakra-colors-basic-grey100)"
+                                        borderTop="1px solid var(--chakra-colors-basic-grey100)"
                                         sx={{
                                             overflow: "hidden",
                                             '&.selected-cell': {
@@ -745,7 +740,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                         bg="white"
                                         zIndex={1}
                                         borderRight="1px solid var(--chakra-colors-basic-grey100)"
-                                        borderBottom="1px solid var(--chakra-colors-basic-grey100)"
+                                        borderTop="1px solid var(--chakra-colors-basic-grey100)"
                                     >
                                         <Flex
                                             height="44px"

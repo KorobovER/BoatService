@@ -157,7 +157,7 @@ const MarinasMenu = () => {
                         </Flex>
                     </Flex>
                 </MenuButton>
-                <MenuList minWidth="240px" rounded='xl' boxShadow="md" py={0}>
+                <MenuList minWidth="240px" rounded='xl' boxShadow="md" py={0} zIndex={1000}>
                     {marinas.map((marina) => (
                         <MenuItem
                             key={marina.marina_id}

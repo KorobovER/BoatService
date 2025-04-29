@@ -1,7 +1,8 @@
 // TableMonth.tsx
 import React from 'react';
-import { Box, Text, Image, Flex, Button, Popover, PopoverTrigger, PopoverContent, PopoverBody, Link } from '@chakra-ui/react';
+import { Box, Text, Image, Flex, Popover, PopoverTrigger, PopoverContent, PopoverBody} from '@chakra-ui/react';
 import TableReservations, { Boat } from './TableReservations';
+import HoverReservation from './HoverReservation';
 
 interface TableMonthProps {
     currentMonthDate: string;
@@ -15,23 +16,23 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
             // Parse the year and month from the date string
             const parts = currentMonthDate.split('-');
             if (parts.length < 2) return [];
-            
+
             const year = parseInt(parts[0], 10);
             const month = parseInt(parts[1], 10);
-            
+
             if (isNaN(year) || isNaN(month)) return [];
-            
+
             // Get last day of month using UTC (day 0 of next month)
             const lastDayDate = new Date(Date.UTC(year, month, 0));
             const lastDay = lastDayDate.getUTCDate();
-            
+
             // Generate dates array - ALWAYS starting from 1st day
             const dates = [];
             for (let day = 1; day <= lastDay; day++) {
                 const formatted = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 dates.push(formatted);
             }
-            
+
             return dates;
         } catch (error) {
             console.error('Error generating month dates:', error);
@@ -46,11 +47,11 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
             const todayYear = today.getFullYear();
             const todayMonth = today.getMonth() + 1; // +1 потому что в JS месяцы от 0 до 11
             const todayDay = today.getDate();
-            
+
             // Парсим дату из строки
             const [year, month, dayOfMonth] = day.split('-').map(Number);
             if (isNaN(year) || isNaN(month) || isNaN(dayOfMonth)) return false;
-            
+
             // Сравниваем компоненты даты с системными
             return (
                 dayOfMonth === todayDay &&
@@ -64,11 +65,11 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
     };
 
     const renderHeader = (day: string) => (
-        <Flex 
-            position="relative" 
-            width="100%" 
-            height="100%" 
-            alignItems="center" 
+        <Flex
+            position="relative"
+            width="100%"
+            height="100%"
+            alignItems="center"
             justifyContent="center"
         >
             {isToday(day) && (
@@ -84,8 +85,8 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                     zIndex="1"
                 />
             )}
-            <Text 
-                color={isToday(day) ? "basic.grey900" : "basic.grey600"} 
+            <Text
+                color={isToday(day) ? "basic.grey900" : "basic.grey600"}
                 fontSize={{ base: "12px", sm: "13px", md: "14px" }}
                 fontWeight="500"
                 textAlign="center"
@@ -108,7 +109,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
 
     const renderBoatCell = (boat: Boat, colspan: number, textColor: string) => {
         // Use colspan < 2 to determine if the reservation is short (< 2 days)
-        const isShortReservation = colspan < 2; 
+        const isShortReservation = colspan < 2;
 
         return (
             <Popover trigger="hover" placement="bottom" strategy="fixed">
@@ -119,7 +120,9 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                         height="100%"
                         gap={isShortReservation ? "0" : "8px"} // No gap if only icon
                         alignItems="center"
-                        justifyContent="center" 
+                        justifyContent="center"
+                        marginLeft="2px"
+                        marginRight="2px"
                     >
                         {/* Boat Icon Logic (Image or Text) */}
                         {boat.vessel_type === 'power' ? (
@@ -155,10 +158,10 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                         ) : (
                             // Fallback if no specific type, maybe just use first letter if short?
                             <Text color={textColor} fontSize="14px" fontWeight="400">
-                                {isShortReservation ? boat.name[0] : boat.name} 
+                                {isShortReservation ? boat.name[0] : boat.name}
                             </Text>
                         )}
-                        
+
                         {/* Conditionally render the text block */}
                         {!isShortReservation && (
                             <Box maxWidth="calc(100% - 30px)" overflow="hidden" textAlign="left">
@@ -168,118 +171,14 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                         )}
                     </Flex>
                 </PopoverTrigger>
-                <PopoverContent 
-                    width="fit-content" 
-                    border="1px solid #D2D2D2" 
-                    borderRadius="8px" 
-                    overflow="hidden"
+                <PopoverContent
+                    border="1px solid var(--chakra-colors-basic-grey200)"
+                    borderRadius="var(--chakra-radii-md)"
+                    bg="basic.grey100"
                     _focus={{ outline: 'none' }}
                 >
                     <PopoverBody>
-                        <Flex gap='8px' alignItems='center' color="black">
-                            <Box>
-                                <Flex gap='8px' alignItems='center'>
-                                    {boat.vessel_type === 'power' ? (
-                                        <Image
-                                            src="/assets/images/power-boat.svg"
-                                            alt={boat.name}
-                                            width="22px"
-                                            height="22px"
-                                            objectFit="cover"
-                                            borderRadius="4px"
-                                            filter="brightness(0)"
-                                        />
-                                    ) : boat.vessel_type === 'catamaran' ? (
-                                        <Image
-                                            src="/assets/images/catamaran-boat.svg"
-                                            alt={boat.name}
-                                            width="22px"
-                                            height="22px"
-                                            objectFit="cover"
-                                            borderRadius="4px"
-                                            filter="brightness(0)"
-                                        />
-                                    ) : boat.vessel_type === 'monohull' ? (
-                                        <Image
-                                            src="/assets/images/monohul-boat.svg"
-                                            alt={boat.name}
-                                            width="22px"
-                                            height="22px"
-                                            objectFit="cover"
-                                            borderRadius="4px"
-                                            filter="brightness(0)"
-                                        />
-                                    ) : (
-                                        <Text color="white" fontSize="14px" fontWeight="500" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.name}</Text>
-                                    )}
-                                    <Text fontSize="14px" fontWeight="500" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.name}</Text>
-                                    <Text fontSize="14px" fontWeight="300" opacity="0.8">|</Text>
-                                    <Text fontSize="14px" fontWeight="300" opacity="0.8" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
-                                        {boat.code}
-                                    </Text>
-                                </Flex>
-                                <Flex p='8px 0px' gap='16px'>
-                                    <Flex gap='4px'>
-                                        <Text fontSize="14px" fontWeight="400" color='white' bg='black' p='0 8px' borderRadius='56px'>In</Text>
-                                        <Text fontSize="14px" fontWeight="400" color='black' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
-                                            {(() => {
-                                                try {
-                                                    const date = boat.startDateObj || new Date(boat.startDay);
-                                                    // Использовать toLocaleString для форматирования даты в локальной временной зоне
-                                                    return date.toLocaleString('en-US', {
-                                                        day: 'numeric',
-                                                        month: 'long',
-                                                        hour: 'numeric',
-                                                        minute: '2-digit',
-                                                        hour12: true,
-                                                    }).replace(',', ' •');
-                                                } catch (error) {
-                                                    return boat.startDay;
-                                                }
-                                            })()}
-                                        </Text>
-                                    </Flex>
-                                    <Flex gap='4px'>
-                                        <Text fontSize="14px" fontWeight="400" color='white' bg='black' p='0 8px' borderRadius='56px'>Out</Text>
-                                        <Text fontSize="14px" fontWeight="400" color='black' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
-                                            {(() => {
-                                                try {
-                                                    const date = boat.endDateObj || new Date(boat.endDay);
-                                                    // Использовать toLocaleString для форматирования даты в локальной временной зоне
-                                                    return date.toLocaleString('en-US', {
-                                                        day: 'numeric',
-                                                        month: 'long',
-                                                        hour: 'numeric',
-                                                        minute: '2-digit',
-                                                        hour12: true,
-                                                    }).replace(',', ' •');
-                                                } catch (error) {
-                                                    return boat.endDay;
-                                                }
-                                            })()}
-                                        </Text>
-                                    </Flex>
-                                </Flex>
-                                <Flex gap='24px' alignItems="flex-end">
-                                    <Button 
-                                        borderRadius='full' 
-                                        bg='#FEA02F' 
-                                        fontSize='14px' 
-                                        fontWeight='400'
-                                        color='black' 
-                                        sx={{ 
-                                            padding: '4px 8px !important',
-                                            minHeight: 'unset',
-                                            height: 'auto',
-                                            lineHeight: '1.2'
-                                        }}
-                                    >
-                                        service request
-                                    </Button>
-                                    <Link variant="unstyled" textDecoration="underline" fontSize='14px' fontWeight='400' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">Open detail view</Link>
-                                </Flex>
-                            </Box>
-                        </Flex>
+                        <HoverReservation boat={boat} />
                     </PopoverBody>
                 </PopoverContent>
             </Popover>

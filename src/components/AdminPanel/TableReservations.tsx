@@ -84,6 +84,24 @@ interface TableReservationsProps {
     isMonthView?: boolean;
 }
 
+export const getCellColor = (boat: Boat): { bg: string; textColor: string } => {
+    // Используем статусы из API через поле admin_status
+    if (boat.admin_status === 'require_action') {
+        return { bg: "system-error", textColor: "white" }; // red - требует действия
+    }
+    
+    if (boat.admin_status === 'future_action') {
+        return { bg: "system.warningYellow", textColor: "white" }; // yellow - будущее действие
+    }
+    
+    if (boat.admin_status === 'completed') {
+        return { bg: "bg.success", textColor: "basic.grey700" }; // light green - завершено
+    }
+    
+    // По умолчанию - нормальное состояние
+    return { bg: "system.successGreen", textColor: "white" }; // green (default) - нормальное состояние
+};
+
 const TableReservations: React.FC<TableReservationsProps> = ({
     days,
     renderHeader,
@@ -242,13 +260,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                 const [endYear, endMonth, endDay] = days[days.length - 1].split('-').map(Number);
                 const periodEndDate = new Date(endYear, endMonth - 1, endDay, 23, 59, 59);
 
-                console.log('Period range:', {
-                    start: periodStartDate.toISOString(),
-                    end: periodEndDate.toISOString(),
-                    startLocal: periodStartDate.toString(),
-                    endLocal: periodEndDate.toString()
-                });
-
                 const apiBoats = reservations.data
                     .filter(reservation => {
                         try {
@@ -286,24 +297,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                             const formatLocalDate = (date: Date) => {
                                 return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
                             };
-
-                            // Для отладки выводим информацию о преобразовании времени
-                            console.log('Converting dates for reservation:', {
-                                id: reservation.mooring_ball.ball_number.toString(),
-                                name: reservation.boat?.boatname || 'N/A',
-                                startUTC: startDateUTC.toISOString(),
-                                endUTC: endDateUTC.toISOString(),
-                                startLocal: startDateUTC.toString(),
-                                endLocal: endDateUTC.toString(),
-                                startLocalHours: startDateUTC.getHours(),
-                                endLocalHours: endDateUTC.getHours(),
-                                startLocalFormatted: formatLocalDate(startDateUTC),
-                                endLocalFormatted: formatLocalDate(endDateUTC),
-                                utcOffset: startDateUTC.getTimezoneOffset() / 60,
-                                startsInSecondHalfLocal: startDateUTC.getHours() >= 12,
-                                endsInFirstHalfLocal: endDateUTC.getHours() < 12,
-                            });
-
                             // Используем локальное время для всей таблицы
                             const boat = {
                                 id: reservation.mooring_ball.ball_number.toString(),
@@ -368,41 +361,12 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         }
     };
 
-    const getCellColor = (boat: Boat): { bg: string; textColor: string } => {
-        // Используем статусы из API через поле admin_status
-        if (boat.admin_status === 'require_action') {
-            return { bg: "system-error", textColor: "white" }; // red - требует действия
-        }
-        
-        if (boat.admin_status === 'future_action') {
-            return { bg: "system.warningYellow", textColor: "white" }; // yellow - будущее действие
-        }
-        
-        if (boat.admin_status === 'completed') {
-            return { bg: "bg.success", textColor: "basic.grey700" }; // light green - завершено
-        }
-        
-        // По умолчанию - нормальное состояние
-        return { bg: "system.successGreen", textColor: "white" }; // green (default) - нормальное состояние
-    };
-
     // Функция для локализованного отображения дня недели
     const getLocalizedDayOfWeek = (dateString: string) => {
         const [year, month, day] = dateString.split('-').map(Number);
         
         // Создаем дату в локальной временной зоне
         const date = new Date(year, month - 1, day);
-        
-        // Для отладки показываем процесс форматирования
-        console.log(`Formatting day of week for ${dateString}:`, {
-            original: dateString,
-            dateObj: date.toString(),
-            isoString: date.toISOString(),
-            timezone: currentTimeZone,
-            weekday: date.toLocaleDateString(undefined, { weekday: 'short' }),
-            hours: date.getHours(),
-            utcOffset: date.getTimezoneOffset() / 60,
-        });
         
         return date.toLocaleDateString(undefined, { weekday: 'short' });
     };

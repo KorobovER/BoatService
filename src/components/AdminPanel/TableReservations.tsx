@@ -600,8 +600,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                                 e.stopPropagation();
                                                 handleCellClick(row.id, day, undefined, timeOfDay);
                                             }}
-                                            // todo: remove borderRight from last cell
-                                            borderRight={!isAM ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
+                                            borderRight={!isAM && dayIndex < days.length - 1 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
                                             borderTop="1px solid var(--chakra-colors-basic-grey100)"
                                         >
                                             <Box height="100%" width="100%" display="flex" alignItems="center" justifyContent="center" />
@@ -701,8 +700,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                         onClick={() => handleCellClick(row.id, day, boatMatch, timeOfDay)}
                                         cursor="pointer"
                                         className={isSelected ? 'selected-cell' : ''}
-                                        // todo: remove borderRight from half day
-                                        borderRight={isAM && halfDayColspan === 1 ? "none" : "1px solid var(--chakra-colors-basic-grey100)"}
+                                        borderRight={dayIndex < days.length - 1 && (halfDayIndex + halfDayColspan) % 2 === 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
                                         borderTop="1px solid var(--chakra-colors-basic-grey100)"
                                         sx={{
                                             overflow: "hidden",

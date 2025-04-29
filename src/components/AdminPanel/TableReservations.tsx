@@ -713,7 +713,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                     >
                                         <Flex
                                             height="44px"
-                                            width="100%"
+                                            width="calc(100% - 4px)"
+                                            margin="0 2px"
                                             alignItems="center"
                                             justifyContent="center"
                                             bg={getCellColor(boatMatch).bg}

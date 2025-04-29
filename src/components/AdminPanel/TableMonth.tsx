@@ -114,7 +114,8 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
             <Popover trigger="hover" placement="bottom" strategy="fixed">
                 <PopoverTrigger>
                     <Flex
-                        width="100%"
+                        width="98%"
+                        margin="auto"
                         height="100%"
                         gap={isShortReservation ? "0" : "8px"} // No gap if only icon
                         alignItems="center"

@@ -93,7 +93,7 @@ const PopoverBoatContent: React.FC<PopoverBoatContentProps> = ({ boat }) => {
                 <Flex gap='24px' alignItems="flex-end">
                     <Button 
                         borderRadius='full' 
-                        bg='#FEA02F' 
+                        bg="var(--chakra-colors-system-warningYellow)"
                         fontSize='14px' 
                         fontWeight='400'
                         color='black' 

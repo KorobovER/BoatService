@@ -34,6 +34,9 @@ const colors = {
     orange: "#FCF0E5",
     mooringField: "#E4E4E4"
   },
+  calendar: {
+    todayBg: "#FAE8D9"
+  },
   // Градиенты
   gradient: {
     orange: "linear-gradient(to right, #DD6600, #EF5457)",

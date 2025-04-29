@@ -163,7 +163,7 @@ const MarinasMenu = () => {
                             key={marina.marina_id}
                             rounded='xl'
                             onClick={() => handleMarinaSelect(marina)}
-                            _hover={{ bg: '#FAE8D9' }}
+                            _hover={{ bg: 'var(--chakra-colors-calendar-todayBg)' }}
                             p='xs'
                         >
                             <HStack gap='sm'>

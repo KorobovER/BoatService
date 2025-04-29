@@ -181,7 +181,12 @@ function Dashboard() {
                                 onReservationClick={handleReservationClick}
                             />
                         )}
-                        {currentView === 'day' && <TableDay />}
+                        {currentView === 'day' && (
+                            <TableDay
+                                currentDate={currentWeekStart}
+                                onReservationClick={handleReservationClick}
+                            />
+                        )}
                     </Box>
                 </Box>
                 {selectedReservation && (

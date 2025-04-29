@@ -144,7 +144,7 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
                     transform="translate(-50%, -50%)"
                     bg="#FAE8D9"
                     borderRadius="full"
-                    width="150px"
+                    width="100%"
                     height="44px"
                     zIndex="1"
                 />

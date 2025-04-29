@@ -79,7 +79,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                     transform="translate(-50%, -50%)"
                     bg="#FAE8D9"
                     borderRadius="full"
-                    width={{ base: "30px", sm: "34px", md: "36px" }}
+                    width="100%"
                     height={{ base: "30px", sm: "34px", md: "36px" }}
                     zIndex="1"
                 />

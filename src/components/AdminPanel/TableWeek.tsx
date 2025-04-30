@@ -123,13 +123,14 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
                 fontWeight="500"
                 textAlign="center"
                 position="relative"
+                textTransform="capitalize"
                 zIndex="2"
             >
                 {(() => {
                     try {
                         const [year, month, dayOfMonth] = day.split('-').map(Number);
                         const date = new Date(Date.UTC(year, month - 1, dayOfMonth));
-                        const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
+                        const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC'});
                         return `${dayOfWeek} ${month}/${dayOfMonth}`;
                     } catch (error) {
                         console.error('Error in renderHeader:', error);

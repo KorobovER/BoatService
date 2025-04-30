@@ -172,6 +172,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
                     </Flex>
                 </PopoverTrigger>
                 <PopoverContent
+                    width='fit-content'
                     border="1px solid var(--chakra-colors-basic-grey200)"
                     borderRadius="var(--chakra-radii-md)"
                     bg="basic.grey100"

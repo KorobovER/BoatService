@@ -143,7 +143,9 @@ export type EmployeeCreate = {
   email: string
   is_active?: boolean
   is_superuser?: boolean
-  full_name?: string | null
+  first_name?: string | null
+  last_name?: string | null
+  preferred_name?: string | null
   password: string
   marina_id?: string | null
 }
@@ -152,7 +154,9 @@ export type EmployeePublic = {
   email: string
   is_active?: boolean
   is_superuser?: boolean
-  full_name?: string | null
+  first_name?: string | null
+  last_name?: string | null
+  preferred_name?: string | null
   id: string
   display_name: string
   display_initials: string
@@ -164,7 +168,9 @@ export type EmployeePublic = {
 export type EmployeeRegister = {
   email: string
   password: string
-  full_name?: string | null
+  first_name: string
+  last_name: string
+  preferred_name?: string | null
   marina_id?: string | null
 }
 
@@ -172,13 +178,17 @@ export type EmployeeUpdate = {
   email?: string | null
   is_active?: boolean
   is_superuser?: boolean
-  full_name?: string | null
+  first_name?: string | null
+  last_name?: string | null
+  preferred_name?: string | null
   password?: string | null
   marina_links?: Array<string>
 }
 
 export type EmployeeUpdateMe = {
-  full_name?: string | null
+  first_name?: string | null
+  last_name?: string | null
+  preferred_name?: string | null
   email?: string | null
 }
 
@@ -756,9 +766,9 @@ export type UserUpdate = {
 }
 
 export type UserUpdateMe = {
+  email?: string | null
   first_name?: string | null
   last_name?: string | null
-  email?: string | null
   preferred_name?: string | null
   country_code?: number | null
   country_code_name?: string | null

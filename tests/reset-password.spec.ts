@@ -31,13 +31,14 @@ test("User can reset password successfully using the link", async ({
   page,
   request,
 }) => {
-  const fullName = "Test User"
+  const firstName = "Test"
+  const lastName = "User"
   const email = randomEmail()
   const password = randomPassword()
   const newPassword = randomPassword()
 
   // Sign up a new user
-  await signUpNewUser(page, fullName, email, password)
+  await signUpNewUser(page, firstName, lastName, email, password)
 
   await page.goto("/recover-password")
   await page.getByPlaceholder("Email").fill(email)
@@ -85,13 +86,14 @@ test("Expired or invalid reset link", async ({ page }) => {
 })
 
 test("Weak new password validation", async ({ page, request }) => {
-  const fullName = "Test User"
+  const firstName = "Test"
+  const lastName = "User"
   const email = randomEmail()
   const password = randomPassword()
   const weakPassword = "123"
 
   // Sign up a new user
-  await signUpNewUser(page, fullName, email, password)
+  await signUpNewUser(page, firstName, lastName, email, password)
 
   await page.goto("/recover-password")
   await page.getByPlaceholder("Email").fill(email)

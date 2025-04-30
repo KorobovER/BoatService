@@ -51,7 +51,8 @@ function SignUp() {
     criteriaMode: "all",
     defaultValues: {
       email: "",
-      full_name: "",
+      first_name: "",
+      last_name: "",
       password: "",
       confirm_password: "",
     },
@@ -82,19 +83,34 @@ function SignUp() {
             alignSelf="center"
             mb={4}
           />
-          <FormControl id="full_name" isInvalid={!!errors.full_name}>
-            <FormLabel htmlFor="full_name" srOnly>
-              Full Name
+          <FormControl id="first_name" isInvalid={!!errors.first_name}>
+            <FormLabel htmlFor="first_name" srOnly>
+              First Name
             </FormLabel>
             <Input
-              id="full_name"
+              id="first_name"
               minLength={3}
-              {...register("full_name", { required: "Full Name is required" })}
-              placeholder="Full Name"
+              {...register("first_name", { required: "First Name is required" })}
+              placeholder="First Name"
               type="text"
             />
-            {errors.full_name && (
-              <FormErrorMessage>{errors.full_name.message}</FormErrorMessage>
+            {errors.first_name && (
+              <FormErrorMessage>{errors.first_name.message}</FormErrorMessage>
+            )}
+          </FormControl>
+          <FormControl id="last_name" isInvalid={!!errors.last_name}>
+            <FormLabel htmlFor="last_name" srOnly>
+              Last Name
+            </FormLabel>
+            <Input
+              id="last_name"
+              minLength={3}
+              {...register("last_name", { required: "Last Name is required" })}
+              placeholder="Last Name"
+              type="text"
+            />
+            {errors.last_name && (
+              <FormErrorMessage>{errors.last_name.message}</FormErrorMessage>
             )}
           </FormControl>
           <FormControl id="email" isInvalid={!!errors.email}>

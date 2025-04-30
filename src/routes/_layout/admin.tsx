@@ -38,8 +38,8 @@ const PER_PAGE = 5
 function getUsersQueryOptions({ page }: { page: number }) {
   return {
     queryFn: () =>
-        // todo: pass proper marinaId
-        EmployeesService.readEmployees({ marinaId: "", skip: (page - 1) * PER_PAGE, limit: PER_PAGE }),
+      // todo: pass proper marinaId
+      EmployeesService.readEmployees({ marinaId: "", skip: (page - 1) * PER_PAGE, limit: PER_PAGE }),
     queryKey: ["users", { page }],
   }
 }
@@ -99,11 +99,11 @@ function UsersTable() {
               {users?.data.map((user) => (
                 <Tr key={user.id}>
                   <Td
-                    color={!user.full_name ? "ui.dim" : "inherit"}
+                    color={!user.display_name ? "ui.dim" : "inherit"}
                     isTruncated
                     maxWidth="150px"
                   >
-                    {user.full_name || "N/A"}
+                    {user.display_name || "N/A"}
                     {currentUser?.id === user.id && (
                       <Badge ml="1" colorScheme="teal">
                         You

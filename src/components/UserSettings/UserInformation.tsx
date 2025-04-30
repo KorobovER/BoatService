@@ -41,7 +41,8 @@ const UserInformation = () => {
     mode: "onBlur",
     criteriaMode: "all",
     defaultValues: {
-      full_name: currentUser?.full_name,
+      first_name: currentUser?.first_name,
+      last_name: currentUser?.last_name,
       email: currentUser?.email,
     },
   })
@@ -85,13 +86,13 @@ const UserInformation = () => {
           onSubmit={handleSubmit(onSubmit)}
         >
           <FormControl>
-            <FormLabel color={color} htmlFor="name">
-              Full name
+            <FormLabel color={color} htmlFor="firstName">
+              First name
             </FormLabel>
             {editMode ? (
               <Input
-                id="name"
-                {...register("full_name", { maxLength: 30 })}
+                id="firstName"
+                {...register("first_name", { maxLength: 30 })}
                 type="text"
                 size="md"
                 w="auto"
@@ -100,11 +101,35 @@ const UserInformation = () => {
               <Text
                 size="md"
                 py={2}
-                color={!currentUser?.full_name ? "ui.dim" : "inherit"}
+                color={!currentUser?.first_name ? "ui.dim" : "inherit"}
                 isTruncated
                 maxWidth="250px"
               >
-                {currentUser?.full_name || "N/A"}
+                {currentUser?.first_name || "N/A"}
+              </Text>
+            )}
+          </FormControl>
+          <FormControl>
+            <FormLabel color={color} htmlFor="name">
+              Last name
+            </FormLabel>
+            {editMode ? (
+              <Input
+                id="lastName"
+                {...register("last_name", { maxLength: 30 })}
+                type="text"
+                size="md"
+                w="auto"
+              />
+            ) : (
+              <Text
+                size="md"
+                py={2}
+                color={!currentUser?.last_name ? "ui.dim" : "inherit"}
+                isTruncated
+                maxWidth="250px"
+              >
+                {currentUser?.last_name || "N/A"}
               </Text>
             )}
           </FormControl>

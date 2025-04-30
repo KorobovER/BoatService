@@ -26,13 +26,14 @@ test.describe("Edit user full name and email successfully", () => {
   test.use({ storageState: { cookies: [], origins: [] } })
 
   test("Edit user name with a valid name", async ({ page }) => {
-    const fullName = "Test User"
+    const firstName = "Test"
+    const lastName = "User"
     const email = randomEmail()
-    const updatedName = "Test User 2"
+    const updatedName = "Test2"
     const password = randomPassword()
 
     // Sign up a new user
-    await signUpNewUser(page, fullName, email, password)
+    await signUpNewUser(page, firstName, lastName, email, password)
 
     // Log in the user
     await logInUser(page, email, password)
@@ -40,7 +41,7 @@ test.describe("Edit user full name and email successfully", () => {
     await page.goto("/settings")
     await page.getByRole("tab", { name: "My profile" }).click()
     await page.getByRole("button", { name: "Edit" }).click()
-    await page.getByLabel("Full name").fill(updatedName)
+    await page.getByLabel("First name").fill(updatedName)
     await page.getByRole("button", { name: "Save" }).click()
     await expect(page.getByText("Employee updated successfully")).toBeVisible()
     // Check if the new name is displayed on the page
@@ -50,13 +51,14 @@ test.describe("Edit user full name and email successfully", () => {
   })
 
   test("Edit user email with a valid email", async ({ page }) => {
-    const fullName = "Test User"
+    const firstName = "Test"
+    const lastName = "User"
     const email = randomEmail()
     const updatedEmail = randomEmail()
     const password = randomPassword()
 
     // Sign up a new user
-    await signUpNewUser(page, fullName, email, password)
+    await signUpNewUser(page, firstName, lastName, email, password)
 
     // Log in the user
     await logInUser(page, email, password)
@@ -77,13 +79,14 @@ test.describe("Edit user with invalid data", () => {
   test.use({ storageState: { cookies: [], origins: [] } })
 
   test("Edit user email with an invalid email", async ({ page }) => {
-    const fullName = "Test User"
+    const firstName = "Test"
+    const lastName = "User"
     const email = randomEmail()
     const password = randomPassword()
     const invalidEmail = ""
 
     // Sign up a new user
-    await signUpNewUser(page, fullName, email, password)
+    await signUpNewUser(page, firstName, lastName, email, password)
 
     // Log in the user
     await logInUser(page, email, password)
@@ -97,13 +100,14 @@ test.describe("Edit user with invalid data", () => {
   })
 
   test("Cancel edit action restores original name", async ({ page }) => {
-    const fullName = "Test User"
+    const firstName = "Test"
+    const lastName = "User"
     const email = randomEmail()
     const password = randomPassword()
-    const updatedName = "Test User"
+    const updatedName = "Test2"
 
     // Sign up a new user
-    await signUpNewUser(page, fullName, email, password)
+    await signUpNewUser(page, firstName, lastName, email, password)
 
     // Log in the user
     await logInUser(page, email, password)
@@ -111,21 +115,22 @@ test.describe("Edit user with invalid data", () => {
     await page.goto("/settings")
     await page.getByRole("tab", { name: "My profile" }).click()
     await page.getByRole("button", { name: "Edit" }).click()
-    await page.getByLabel("Full name").fill(updatedName)
+    await page.getByLabel("First name").fill(updatedName)
     await page.getByRole("button", { name: "Cancel" }).first().click()
     await expect(
-      page.getByLabel("My profile").getByText(fullName, { exact: true }),
+      page.getByLabel("My profile").getByText(firstName, { exact: true }),
     ).toBeVisible()
   })
 
   test("Cancel edit action restores original email", async ({ page }) => {
-    const fullName = "Test User"
+    const firstName = "Test"
+    const lastName = "User"
     const email = randomEmail()
     const password = randomPassword()
     const updatedEmail = randomEmail()
 
     // Sign up a new user
-    await signUpNewUser(page, fullName, email, password)
+    await signUpNewUser(page, firstName, lastName, email, password)
 
     // Log in the user
     await logInUser(page, email, password)
@@ -147,13 +152,14 @@ test.describe("Change password successfully", () => {
   test.use({ storageState: { cookies: [], origins: [] } })
 
   test("Update password successfully", async ({ page }) => {
-    const fullName = "Test User"
+    const firstName = "Test"
+    const lastName = "User"
     const email = randomEmail()
     const password = randomPassword()
     const NewPassword = randomPassword()
 
     // Sign up a new user
-    await signUpNewUser(page, fullName, email, password)
+    await signUpNewUser(page, firstName, lastName, email, password)
 
     // Log in the user
     await logInUser(page, email, password)
@@ -177,13 +183,14 @@ test.describe("Change password with invalid data", () => {
   test.use({ storageState: { cookies: [], origins: [] } })
 
   test("Update password with weak passwords", async ({ page }) => {
-    const fullName = "Test User"
+    const firstName = "Test"
+    const lastName = "User"
     const email = randomEmail()
     const password = randomPassword()
     const weakPassword = "weak"
 
     // Sign up a new user
-    await signUpNewUser(page, fullName, email, password)
+    await signUpNewUser(page, firstName, lastName, email, password)
 
     // Log in the user
     await logInUser(page, email, password)
@@ -201,14 +208,15 @@ test.describe("Change password with invalid data", () => {
   test("New password and confirmation password do not match", async ({
     page,
   }) => {
-    const fullName = "Test User"
+    const firstName = "Test"
+    const lastName = "User"
     const email = randomEmail()
     const password = randomPassword()
     const newPassword = randomPassword()
     const confirmPassword = randomPassword()
 
     // Sign up a new user
-    await signUpNewUser(page, fullName, email, password)
+    await signUpNewUser(page, firstName, lastName, email, password)
 
     // Log in the user
     await logInUser(page, email, password)
@@ -223,12 +231,13 @@ test.describe("Change password with invalid data", () => {
   })
 
   test("Current password and new password are the same", async ({ page }) => {
-    const fullName = "Test User"
+    const firstName = "Test"
+    const lastName = "User"
     const email = randomEmail()
     const password = randomPassword()
 
     // Sign up a new user
-    await signUpNewUser(page, fullName, email, password)
+    await signUpNewUser(page, firstName, lastName, email, password)
 
     // Log in the user
     await logInUser(page, email, password)

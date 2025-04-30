@@ -5240,7 +5240,7 @@
             "title": "Is Superuser",
             "default": false
           },
-          "full_name": {
+          "first_name": {
             "anyOf": [
               {
                 "type": "string",
@@ -5250,7 +5250,31 @@
                 "type": "null"
               }
             ],
-            "title": "Full Name"
+            "title": "First Name"
+          },
+          "last_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Name"
+          },
+          "preferred_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Name"
           },
           "password": {
             "type": "string",
@@ -5297,7 +5321,7 @@
             "title": "Is Superuser",
             "default": false
           },
-          "full_name": {
+          "first_name": {
             "anyOf": [
               {
                 "type": "string",
@@ -5307,7 +5331,31 @@
                 "type": "null"
               }
             ],
-            "title": "Full Name"
+            "title": "First Name"
+          },
+          "last_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Name"
+          },
+          "preferred_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Name"
           },
           "id": {
             "type": "string",
@@ -5366,7 +5414,19 @@
             "minLength": 8,
             "title": "Password"
           },
-          "full_name": {
+          "first_name": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "First Name"
+          },
+          "last_name": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Last Name"
+          },
+          "preferred_name": {
             "anyOf": [
               {
                 "type": "string",
@@ -5376,7 +5436,7 @@
                 "type": "null"
               }
             ],
-            "title": "Full Name"
+            "title": "Preferred Name"
           },
           "marina_id": {
             "anyOf": [
@@ -5395,7 +5455,9 @@
         "type": "object",
         "required": [
           "email",
-          "password"
+          "password",
+          "first_name",
+          "last_name"
         ],
         "title": "EmployeeRegister"
       },
@@ -5424,7 +5486,7 @@
             "title": "Is Superuser",
             "default": false
           },
-          "full_name": {
+          "first_name": {
             "anyOf": [
               {
                 "type": "string",
@@ -5434,7 +5496,31 @@
                 "type": "null"
               }
             ],
-            "title": "Full Name"
+            "title": "First Name"
+          },
+          "last_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Name"
+          },
+          "preferred_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Name"
           },
           "password": {
             "anyOf": [
@@ -5464,7 +5550,7 @@
       },
       "EmployeeUpdateMe": {
         "properties": {
-          "full_name": {
+          "first_name": {
             "anyOf": [
               {
                 "type": "string",
@@ -5474,7 +5560,31 @@
                 "type": "null"
               }
             ],
-            "title": "Full Name"
+            "title": "First Name"
+          },
+          "last_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Name"
+          },
+          "preferred_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Name"
           },
           "email": {
             "anyOf": [
@@ -8907,6 +9017,19 @@
       },
       "UserUpdateMe": {
         "properties": {
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64,
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
           "first_name": {
             "anyOf": [
               {
@@ -8930,19 +9053,6 @@
               }
             ],
             "title": "Last Name"
-          },
-          "email": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 64,
-                "format": "email"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Email"
           },
           "preferred_name": {
             "anyOf": [

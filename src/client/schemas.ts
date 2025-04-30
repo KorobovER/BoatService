@@ -757,7 +757,31 @@ export const $EmployeeCreate = {
       type: "boolean",
       default: false,
     },
-    full_name: {
+    first_name: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 64,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    last_name: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 64,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    preferred_name: {
       type: "any-of",
       contains: [
         {
@@ -807,7 +831,31 @@ export const $EmployeePublic = {
       type: "boolean",
       default: false,
     },
-    full_name: {
+    first_name: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 64,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    last_name: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 64,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    preferred_name: {
       type: "any-of",
       contains: [
         {
@@ -866,7 +914,19 @@ export const $EmployeeRegister = {
       maxLength: 40,
       minLength: 8,
     },
-    full_name: {
+    first_name: {
+      type: "string",
+      isRequired: true,
+      maxLength: 64,
+      minLength: 1,
+    },
+    last_name: {
+      type: "string",
+      isRequired: true,
+      maxLength: 64,
+      minLength: 1,
+    },
+    preferred_name: {
       type: "any-of",
       contains: [
         {
@@ -917,7 +977,31 @@ export const $EmployeeUpdate = {
       type: "boolean",
       default: false,
     },
-    full_name: {
+    first_name: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 64,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    last_name: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 64,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    preferred_name: {
       type: "any-of",
       contains: [
         {
@@ -955,7 +1039,31 @@ export const $EmployeeUpdate = {
 
 export const $EmployeeUpdateMe = {
   properties: {
-    full_name: {
+    first_name: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 64,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    last_name: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 64,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
+    preferred_name: {
       type: "any-of",
       contains: [
         {
@@ -4009,6 +4117,19 @@ export const $UserUpdate = {
 
 export const $UserUpdateMe = {
   properties: {
+    email: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          format: "email",
+          maxLength: 64,
+        },
+        {
+          type: "null",
+        },
+      ],
+    },
     first_name: {
       type: "any-of",
       contains: [
@@ -4026,19 +4147,6 @@ export const $UserUpdateMe = {
       contains: [
         {
           type: "string",
-          maxLength: 64,
-        },
-        {
-          type: "null",
-        },
-      ],
-    },
-    email: {
-      type: "any-of",
-      contains: [
-        {
-          type: "string",
-          format: "email",
           maxLength: 64,
         },
         {

@@ -45,7 +45,8 @@ const AddEmployee = ({ isOpen, onClose }: AddEmployeeProps) => {
     criteriaMode: "all",
     defaultValues: {
       email: "",
-      full_name: "",
+      first_name: "",
+      last_name: "",
       password: "",
       confirm_password: "",
       marina_id: "",
@@ -102,16 +103,28 @@ const AddEmployee = ({ isOpen, onClose }: AddEmployeeProps) => {
                 <FormErrorMessage>{errors.email.message}</FormErrorMessage>
               )}
             </FormControl>
-            <FormControl mt={4} isInvalid={!!errors.full_name}>
-              <FormLabel htmlFor="name">Full name</FormLabel>
+            <FormControl mt={4} isInvalid={!!errors.first_name}>
+              <FormLabel htmlFor="firstName">First name</FormLabel>
               <Input
-                id="name"
-                {...register("full_name")}
-                placeholder="Full name"
+                id="firstName"
+                {...register("first_name")}
+                placeholder="First name"
                 type="text"
               />
-              {errors.full_name && (
-                <FormErrorMessage>{errors.full_name.message}</FormErrorMessage>
+              {errors.first_name && (
+                <FormErrorMessage>{errors.first_name.message}</FormErrorMessage>
+              )}
+            </FormControl>
+            <FormControl mt={4} isInvalid={!!errors.last_name}>
+              <FormLabel htmlFor="lastName">Last name</FormLabel>
+              <Input
+                id="lastName"
+                {...register("last_name")}
+                placeholder="Last name"
+                type="text"
+              />
+              {errors.last_name && (
+                <FormErrorMessage>{errors.last_name.message}</FormErrorMessage>
               )}
             </FormControl>
             <FormControl mt={4} isRequired isInvalid={!!errors.password}>

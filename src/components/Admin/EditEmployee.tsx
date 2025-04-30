@@ -108,8 +108,12 @@ const EditEmployee = ({ item, isOpen, onClose }: EditEmployeeProps) => {
               )}
             </FormControl>
             <FormControl mt={4}>
-              <FormLabel htmlFor="name">Full name</FormLabel>
-              <Input id="name" {...register("full_name")} type="text" />
+              <FormLabel htmlFor="firstName">First name</FormLabel>
+              <Input id="firstName" {...register("first_name")} type="text" />
+            </FormControl>
+            <FormControl mt={4}>
+              <FormLabel htmlFor="lastName">Last name</FormLabel>
+              <Input id="lastName" {...register("last_name")} type="text" />
             </FormControl>
             <FormControl mt={4} isInvalid={!!errors.password}>
               <FormLabel htmlFor="password">Set Password</FormLabel>

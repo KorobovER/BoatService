@@ -72,6 +72,10 @@ export interface Boat {
     endDateObj: Date;
     startsInSecondHalfLocal: boolean;
     endsInFirstHalfLocal: boolean;
+    startsBefore?: boolean;
+    endsAfter?: boolean;
+    effectiveStartDate?: Date;
+    effectiveEndDate?: Date;
 }
 
 interface TableReservationsProps {
@@ -167,19 +171,9 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     // Перезагружаем данные при изменении временной зоны
     useEffect(() => {
         if (boats.length > 0) {
-            console.log('Time zone changed to:', currentTimeZone);
-            
             // Принудительно инвалидируем кэш для обновления данных
             queryClient.invalidateQueries({ queryKey: ['mooringBalls'] });
             queryClient.invalidateQueries({ queryKey: ['reservations'] });
-            
-            // Выводим информацию о смене часового пояса для отладки
-            console.log('Timezone change detected:', {
-                newTimezone: currentTimeZone,
-                date: new Date().toString(),
-                utcDate: new Date().toUTCString(),
-                utcOffset: new Date().getTimezoneOffset() / 60
-            });
         }
     }, [currentTimeZone, queryClient, boats.length]);
 
@@ -221,7 +215,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
 
     // Debugging for days array
     useEffect(() => {
-        console.log('TableReservations: days array changed:', days);
+        // Array changes are tracked
     }, [days]);
 
     // Обработка швартовок (общая логика)
@@ -251,8 +245,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     useEffect(() => {
         if (reservations?.data && days.length > 0) {
             try {
-                console.log('TableReservations: Processing reservations for days:', days);
-                
                 // Создаем диапазон дат в локальной временной зоне
                 const [startYear, startMonth, startDay] = days[0].split('-').map(Number);
                 const periodStartDate = new Date(startYear, startMonth - 1, startDay, 0, 0, 0);
@@ -270,14 +262,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                             // Парсим строки дат - они будут автоматически преобразованы в локальное время
                             const resStart = new Date(resStartStr);
                             const resEnd = new Date(resEndStr);
-
-                            console.log('Reservation dates:', {
-                                id: reservation.mooring_ball?.ball_number.toString(),
-                                startUTC: resStartStr,
-                                endUTC: resEndStr,
-                                startLocal: resStart.toString(),
-                                endLocal: resEnd.toString()
-                            });
 
                             // Проверяем, если хотя бы часть резервации попадает в видимый период
                             // Резервация начинается до конца периода И заканчивается после начала периода
@@ -326,6 +310,10 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 // Сохраняем оригинальные объекты Date для использования в компонентах
                                 startDateObj: startDateUTC,
                                 endDateObj: endDateUTC,
+                                startsBefore: startDateUTC < periodStartDate,
+                                endsAfter: endDateUTC > periodEndDate,
+                                effectiveStartDate: startDateUTC < periodStartDate ? startDateUTC : undefined,
+                                effectiveEndDate: endDateUTC > periodEndDate ? endDateUTC : undefined,
                             };
                             return boat;
                         } catch (error) {
@@ -373,19 +361,21 @@ const TableReservations: React.FC<TableReservationsProps> = ({
 
     // Функция для локализованного отображения дня и месяца
     const getLocalizedDate = (dateString: string) => {
-        const [year, month, day] = dateString.split('-').map(Number);
-        
-        // Создаем дату в локальной временной зоне
-        const date = new Date(year, month - 1, day);
-        
-        // Для отладки
-        console.log(`Formatting date for ${dateString}:`, {
-            original: dateString,
-            formatted: date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }),
-            timezone: currentTimeZone
-        });
-        
-        return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+        try {
+            const [year, month, day] = dateString.split('-').map(Number);
+            const date = new Date(year, month - 1, day);
+            
+            // Format the date in a localized way based on timezone
+            const formattedDate = date.toLocaleDateString(undefined, {
+                day: 'numeric',
+                month: 'numeric',
+            });
+            
+            return formattedDate;
+        } catch (e) {
+            console.error('Error formatting date:', e);
+            return dateString;
+        }
     };
 
     // Добавим отладочное сообщение для контроля временной зоны

@@ -17,6 +17,30 @@ const HoverReservation: React.FC<HoverReservationProps> = ({ boat }) => {
         color: hasServiceRequests ? 'basic.grey900' : 'white'
     };
 
+    // Helper function to format date and time correctly
+    const formatDateTime = (dateObj: Date) => {
+        if (!dateObj || !(dateObj instanceof Date) || isNaN(dateObj.getTime())) {
+            return 'Invalid date';
+        }
+        
+        const time = dateObj.toLocaleString('en-US', {
+            hour: 'numeric',
+            hour12: true,
+        }).toLowerCase();
+        
+        const dateStr = dateObj.toLocaleString('en-US', {
+            month: 'long',
+            day: 'numeric',
+        });
+        
+        return (
+            <>
+                <Text as="span" color='basic.grey900' fontWeight="400">{time}</Text>
+                <Text as="span" color='basic.grey900' fontWeight="300">, {dateStr}</Text>
+            </>
+        );
+    };
+
     return (
         <Flex flexDirection='column' gap='8px'>
             <Flex gap='8px' alignItems='center'>
@@ -63,53 +87,13 @@ const HoverReservation: React.FC<HoverReservationProps> = ({ boat }) => {
                 <Flex gap='4px' whiteSpace="nowrap">
                     <Text fontSize="14px" fontWeight="400" color='white' bg='black' p='0 8px' borderRadius='56px'>In</Text>
                     <Text fontSize="14px" fontWeight="400" color='basic.grey700' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
-                        {(() => {
-                            try {
-                                const date = boat.startDateObj || new Date(boat.startDay);
-                                const time = date.toLocaleString('en-US', {
-                                    hour: 'numeric',
-                                    hour12: true,
-                                }).toLowerCase();
-                                const dateStr = date.toLocaleString('en-US', {
-                                    month: 'long',
-                                    day: 'numeric',
-                                });
-                                return (
-                                    <>
-                                        <Text as="span" color='basic.grey900' fontWeight="400">{time}</Text>
-                                        <Text as="span" color='basic.grey900' fontWeight="300">, {dateStr}</Text>
-                                    </>
-                                );
-                            } catch (error) {
-                                return `${boat.startDay} • ${boat.startTime || '--:--'}`;
-                            }
-                        })()}
+                        {boat.startDateObj ? formatDateTime(boat.startDateObj) : 'N/A'}
                     </Text>
                 </Flex>
                 <Flex gap='4px' whiteSpace="nowrap">
                     <Text fontSize="14px" fontWeight="400" color='white' bg='black' p='0 8px' borderRadius='56px'>Out</Text>
                     <Text fontSize="14px" fontWeight="400" color='basic.grey700' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
-                        {(() => {
-                            try {
-                                const date = boat.endDateObj || new Date(boat.endDay);
-                                const time = date.toLocaleString('en-US', {
-                                    hour: 'numeric',
-                                    hour12: true,
-                                }).toLowerCase();
-                                const dateStr = date.toLocaleString('en-US', {
-                                    month: 'long',
-                                    day: 'numeric',
-                                });
-                                return (
-                                    <>
-                                        <Text as="span" color='basic.grey900' fontWeight="400">{time}</Text>
-                                        <Text as="span" color='basic.grey900' fontWeight="300">, {dateStr}</Text>
-                                    </>
-                                );
-                            } catch (error) {
-                                return `${boat.endDay} • ${boat.endTime || '--:--'}`;
-                            }
-                        })()}
+                        {boat.endDateObj ? formatDateTime(boat.endDateObj) : 'N/A'}
                     </Text>
                 </Flex>
             </Flex>

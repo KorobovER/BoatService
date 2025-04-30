@@ -131,6 +131,7 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
                     fontSize="12px"
                     fontWeight="400"
                     onClick={() => onViewChange('day')}
+                    data-testid="day-view-button"
                 >
                     Day
                 </Button>

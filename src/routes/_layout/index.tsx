@@ -19,7 +19,8 @@ function Dashboard() {
     // Use separate month and year for simplicity
     const [currentMonth, setCurrentMonth] = useState<number>(0);
     const [currentYear, setCurrentYear] = useState<number>(0);
-    const [currentView, setCurrentView] = useState<TableView>('week');
+    const [currentView, setCurrentView] = useState<TableView>('day');
+    const [currentDay, setCurrentDay] = useState<string>('');
     const [selectedReservation, setSelectedReservation] = useState<{rowId: string; day: string; boat?: Boat} | null>(null);
     const tableContainerRef = useRef<HTMLDivElement>(null);
 
@@ -33,6 +34,10 @@ function Dashboard() {
         return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
     };
 
+    const formatDateString = (date: Date) => {
+        return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
+    };
+
     // Инициализация начальных дат
     useEffect(() => {
         const today = new Date();
@@ -40,14 +45,35 @@ function Dashboard() {
         // Устанавливаем текущую неделю
         setCurrentWeekStart(getCurrentWeekMonday(today));
         
+        // Устанавливаем текущий день
+        setCurrentDay(formatDateString(today));
+        
         // Устанавливаем текущий месяц и год напрямую (1-12 для месяца)
         setCurrentMonth(today.getUTCMonth() + 1);
         setCurrentYear(today.getUTCFullYear());
+        
+        // Ensure we're in day view by default
+        setCurrentView('day');
     }, []);
 
     // Simple function to get date string from month/year 
     const getMonthDateString = () => {
         return `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
+    };
+
+    // Обработчики для дневного представления
+    const handlePrevDay = () => {
+        const [year, month, day] = currentDay.split('-').map(Number);
+        const date = new Date(Date.UTC(year, month - 1, day));
+        date.setUTCDate(date.getUTCDate() - 1);
+        setCurrentDay(formatDateString(date));
+    };
+
+    const handleNextDay = () => {
+        const [year, month, day] = currentDay.split('-').map(Number);
+        const date = new Date(Date.UTC(year, month - 1, day));
+        date.setUTCDate(date.getUTCDate() + 1);
+        setCurrentDay(formatDateString(date));
     };
 
     // Обработчики для недельного представления
@@ -93,6 +119,8 @@ function Dashboard() {
         if (currentView === 'month') {
             setCurrentMonth(today.getUTCMonth() + 1);
             setCurrentYear(today.getUTCFullYear());
+        } else if (currentView === 'day') {
+            setCurrentDay(formatDateString(today));
         } else {
             setCurrentWeekStart(getCurrentWeekMonday(today));
         }
@@ -110,6 +138,13 @@ function Dashboard() {
             const end = new Date(Date.UTC(year, month - 1, day));
             end.setUTCDate(end.getUTCDate() + 6);
             return `${start.toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' })} - ${end.toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' })}`;
+        } else if (currentView === 'day' && currentDay) {
+            const [year, month, day] = currentDay.split('-').map(Number);
+            const date = new Date(Date.UTC(year, month - 1, day));
+            // Format as "Tuesday 3/4"
+            const weekday = date.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
+            const shortDate = `${month}/${day}`;
+            return `${weekday} ${shortDate}`;
         }
         return '';
     };
@@ -117,6 +152,12 @@ function Dashboard() {
     // Обработчик переключения между режимами
     const handleViewChange = (view: TableView) => {
         setCurrentView(view);
+        
+        // When switching to day view, always set the current day to today
+        if (view === 'day') {
+            const today = new Date();
+            setCurrentDay(formatDateString(today));
+        }
     };
 
     // Общий обработчик для кнопок переключения
@@ -125,6 +166,8 @@ function Dashboard() {
             direction === 'prev' ? handlePrevWeek() : handleNextWeek();
         } else if (currentView === 'month') {
             direction === 'prev' ? handlePrevMonth() : handleNextMonth();
+        } else if (currentView === 'day') {
+            direction === 'prev' ? handlePrevDay() : handleNextDay();
         }
     };
 
@@ -183,7 +226,7 @@ function Dashboard() {
                         )}
                         {currentView === 'day' && (
                             <TableDay
-                                currentDate={currentWeekStart}
+                                currentDate={currentDay}
                                 onReservationClick={handleReservationClick}
                             />
                         )}

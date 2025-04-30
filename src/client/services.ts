@@ -39,13 +39,16 @@ import type {
   MooringBallsWithReservationBasePublic,
   MooringBallUpdate,
   MooringBallWithReservationsPublic,
+  PaymentReceiptPublic,
   ReservationCreate,
   ReservationCreatedPublic,
   ReservationPublic,
   ReservationsPublic,
   ReservationUpdate,
-  ServiceOnReservation,
   ServiceOnReservationCreate,
+  ServiceOnReservationPublic,
+  ServiceOnReservationUpdate,
+  ServiceRequestStatus,
   UserReservationsPublic,
   Body_users_create_profile_pic_me,
   UserRegister,
@@ -1294,9 +1297,22 @@ export type TDataDeleteReservation = {
 export type TDataCreateReservation = {
   requestBody: ReservationCreate
 }
+export type TDataCreatePaymentReceipt = {
+  reservationId: string
+}
 export type TDataRequestReservationService = {
-  id: string
   requestBody: ServiceOnReservationCreate
+  reservationId: string
+}
+export type TDataUpdateReservationService = {
+  requestBody: ServiceOnReservationUpdate
+  reservationId: string
+  serviceId: string
+}
+export type TDataUpdateReservationServiceStatus = {
+  reservationId: string
+  serviceId: string
+  statusIn: ServiceRequestStatus
 }
 export type TDataActivateReservation = {
   id: string
@@ -1458,22 +1474,92 @@ export class ReservationsService {
   }
 
   /**
+   * Create Payment Receipt
+   * @returns PaymentReceiptPublic Successful Response
+   * @throws ApiError
+   */
+  public static createPaymentReceipt(
+    data: TDataCreatePaymentReceipt,
+  ): CancelablePromise<PaymentReceiptPublic> {
+    const { reservationId } = data
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/reservations/{reservation_id}/payment",
+      path: {
+        reservation_id: reservationId,
+      },
+      errors: {
+        422: `Validation Error`,
+      },
+    })
+  }
+
+  /**
    * Request Reservation Service
-   * @returns ServiceOnReservation Successful Response
+   * @returns ServiceOnReservationPublic Successful Response
    * @throws ApiError
    */
   public static requestReservationService(
     data: TDataRequestReservationService,
-  ): CancelablePromise<ServiceOnReservation> {
-    const { id, requestBody } = data
+  ): CancelablePromise<ServiceOnReservationPublic> {
+    const { requestBody, reservationId } = data
     return __request(OpenAPI, {
       method: "POST",
-      url: "/api/v1/reservations/{id}/request-service",
+      url: "/api/v1/reservations/{reservation_id}/request-service",
       path: {
-        id,
+        reservation_id: reservationId,
       },
       body: requestBody,
       mediaType: "application/json",
+      errors: {
+        422: `Validation Error`,
+      },
+    })
+  }
+
+  /**
+   * Update Reservation Service
+   * @returns ServiceOnReservationPublic Successful Response
+   * @throws ApiError
+   */
+  public static updateReservationService(
+    data: TDataUpdateReservationService,
+  ): CancelablePromise<ServiceOnReservationPublic> {
+    const { requestBody, reservationId, serviceId } = data
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/reservations/{reservation_id}/service/{service_id}",
+      path: {
+        reservation_id: reservationId,
+        service_id: serviceId,
+      },
+      body: requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: `Validation Error`,
+      },
+    })
+  }
+
+  /**
+   * Update Reservation Service Status
+   * @returns ServiceOnReservationPublic Successful Response
+   * @throws ApiError
+   */
+  public static updateReservationServiceStatus(
+    data: TDataUpdateReservationServiceStatus,
+  ): CancelablePromise<ServiceOnReservationPublic> {
+    const { reservationId, serviceId, statusIn } = data
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/reservations/{reservation_id}/service/{service_id}/status",
+      path: {
+        reservation_id: reservationId,
+        service_id: serviceId,
+      },
+      query: {
+        status_in: statusIn,
+      },
       errors: {
         422: `Validation Error`,
       },
@@ -1640,12 +1726,12 @@ export class UsersService {
   }
 
   /**
-   * Read Customer Payment Methods
+   * Get Customer Payment Methods
    * Get current user stripe payment info.
    * @returns unknown Successful Response
    * @throws ApiError
    */
-  public static readCustomerPaymentMethods(): CancelablePromise<unknown> {
+  public static getCustomerPaymentMethods(): CancelablePromise<unknown> {
     return __request(OpenAPI, {
       method: "GET",
       url: "/api/v1/users/payment-method/",

@@ -450,9 +450,12 @@ export type PaymentMethodPublic = {
 export type PaymentReceiptPublic = {
   payment_receipt_id: string
   receipt_id: string
-  total_price: number
+  subtotal: number
+  service_fee: number
+  taxes: number
   created_by_user: string | null
   payment_details_simple: PaymentDetailsSimple | null
+  service_requests: Array<ServiceOnReservationPublic>
 }
 
 export type RegionData = {
@@ -573,24 +576,9 @@ export type ReservationsPublic = {
   count: number
 }
 
-export type ServiceOnReservation = {
-  service_reservation_id?: string
-  created_at?: string
-  updated_at: string
-  requested_date?: string
-  status: ServiceRequestStatus
-  services?: Array<SubServiceRequest>
-  special_instructions: string | null
-  total_price: number
-  approved_by_user: string | null
-  confirmation_image_url: string | null
-  reservation_id: string
-  payment_receipt_id: string | null
-}
-
 export type ServiceOnReservationCreate = {
   requested_date: string
-  requests: Array<SubServiceRequest>
+  services: Array<SubServiceRequest>
   special_instructions: string | null
 }
 
@@ -603,7 +591,13 @@ export type ServiceOnReservationPublic = {
   services: Array<SubServiceRequest>
   special_instructions: string | null
   total_price: number
-  payment_receipt: PaymentReceiptPublic | null
+  payment_receipt_id: string | null
+}
+
+export type ServiceOnReservationUpdate = {
+  requested_date: string | null
+  services: Array<SubServiceRequest>
+  special_instructions: string | null
 }
 
 export type ServiceRequestStatus =

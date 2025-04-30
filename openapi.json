@@ -2839,7 +2839,55 @@
         ]
       }
     },
-    "/api/v1/reservations/{id}/request-service": {
+    "/api/v1/reservations/{reservation_id}/payment": {
+      "post": {
+        "tags": [
+          "reservations"
+        ],
+        "summary": "Create Payment Receipt",
+        "operationId": "create_payment_receipt",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "reservation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Reservation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentReceiptPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reservations/{reservation_id}/request-service": {
       "post": {
         "tags": [
           "reservations"
@@ -2853,13 +2901,13 @@
         ],
         "parameters": [
           {
-            "name": "id",
+            "name": "reservation_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid",
-              "title": "Id"
+              "title": "Reservation Id"
             }
           }
         ],
@@ -2879,7 +2927,141 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServiceOnReservation"
+                  "$ref": "#/components/schemas/ServiceOnReservationPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reservations/{reservation_id}/service/{service_id}": {
+      "put": {
+        "tags": [
+          "reservations"
+        ],
+        "summary": "Update Reservation Service",
+        "operationId": "update_reservation_service",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "reservation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Reservation Id"
+            }
+          },
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Service Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceOnReservationUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceOnReservationPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reservations/{reservation_id}/service/{service_id}/status": {
+      "put": {
+        "tags": [
+          "reservations"
+        ],
+        "summary": "Update Reservation Service Status",
+        "operationId": "update_reservation_service_status",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "reservation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Reservation Id"
+            }
+          },
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Service Id"
+            }
+          },
+          {
+            "name": "status_in",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ServiceRequestStatus"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceOnReservationPublic"
                 }
               }
             }
@@ -3127,16 +3309,16 @@
         "tags": [
           "users"
         ],
-        "summary": "Read Customer Payment Methods",
+        "summary": "Get Customer Payment Methods",
         "description": "Get current user stripe payment info.",
-        "operationId": "read_customer_payment_methods",
+        "operationId": "get_customer_payment_methods",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Users-Read Customer Payment Methods"
+                  "title": "Response Users-Get Customer Payment Methods"
                 }
               }
             }
@@ -6912,9 +7094,17 @@
             "type": "string",
             "title": "Receipt Id"
           },
-          "total_price": {
+          "subtotal": {
             "type": "number",
-            "title": "Total Price"
+            "title": "Subtotal"
+          },
+          "service_fee": {
+            "type": "number",
+            "title": "Service Fee"
+          },
+          "taxes": {
+            "type": "number",
+            "title": "Taxes"
           },
           "created_by_user": {
             "anyOf": [
@@ -6937,15 +7127,25 @@
                 "type": "null"
               }
             ]
+          },
+          "service_requests": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceOnReservationPublic"
+            },
+            "type": "array",
+            "title": "Service Requests"
           }
         },
         "type": "object",
         "required": [
           "payment_receipt_id",
           "receipt_id",
-          "total_price",
+          "subtotal",
+          "service_fee",
+          "taxes",
           "created_by_user",
-          "payment_details_simple"
+          "payment_details_simple",
+          "service_requests"
         ],
         "title": "PaymentReceiptPublic"
       },
@@ -7591,30 +7791,12 @@
         ],
         "title": "ReservationsPublic"
       },
-      "ServiceOnReservation": {
+      "ServiceOnReservationCreate": {
         "properties": {
-          "service_reservation_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Service Reservation Id"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created At"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Updated At"
-          },
           "requested_date": {
             "type": "string",
             "format": "date-time",
             "title": "Requested Date"
-          },
-          "status": {
-            "$ref": "#/components/schemas/ServiceRequestStatus"
           },
           "services": {
             "items": {
@@ -7634,98 +7816,12 @@
               }
             ],
             "title": "Special Instructions"
-          },
-          "total_price": {
-            "type": "number",
-            "minimum": 0,
-            "title": "Total Price"
-          },
-          "approved_by_user": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Approved By User"
-          },
-          "confirmation_image_url": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 256
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Confirmation Image Url"
-          },
-          "reservation_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Reservation Id"
-          },
-          "payment_receipt_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Payment Receipt Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "updated_at",
-          "status",
-          "special_instructions",
-          "total_price",
-          "approved_by_user",
-          "confirmation_image_url",
-          "reservation_id",
-          "payment_receipt_id"
-        ],
-        "title": "ServiceOnReservation"
-      },
-      "ServiceOnReservationCreate": {
-        "properties": {
-          "requested_date": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Requested Date"
-          },
-          "requests": {
-            "items": {
-              "$ref": "#/components/schemas/SubServiceRequest"
-            },
-            "type": "array",
-            "title": "Requests"
-          },
-          "special_instructions": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 255
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Special Instructions"
           }
         },
         "type": "object",
         "required": [
           "requested_date",
-          "requests",
+          "services",
           "special_instructions"
         ],
         "title": "ServiceOnReservationCreate"
@@ -7775,15 +7871,17 @@
             "type": "number",
             "title": "Total Price"
           },
-          "payment_receipt": {
+          "payment_receipt_id": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/PaymentReceiptPublic"
+                "type": "string",
+                "format": "uuid"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Payment Receipt Id"
           }
         },
         "type": "object",
@@ -7796,9 +7894,51 @@
           "services",
           "special_instructions",
           "total_price",
-          "payment_receipt"
+          "payment_receipt_id"
         ],
         "title": "ServiceOnReservationPublic"
+      },
+      "ServiceOnReservationUpdate": {
+        "properties": {
+          "requested_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested Date"
+          },
+          "services": {
+            "items": {
+              "$ref": "#/components/schemas/SubServiceRequest"
+            },
+            "type": "array",
+            "title": "Services"
+          },
+          "special_instructions": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Special Instructions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "requested_date",
+          "services",
+          "special_instructions"
+        ],
+        "title": "ServiceOnReservationUpdate"
       },
       "ServiceRequestStatus": {
         "type": "string",

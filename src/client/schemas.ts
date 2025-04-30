@@ -2369,7 +2369,15 @@ export const $PaymentReceiptPublic = {
       type: "string",
       isRequired: true,
     },
-    total_price: {
+    subtotal: {
+      type: "number",
+      isRequired: true,
+    },
+    service_fee: {
+      type: "number",
+      isRequired: true,
+    },
+    taxes: {
       type: "number",
       isRequired: true,
     },
@@ -2396,6 +2404,13 @@ export const $PaymentReceiptPublic = {
           type: "null",
         },
       ],
+      isRequired: true,
+    },
+    service_requests: {
+      type: "array",
+      contains: {
+        type: "ServiceOnReservationPublic",
+      },
       isRequired: true,
     },
   },
@@ -2973,100 +2988,6 @@ export const $ReservationsPublic = {
   },
 } as const
 
-export const $ServiceOnReservation = {
-  properties: {
-    service_reservation_id: {
-      type: "string",
-      format: "uuid",
-    },
-    created_at: {
-      type: "string",
-      format: "date-time",
-    },
-    updated_at: {
-      type: "string",
-      isRequired: true,
-      format: "date-time",
-    },
-    requested_date: {
-      type: "string",
-      format: "date-time",
-    },
-    status: {
-      type: "ServiceRequestStatus",
-      isRequired: true,
-    },
-    services: {
-      type: "array",
-      contains: {
-        type: "SubServiceRequest",
-      },
-    },
-    special_instructions: {
-      type: "any-of",
-      contains: [
-        {
-          type: "string",
-          maxLength: 255,
-        },
-        {
-          type: "null",
-        },
-      ],
-      isRequired: true,
-    },
-    total_price: {
-      type: "number",
-      isRequired: true,
-      minimum: 0,
-    },
-    approved_by_user: {
-      type: "any-of",
-      contains: [
-        {
-          type: "string",
-          format: "uuid",
-        },
-        {
-          type: "null",
-        },
-      ],
-      isRequired: true,
-    },
-    confirmation_image_url: {
-      type: "any-of",
-      contains: [
-        {
-          type: "string",
-          maxLength: 256,
-        },
-        {
-          type: "null",
-        },
-      ],
-      isRequired: true,
-    },
-    reservation_id: {
-      type: "string",
-      isRequired: true,
-      format: "uuid",
-    },
-    payment_receipt_id: {
-      type: "any-of",
-      contains: [
-        {
-          type: "string",
-          format: "uuid",
-        },
-        {
-          type: "null",
-        },
-      ],
-      isRequired: true,
-    },
-  },
-} as const
-
 export const $ServiceOnReservationCreate = {
   properties: {
     requested_date: {
@@ -3074,7 +2995,7 @@ export const $ServiceOnReservationCreate = {
       isRequired: true,
       format: "date-time",
     },
-    requests: {
+    services: {
       type: "array",
       contains: {
         type: "SubServiceRequest",
@@ -3144,11 +3065,50 @@ export const $ServiceOnReservationPublic = {
       type: "number",
       isRequired: true,
     },
-    payment_receipt: {
+    payment_receipt_id: {
       type: "any-of",
       contains: [
         {
-          type: "PaymentReceiptPublic",
+          type: "string",
+          format: "uuid",
+        },
+        {
+          type: "null",
+        },
+      ],
+      isRequired: true,
+    },
+  },
+} as const
+
+export const $ServiceOnReservationUpdate = {
+  properties: {
+    requested_date: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          format: "date-time",
+        },
+        {
+          type: "null",
+        },
+      ],
+      isRequired: true,
+    },
+    services: {
+      type: "array",
+      contains: {
+        type: "SubServiceRequest",
+      },
+      isRequired: true,
+    },
+    special_instructions: {
+      type: "any-of",
+      contains: [
+        {
+          type: "string",
+          maxLength: 255,
         },
         {
           type: "null",

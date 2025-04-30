@@ -485,7 +485,7 @@ const TableDay: React.FC<TableDayProps> = ({
                                 const secondHalfIndex = hourIndex * 2 + 1;
                                 
                                 // Convert hour index to 24-hour format hour (0-23)
-                                let realHour;
+                                let realHour: number;
                                 if (hourIndex === 0) {
                                     realHour = 0; // 12 AM (midnight)
                                 } else if (hourIndex === 12) {

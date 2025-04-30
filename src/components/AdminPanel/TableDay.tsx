@@ -299,10 +299,9 @@ const TableDay: React.FC<TableDayProps> = ({
                     .filter(reservation => {
                         try {
                             // Get reservation start and end dates
-                            const startDate = new Date(reservation.start_date);
-                            const endDate = new Date(reservation.end_date);
-                    
-                            
+                            const startDate = new Date(reservation.start_date.endsWith('Z') ? reservation.start_date : reservation.start_date + 'Z');
+                            const endDate = new Date(reservation.end_date.endsWith('Z') ? reservation.end_date : reservation.end_date + 'Z');
+
                             // Check if reservation overlaps with current day
                             // A reservation overlaps with the day if:
                             // 1. It starts before the end of the day AND
@@ -320,9 +319,9 @@ const TableDay: React.FC<TableDayProps> = ({
                     .map(reservation => {
                         try {
                             // Create Date objects for reservation boundaries
-                            const startDate = new Date(reservation.start_date);
-                            const endDate = new Date(reservation.end_date);
-                            
+                            const startDate = new Date(reservation.start_date.endsWith('Z') ? reservation.start_date : reservation.start_date + 'Z');
+                            const endDate = new Date(reservation.end_date.endsWith('Z') ? reservation.end_date : reservation.end_date + 'Z');
+
                             // For the current day view, determine effective start and end times
                             // If the reservation starts before this day, use the start of the day
                             // If the reservation ends after this day, use the end of the day

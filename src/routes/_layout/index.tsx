@@ -19,7 +19,7 @@ function Dashboard() {
     // Use separate month and year for simplicity
     const [currentMonth, setCurrentMonth] = useState<number>(0);
     const [currentYear, setCurrentYear] = useState<number>(0);
-    const [currentView, setCurrentView] = useState<TableView>('day');
+    const [currentView, setCurrentView] = useState<TableView>('week');
     const [currentDay, setCurrentDay] = useState<string>('');
     const [selectedReservation, setSelectedReservation] = useState<{rowId: string; day: string; boat?: Boat} | null>(null);
     const tableContainerRef = useRef<HTMLDivElement>(null);
@@ -52,8 +52,8 @@ function Dashboard() {
         setCurrentMonth(today.getUTCMonth() + 1);
         setCurrentYear(today.getUTCFullYear());
         
-        // Ensure we're in day view by default
-        setCurrentView('day');
+        // Ensure we're in week view by default
+        setCurrentView('week');
     }, []);
 
     // Simple function to get date string from month/year 

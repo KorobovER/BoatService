@@ -45,6 +45,7 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
             height='42px'
             pl='xl'
             pr='xl' 
+            color='basic.grey700'
             activeProps={{
               style: {
                 background: "white",
@@ -59,7 +60,7 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
             onClick={onClose}
           >
             <Icon as={icon} mr='sm' boxSize='14px' />
-            <Text fontSize='14px' color='basic.grey700' fontWeight='400'>{title}</Text>
+            <Text fontSize='14px' fontWeight='400'>{title}</Text>
           </Flex>
         ))}
       </Flex>

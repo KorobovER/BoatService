@@ -99,7 +99,7 @@ const UserMenu = () => {
             <MenuItem
               icon={<FiLogOut fontSize="18px" />}
               onClick={handleLogout}
-              color="system.errorRed"
+              color="ui.danger"
               fontWeight="bold"
             >
               Log out

@@ -75,6 +75,8 @@ export interface Boat {
     endsAfter: boolean;
     effectiveStartDate: Date;
     effectiveEndDate: Date;
+    user_first_name?: string;
+    user_last_name?: string;
 }
 
 interface TableDayProps {
@@ -296,6 +298,9 @@ const TableDay: React.FC<TableDayProps> = ({
                                 // Flags for multi-day handling
                                 startsBefore,
                                 endsAfter,
+                                // Добавляем данные о пользователе
+                                user_first_name: reservation.user?.first_name,
+                                user_last_name: reservation.user?.last_name
                             };
                         } catch (error) {
                             console.error('Error processing reservation:', error);

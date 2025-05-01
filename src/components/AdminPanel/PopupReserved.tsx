@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect} from 'react';
 import { Box, Text, Image, Flex, Button } from '@chakra-ui/react';
 import { Boat } from './TableReservations';
 
@@ -46,32 +46,10 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     isOpen,
     rowId,
     boat,
-    onClose,
+
     day,
 }) => {
-    const [tableHeight, setTableHeight] = useState(0);
-    const [popupMaxHeight, setPopupMaxHeight] = useState('auto');
 
-    // Effect to calculate table height and set popup max height
-    useEffect(() => {
-        if (isOpen) {
-            // Определяем, с какой таблицей работаем (Day или Week/Month)
-            const isTableDay = document.querySelector('td[data-hour]') !== null;
-            const tableSelector = isTableDay ? 'table' : '.reservation-table-body';
-
-            // Находим таблицу
-            const tableElement = document.querySelector(tableSelector);
-            if (tableElement) {
-                const tableRect = tableElement.getBoundingClientRect();
-                setTableHeight(tableRect.height);
-
-                // Учитываем отступы и высоту заголовка попапа (примерно 130px)
-                const maxContentHeight = tableRect.height - 130;
-                setPopupMaxHeight(`${maxContentHeight}px`);
-                console.log('Table found, setting popup max height:', maxContentHeight);
-            }
-        }
-    }, [isOpen]);
 
     useEffect(() => {
         if (isOpen && boat) {
@@ -191,7 +169,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 width="auto"
                 overflow="hidden"
                 gap="lg"
-                
+
             >
                 {/* Header - фиксированный */}
                 <Flex
@@ -329,7 +307,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                                 <Text textAlign="center" fontSize="20px" fontWeight="500" color="brand.primaryOrange">No service requests</Text>
                                 <Text textAlign="center" fontSize="14px" fontWeight="300" color="brand.primaryOrange">Click here to add a service</Text>
                             </Flex>
-                            <Button variant="unstyled" _hover={{ opacity: 0.8 }} borderRadius="100%"><Image src="/assets/images/button-plus.svg" alt="plus"/></Button>
+                            <Button variant="unstyled" _hover={{ opacity: 0.8 }} borderRadius="100%"><Image src="/assets/images/button-plus.svg" alt="plus" /></Button>
                         </Flex>
                     </Flex>
                 </Flex>

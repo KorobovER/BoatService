@@ -211,8 +211,8 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                                 <Text bg="basic.grey100" px="sm" py="xs" borderRadius="var(--chakra-space-sm)" fontSize="16px" fontWeight="500" color="gray.900">{boat.code}</Text>
                             </Flex>
                             <Flex justifyContent="space-between" align="center">
-                                <Text fontSize="12px" fontWeight="300" color="gray.900">LOA 40ft | Draft 4ft</Text> {/*Откуда это брать?*/}
-                                <Text fontSize="12px" fontWeight="300" color="gray.900">Sail number: {rowId}</Text>
+                                <Text fontSize="12px" fontWeight="300" color="gray.900">LOA 40ft | Draft 4ft</Text> {/* todo: use reservation.boat.loa and draft */}
+                                <Text fontSize="12px" fontWeight="300" color="gray.900">Sail number: 00</Text> {/* todo: use reservation.boat.sailId */}
                             </Flex>
                         </Box>
                     </Flex>

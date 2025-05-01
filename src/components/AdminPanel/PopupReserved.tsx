@@ -241,7 +241,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                             <Flex gap="lg">
                                 <Flex align="center" gap="xs">
                                     <Image
-                                        src="/assets/images/bolla-cell-secondary.svg"
+                                        src="/assets/images/bola-cell-secondary.svg"
                                         alt={rowId}
                                     />
                                     <Text fontSize="20px" fontWeight="400" color="gray.900">{rowId}</Text>

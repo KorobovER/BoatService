@@ -15,7 +15,7 @@ import {
     Th,
     Td
 } from '@chakra-ui/react';
-import BollaCell from "../../../public/assets/images/bolla-cell.svg";
+import BolaCell from "/assets/images/bola-cell.svg";
 import { ReservationsService, MarinasService } from '../../client';
 import { useMarina } from '../../context/MarinaContext';
 import PopupFreeCell from './PopupFreeCell';
@@ -713,8 +713,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                             <Image
                                                 w="24px"
                                                 h="24px"
-                                                src={row.marina?.logo_url ? transformS3Url(row.marina.logo_url) : BollaCell}
-                                                alt="Bolla"
+                                                src={row.marina?.logo_url ? transformS3Url(row.marina.logo_url) : BolaCell}
+                                                alt="Bola"
                                             />
                                             <Text
                                                 fontSize="16px"

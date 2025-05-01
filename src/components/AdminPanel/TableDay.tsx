@@ -14,17 +14,13 @@ import {
     Tr,
     Th,
     Td,
-    Popover,
-    PopoverTrigger,
-    PopoverContent,
-    PopoverBody
 } from '@chakra-ui/react';
 import BollaCell from "../../../public/assets/images/bolla-cell.svg";
 import { ReservationsService, MarinasService } from '../../client';
 import { useMarina } from '../../context/MarinaContext';
 import PopupFreeCell from './PopupFreeCell';
 import PopupReserved from './PopupReserved';
-import HoverReservation from './HoverReservation';
+import BoatCell, { getCellColor } from './BoatCell';
 
 // Функция для преобразования S3 URL
 const transformS3Url = (url: string): string => {
@@ -85,89 +81,6 @@ interface TableDayProps {
     currentDate: string;
     onReservationClick: (rowId: string, hour: string, boat?: Boat) => void;
 }
-
-export const getCellColor = (boat: Boat): { bg: string; textColor: string } => {
-    if (boat.admin_status === 'require_action') {
-        return { bg: "system-error", textColor: "white" };
-    }
-    
-    if (boat.admin_status === 'future_action') {
-        return { bg: "system.warningYellow", textColor: "white" };
-    }
-    
-    if (boat.admin_status === 'completed') {
-        return { bg: "bg.success", textColor: "basic.grey700" };
-    }
-    
-    return { bg: "system.successGreen", textColor: "white" };
-};
-
-// Компонент для отображения содержимого ячейки с резервацией
-const renderBoatCell = (boat: Boat, textColor: string) => {
-    return (
-        <Popover trigger="hover" placement="bottom" strategy="fixed">
-            <PopoverTrigger>
-                <Flex
-                    width="100%"
-                    height="100%"
-                    gap="8px"
-                    alignItems="center"
-                    justifyContent="center"
-                >
-                    {boat.vessel_type === 'power' ? (
-                        <Image
-                            src="/assets/images/power-boat.svg"
-                            alt={boat.name}
-                            width="22px"
-                            height="22px"
-                            objectFit="cover"
-                            borderRadius="4px"
-                            filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
-                        />
-                    ) : boat.vessel_type === 'catamaran' ? (
-                        <Image
-                            src="/assets/images/catamaran-boat.svg"
-                            alt={boat.name}
-                            width="22px"
-                            height="22px"
-                            objectFit="cover"
-                            borderRadius="4px"
-                            filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
-                        />
-                    ) : boat.vessel_type === 'monohull' ? (
-                        <Image
-                            src="/assets/images/monohul-boat.svg"
-                            alt={boat.name}
-                            width="22px"
-                            height="22px"
-                            objectFit="cover"
-                            borderRadius="4px"
-                            filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
-                        />
-                    ) : (
-                        <Text color={textColor} fontSize="14px" fontWeight="400">{boat.name[0]}</Text>
-                    )}
-                    {/* Показываем дополнительный текст */}
-                    <Box maxWidth="calc(100% - 30px)" overflow="hidden" textAlign="left">
-                        <Text color={textColor} fontSize="16px" fontWeight="400" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.name}</Text>
-                        <Text color={textColor} fontSize="12px" fontWeight="300" opacity="0.8" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.code}</Text>
-                    </Box>
-                </Flex>
-            </PopoverTrigger>
-            <PopoverContent 
-                width='fit-content'
-                border="1px solid var(--chakra-colors-basic-grey200)"
-                borderRadius="var(--chakra-radii-md)"
-                bg="basic.grey100"
-                _focus={{ outline: 'none' }}
-            >
-                <PopoverBody>
-                    <HoverReservation boat={boat} />
-                </PopoverBody>
-            </PopoverContent>
-        </Popover>
-    );
-};
 
 const TableDay: React.FC<TableDayProps> = ({
     currentDate,
@@ -407,7 +320,10 @@ const TableDay: React.FC<TableDayProps> = ({
         }
     }, [reservations, currentDate, currentTimeZone]);
 
-
+    // Компонент для отображения содержимого ячейки с резервацией
+    const renderBoatCell = (boat: Boat, textColor: string) => {
+        return <BoatCell boat={boat} textColor={textColor} />;
+    };
 
     const handleCellClick = (rowId: string, hour: string, halfHour?: 'first' | 'second', boat?: Boat) => {
         setSelectedCell({ rowId, hour, halfHour, boat });

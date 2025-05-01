@@ -1,8 +1,8 @@
 // TableWeek.tsx
 import React, { useMemo } from 'react';
-import { Box, Text, Image, Flex, Popover, PopoverTrigger, PopoverContent, PopoverBody, Spinner, Center } from '@chakra-ui/react';
+import { Box, Text, Spinner, Center } from '@chakra-ui/react';
 import TableReservations, { Boat } from './TableReservations';
-import HoverReservation from './HoverReservation';
+import BoatCell from './BoatCell';
 
 interface TableWeekProps {
     currentWeekStart: string;
@@ -154,70 +154,8 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
         </>
     );
 
-    const renderBoatCell = (boat: Boat, _colspan: number, textColor: string) => {
-        return (
-            <Popover trigger="hover" placement="bottom" strategy="fixed">
-                <PopoverTrigger>
-                    <Flex
-                        width="100%"
-                        height="100%"
-                        gap="8px"
-                        alignItems="center"
-                        justifyContent="center"
-                    >
-                        {boat.vessel_type === 'power' ? (
-                            <Image
-                                src="/assets/images/power-boat.svg"
-                                alt={boat.name}
-                                width="22px"
-                                height="22px"
-                                objectFit="cover"
-                                borderRadius="4px"
-                                filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
-                            />
-                        ) : boat.vessel_type === 'catamaran' ? (
-                            <Image
-                                src="/assets/images/catamaran-boat.svg"
-                                alt={boat.name}
-                                width="22px"
-                                height="22px"
-                                objectFit="cover"
-                                borderRadius="4px"
-                                filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
-                            />
-                        ) : boat.vessel_type === 'monohull' ? (
-                            <Image
-                                src="/assets/images/monohul-boat.svg"
-                                alt={boat.name}
-                                width="22px"
-                                height="22px"
-                                objectFit="cover"
-                                borderRadius="4px"
-                                filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
-                            />
-                        ) : (
-                            <Text color={textColor} fontSize="14px" fontWeight="400">{boat.name[0]}</Text>
-                        )}
-                        {/* Показываем дополнительный текст */}
-                        <Box maxWidth="calc(100% - 30px)" overflow="hidden" textAlign="left">
-                            <Text color={textColor} fontSize="16px" fontWeight="400" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.name}</Text>
-                            <Text color={textColor} fontSize="12px" fontWeight="300" opacity="0.8" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.code}</Text>
-                        </Box>
-                    </Flex>
-                </PopoverTrigger>
-                <PopoverContent 
-                    width='fit-content'
-                    border="1px solid var(--chakra-colors-basic-grey200)"
-                    borderRadius="var(--chakra-radii-md)"
-                    bg="basic.grey100"
-                    _focus={{ outline: 'none' }}
-                >
-                    <PopoverBody>
-                        <HoverReservation boat={boat} />
-                    </PopoverBody>
-                </PopoverContent>
-            </Popover>
-        );
+    const renderBoatCell = (boat: Boat, colspan: number, textColor: string) => {
+        return <BoatCell boat={boat} textColor={textColor} colspan={colspan} />;
     };
 
     return (

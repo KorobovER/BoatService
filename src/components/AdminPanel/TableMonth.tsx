@@ -1,8 +1,8 @@
 // TableMonth.tsx
 import React from 'react';
-import { Box, Text, Image, Flex, Popover, PopoverTrigger, PopoverContent, PopoverBody} from '@chakra-ui/react';
+import { Box, Text, Flex} from '@chakra-ui/react';
 import TableReservations, { Boat } from './TableReservations';
-import HoverReservation from './HoverReservation';
+import BoatCell from './BoatCell';
 
 interface TableMonthProps {
     currentMonthDate: string;
@@ -108,82 +108,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
     );
 
     const renderBoatCell = (boat: Boat, colspan: number, textColor: string) => {
-        // Use colspan < 2 to determine if the reservation is short (< 2 days)
-        const isShortReservation = colspan < 2;
-
-        return (
-            <Popover trigger="hover" placement="bottom" strategy="fixed">
-                <PopoverTrigger>
-                    <Flex
-                        width="98%"
-                        margin="auto"
-                        height="100%"
-                        gap={isShortReservation ? "0" : "8px"} // No gap if only icon
-                        alignItems="center"
-                        justifyContent="center"
-                        marginLeft="2px"
-                        marginRight="2px"
-                    >
-                        {/* Boat Icon Logic (Image or Text) */}
-                        {boat.vessel_type === 'power' ? (
-                            <Image
-                                src="/assets/images/power-boat.svg"
-                                alt={boat.name}
-                                width="22px" // Consistent size
-                                height="22px"
-                                objectFit="cover"
-                                borderRadius="4px"
-                                filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
-                            />
-                        ) : boat.vessel_type === 'catamaran' ? (
-                            <Image
-                                src="/assets/images/catamaran-boat.svg"
-                                alt={boat.name}
-                                width="22px" // Consistent size
-                                height="22px"
-                                objectFit="cover"
-                                borderRadius="4px"
-                                filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
-                            />
-                        ) : boat.vessel_type === 'monohull' ? (
-                            <Image
-                                src="/assets/images/monohul-boat.svg"
-                                alt={boat.name}
-                                width="22px" // Consistent size
-                                height="22px"
-                                objectFit="cover"
-                                borderRadius="4px"
-                                filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
-                            />
-                        ) : (
-                            // Fallback if no specific type, maybe just use first letter if short?
-                            <Text color={textColor} fontSize="14px" fontWeight="400">
-                                {isShortReservation ? boat.name[0] : boat.name}
-                            </Text>
-                        )}
-
-                        {/* Conditionally render the text block */}
-                        {!isShortReservation && (
-                            <Box maxWidth="calc(100% - 30px)" overflow="hidden" textAlign="left">
-                                <Text color={textColor} fontSize={"16px"} fontWeight="400" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.name}</Text>
-                                <Text color={textColor} fontSize={"12px"} fontWeight="300" opacity="0.8" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.code}</Text>
-                            </Box>
-                        )}
-                    </Flex>
-                </PopoverTrigger>
-                <PopoverContent
-                    width='fit-content'
-                    border="1px solid var(--chakra-colors-basic-grey200)"
-                    borderRadius="var(--chakra-radii-md)"
-                    bg="basic.grey100"
-                    _focus={{ outline: 'none' }}
-                >
-                    <PopoverBody>
-                        <HoverReservation boat={boat} />
-                    </PopoverBody>
-                </PopoverContent>
-            </Popover>
-        );
+        return <BoatCell boat={boat} textColor={textColor} colspan={colspan} isMonthView={true} />;
     };
 
     // Get the dates once

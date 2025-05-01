@@ -1,4 +1,4 @@
-import React, { useEffect} from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Text, Image, Flex, Button } from '@chakra-ui/react';
 import { Boat } from './TableReservations';
 
@@ -23,17 +23,17 @@ const formatDateTime = (dateObj: Date) => {
     if (!dateObj || !(dateObj instanceof Date) || isNaN(dateObj.getTime())) {
         return 'Invalid date';
     }
-    
+
     const time = dateObj.toLocaleString('en-US', {
         hour: 'numeric',
         hour12: true,
     }).toLowerCase();
-    
+
     const dateStr = dateObj.toLocaleString('en-US', {
         month: 'long',
         day: 'numeric',
     });
-    
+
     return (
         <>
             <Text as="span" color='basic.grey900' fontWeight="400">{time}</Text>
@@ -46,9 +46,32 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     isOpen,
     rowId,
     boat,
+    onClose,
     day,
 }) => {
+    const [tableHeight, setTableHeight] = useState(0);
+    const [popupMaxHeight, setPopupMaxHeight] = useState('auto');
 
+    // Effect to calculate table height and set popup max height
+    useEffect(() => {
+        if (isOpen) {
+            // Определяем, с какой таблицей работаем (Day или Week/Month)
+            const isTableDay = document.querySelector('td[data-hour]') !== null;
+            const tableSelector = isTableDay ? 'table' : '.reservation-table-body';
+
+            // Находим таблицу
+            const tableElement = document.querySelector(tableSelector);
+            if (tableElement) {
+                const tableRect = tableElement.getBoundingClientRect();
+                setTableHeight(tableRect.height);
+
+                // Учитываем отступы и высоту заголовка попапа (примерно 130px)
+                const maxContentHeight = tableRect.height - 130;
+                setPopupMaxHeight(`${maxContentHeight}px`);
+                console.log('Table found, setting popup max height:', maxContentHeight);
+            }
+        }
+    }, [isOpen]);
 
     useEffect(() => {
         if (isOpen && boat) {
@@ -69,24 +92,24 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
             // Определяем, с какой таблицей работаем (Day или Week/Month)
             const isTableDay = document.querySelector('td[data-hour]') !== null;
             console.log('Table type detected:', isTableDay ? 'TableDay' : 'TableWeek/Month');
-            
+
             // Найдем ячейки с лодками
             const boatContainers = document.querySelectorAll('.boat-cell-container');
             const tableCells = document.querySelectorAll('td[data-boat-id]');
-            
+
             console.log(`Found: ${boatContainers.length} containers, ${tableCells.length} table cells`);
-            
+
             // Затемняем ВСЕ ячейки и контейнеры
             applyStyles(boatContainers, { opacity: '0.4', transition: 'opacity 0.2s ease-in-out' });
-            
+
             // Определяем селектор в зависимости от типа таблицы
             let foundExactCell = false;
-            
+
             if (isTableDay) {
                 // Для TableDay используем день и ID лодки
                 const dayBoatSelector = `td[data-boat-id="${boat.id}"][data-day="${day}"]`;
                 const exactTdCell = document.querySelector(dayBoatSelector);
-                
+
                 if (exactTdCell) {
                     const containerInside = exactTdCell.querySelector('.boat-cell-container');
                     if (containerInside) {
@@ -100,7 +123,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 // 1. Перебираем ячейки таблицы и ищем точное совпадение
                 const currentCellKey = `boat-${rowId}-${day}-${boat.id}`;
                 console.log('Looking for cell with key containing:', currentCellKey);
-                
+
                 tableCells.forEach(cell => {
                     const cellKey = cell.getAttribute('key');
                     if (cellKey && cellKey.includes(currentCellKey)) {
@@ -114,7 +137,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                     }
                 });
             }
-            
+
             // Если не нашли по ключу, ищем по выделенной ячейке
             if (!foundExactCell) {
                 // Ищем выделенную ячейку
@@ -129,7 +152,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                     }
                 }
             }
-            
+
             // Если все еще не нашли, используем ID лодки как последний вариант
             if (!foundExactCell) {
                 // Последний способ - просто по ID лодки
@@ -139,7 +162,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                     console.log('Found by boat ID only (fallback)');
                 }
             }
-            
+
             // Cleanup function
             return () => {
                 // Reset opacity for all cells
@@ -159,13 +182,18 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
             {/* Popup content */}
             <Flex
                 flexDirection="column"
-                gap="var(--chakra-space-xl)"
                 bg="white"
                 rounded="var(--chakra-space-lg)"
                 zIndex="1000"
                 position="relative"
+                height='auto'
+                minHeight="400px"
+                width="auto"
+                overflow="hidden"
+                gap="lg"
+                
             >
-                {/* Header */}
+                {/* Header - фиксированный */}
                 <Flex
                     borderBottom="1px solid"
                     borderColor="gray.100"
@@ -173,6 +201,10 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                     align="center"
                     bg="white"
                     borderTopRadius="var(--chakra-space-xl)"
+                    p="0"
+                    width="100%"
+                    minHeight="80px"
+                    flexShrink={0}
                 >
                     <Flex pt="xl"
                         pb="lg"
@@ -206,82 +238,100 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                             </Flex>
                         </Box>
                     </Flex>
-
                 </Flex>
 
-                {/* Content */}
-                <Flex width="100%" px="24px" align="center" justify="space-between" gap="lg">
-                    <Flex
-                        py='xs'
-                        px='sm'
-                        bg='basic.grey100'
-                        border="1px solid"
-                        borderColor="basic.grey200"
-                        borderRadius="var(--chakra-space-sm)"
-                        align="center"
-                        width="100%"
-                        justify="space-between"
-                    >
-                        <Flex gap="lg">
-                            <Flex align="center" gap="xs">
-                                <Image
-                                    src="/assets/images/bolla-cell-secondary.svg"
-                                    alt={rowId}
-                                />
-                                <Text>{rowId}</Text>
-                            </Flex>
-                            <Flex justify="center" flexDirection="column">
-                                <Flex align="center" gap='xs' whiteSpace="nowrap">
-                                    <Flex
-                                        width="33px"
-                                        height="14px"
-                                        px="xs"
-                                        textAlign="center"
-                                        fontSize="14px"
-                                        fontWeight="400"
-                                        color='white'
-                                        bg='black'
-                                        borderRadius='56px'
-                                        alignItems="center"
-                                        justifyContent="center"
-                                    >In</Flex>
-                                    <Text fontSize="14px" fontWeight="400" color='basic.grey700' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
-                                        {boat.startDateObj ? formatDateTime(boat.startDateObj) : 'N/A'}
-                                    </Text>
+                {/* Content*/}
+                <Flex
+                    flexDirection="column"
+                    gap="2xl"
+                    width="100%"
+                    px="24px"
+                    pb="24px"
+                >
+                    <Flex width="100%" align="center" justify="space-between" gap="lg">
+                        <Flex
+                            py='xs'
+                            px='sm'
+                            bg='basic.grey100'
+                            border="1px solid"
+                            borderColor="basic.grey200"
+                            borderRadius="var(--chakra-space-sm)"
+                            align="center"
+                            width="100%"
+                            justify="space-between"
+                        >
+                            <Flex gap="lg">
+                                <Flex align="center" gap="xs">
+                                    <Image
+                                        src="/assets/images/bolla-cell-secondary.svg"
+                                        alt={rowId}
+                                    />
+                                    <Text fontSize="20px" fontWeight="400" color="gray.900">{rowId}</Text>
                                 </Flex>
-                                <Flex align="center" gap='xs' whiteSpace="nowrap">
-                                    <Flex
-                                        width="33px"
-                                        height="14px"
-                                        px="xs"
-                                        textAlign="center"
-                                        fontSize="14px"
-                                        fontWeight="400"
-                                        color='white'
-                                        bg='black'
-                                        borderRadius='56px'
-                                        alignItems="center"
-                                        justifyContent="center"
-                                    >Out</Flex>
-                                    <Text fontSize="14px" fontWeight="400" color='basic.grey700' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
-                                        {boat.endDateObj ? formatDateTime(boat.endDateObj) : 'N/A'}
-                                    </Text>
+                                <Flex justify="center" flexDirection="column">
+                                    <Flex align="center" gap='xs' whiteSpace="nowrap">
+                                        <Flex
+                                            width="33px"
+                                            height="14px"
+                                            px="xs"
+                                            textAlign="center"
+                                            fontSize="14px"
+                                            fontWeight="400"
+                                            color='white'
+                                            bg='black'
+                                            borderRadius='56px'
+                                            alignItems="center"
+                                            justifyContent="center"
+                                        >In</Flex>
+                                        <Text fontSize="14px" fontWeight="400" color='basic.grey700' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
+                                            {boat.startDateObj ? formatDateTime(boat.startDateObj) : 'N/A'}
+                                        </Text>
+                                    </Flex>
+                                    <Flex align="center" gap='xs' whiteSpace="nowrap">
+                                        <Flex
+                                            width="33px"
+                                            height="14px"
+                                            px="xs"
+                                            textAlign="center"
+                                            fontSize="14px"
+                                            fontWeight="400"
+                                            color='white'
+                                            bg='black'
+                                            borderRadius='56px'
+                                            alignItems="center"
+                                            justifyContent="center"
+                                        >Out</Flex>
+                                        <Text fontSize="14px" fontWeight="400" color='basic.grey700' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
+                                            {boat.endDateObj ? formatDateTime(boat.endDateObj) : 'N/A'}
+                                        </Text>
+                                    </Flex>
                                 </Flex>
                             </Flex>
+                            <Button boxSize="auto" py='xs' px='sm' bg='white' border="1px solid" borderColor="basic.grey200" borderRadius="var(--chakra-space-5xl)" color='brand.secondaryBlue'><Text padding="0" fontSize="12px" fontWeight="400" color='brand.secondaryBlue'>Active booking</Text></Button>
                         </Flex>
-                        <Button px='sm' py='xs' bg='white' border="1px solid" borderColor="basic.grey200" borderRadius="var(--chakra-space-5xl)" fontSize="12px" fontWeight="400" color='brand.secondaryBlue'>Active booking</Button>
+                        <Button
+                            variant="unstyled"
+                            padding="0"
+                            display="flex"
+                            minWidth="0"
+                            height="auto"
+                            minHeight="0"
+                            _hover={{ opacity: 0.8 }}
+                        >
+                            <Image src="/assets/images/chat-icon.svg" alt="Chat" />
+                        </Button>
                     </Flex>
-                    <Button
-                        variant="unstyled"
-                        padding="0"
-                        display="flex"
-                        minWidth="0"
-                        height="auto"
-                        minHeight="0"
-                        _hover={{ opacity: 0.8 }}
-                    >
-                        <Image src="/assets/images/chat-icon.svg" alt="Chat" />
-                    </Button>
+
+                    <Flex alignSelf="stretch" gap='sm' justifyContent="center" alignItems="center" flexDirection="column" border="1px dashed" borderColor="brand.primaryOrange" borderRadius="var(--chakra-space-sm)" w="100%">
+                        <Flex flexDirection="column" alignItems="center" gap='20px' py='3xl' px='md' w="100%">
+                            <Image width="52px" height="52px" src="/assets/images/service.svg" alt="service" />
+                            <Flex flexDirection="column" alignItems="center">
+                                <Text textAlign="center" fontSize="20px" fontWeight="500" color="brand.primaryOrange">No service requests</Text>
+                                <Text textAlign="center" fontSize="14px" fontWeight="300" color="brand.primaryOrange">Click here to add a service</Text>
+                            </Flex>
+                            <Button variant="unstyled" _hover={{ opacity: 0.8 }} borderRadius="100%"><Image src="/assets/images/button-plus.svg" alt="plus"/></Button>
+                        </Flex>
+                    </Flex>
                 </Flex>
             </Flex>
         </>

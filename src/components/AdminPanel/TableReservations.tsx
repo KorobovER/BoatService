@@ -76,6 +76,8 @@ export interface Boat {
     endsAfter?: boolean;
     effectiveStartDate?: Date;
     effectiveEndDate?: Date;
+    user_first_name?: string;
+    user_last_name?: string;
 }
 
 interface TableReservationsProps {
@@ -314,6 +316,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 endsAfter: endDateUTC > periodEndDate,
                                 effectiveStartDate: startDateUTC < periodStartDate ? startDateUTC : undefined,
                                 effectiveEndDate: endDateUTC > periodEndDate ? endDateUTC : undefined,
+                                user_first_name: reservation.user?.first_name,
+                                user_last_name: reservation.user?.last_name,
                             };
                             return boat;
                         } catch (error) {
@@ -433,7 +437,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                     width: '100%',
                 }
             }}>
-                <Table variant="unstyled" width="100%">
+                <Table className="reservation-table-body" variant="unstyled" width="100%">
                     <Thead>
                         <Tr>
                             <Th
@@ -656,6 +660,9 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                         className={isSelected ? 'selected-cell' : ''}
                                         borderRight={dayIndex < days.length - 1 && (halfDayIndex + halfDayColspan) % 2 === 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
                                         borderTop="1px solid var(--chakra-colors-basic-grey100)"
+                                        data-boat-id={boatMatch.id}
+                                        data-boat-name={boatMatch.name}
+                                        data-boat-code={boatMatch.code}
                                         sx={{
                                             overflow: "hidden",
                                             '&.selected-cell': {
@@ -671,6 +678,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                             justifyContent="center"
                                             bg={getCellColor(boatMatch).bg}
                                             borderRadius={borderRadius}
+                                            className="boat-cell-container"
+                                            data-boat-id={boatMatch.id}
                                         >
                                             {/* Показываем информацию о лодке */}
                                             {renderBoatCell(boatMatch, halfDayColspan / 2, getCellColor(boatMatch).textColor)}
@@ -737,7 +746,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                         day={selectedCell.day}
                         timeOfDay={selectedCell.timeOfDay}
                     />
-                    <PopupReserved
+                    <PopupReserved 
                         isOpen={isReservedOpen}
                         onClose={onReservedClose}
                         rowId={selectedCell.rowId}

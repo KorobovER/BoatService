@@ -659,15 +659,21 @@ const TableDay: React.FC<TableDayProps> = ({
                                     cells.push(
                                         <Td
                                             height="52px"
-                                        key={`boat-${row.id}-${hour}-${boatForHalfHour.id}-${halfHour}-${currentDate}`}
-                                        color={textColor}
-                                        colSpan={halfHourColspan}
+                                            key={`boat-${row.id}-${hour}-${boatForHalfHour.id}-${halfHour}-${currentDate}`}
+                                            color={textColor}
+                                            colSpan={halfHourColspan}
                                             p={0}
                                             textAlign="center"
-                                        onClick={() => handleCellClick(row.id, hour, halfHour, boatForHalfHour)}
+                                            onClick={() => handleCellClick(row.id, hour, halfHour, boatForHalfHour)}
                                             cursor="pointer"
-                                        borderRight={hourIndex < hours.length - 1 && (halfHourIndex + halfHourColspan) % 2 === 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
+                                            className={selectedCell?.boat?.id === boatForHalfHour.id ? 'selected-cell' : ''}
+                                            borderRight={hourIndex < hours.length - 1 && (halfHourIndex + halfHourColspan) % 2 === 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
                                             borderTop="1px solid var(--chakra-colors-basic-grey100)"
+                                            data-boat-id={boatForHalfHour.id}
+                                            data-boat-name={boatForHalfHour.name}
+                                            data-boat-code={boatForHalfHour.code}
+                                            data-day={currentDate}
+                                            data-hour={hour}
                                             sx={{
                                                 overflow: "hidden",
                                             }}
@@ -678,10 +684,12 @@ const TableDay: React.FC<TableDayProps> = ({
                                                 margin="0 2px"
                                                 alignItems="center"
                                                 justifyContent="center"
-                                            bg={getCellColor(boatForHalfHour).bg}
-                                            borderRadius={borderRadius}
+                                                bg={getCellColor(boatForHalfHour).bg}
+                                                borderRadius={borderRadius}
+                                                className="boat-cell-container"
+                                                data-boat-id={boatForHalfHour.id}
                                             >
-                                            {renderBoatCell(boatForHalfHour, textColor)}
+                                                {renderBoatCell(boatForHalfHour, textColor)}
                                             </Flex>
                                         </Td>
                                     );

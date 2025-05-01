@@ -1,5 +1,5 @@
-import React from 'react';
-import { Box, Text, Image, Flex, Divider } from '@chakra-ui/react';
+import React, { useEffect} from 'react';
+import { Box, Text, Image, Flex, Button } from '@chakra-ui/react';
 import { Boat } from './TableReservations';
 
 interface PopupReservedProps {
@@ -9,127 +9,282 @@ interface PopupReservedProps {
     day: string;
     boat?: Boat;
     timeOfDay?: 'AM' | 'PM';
+    position?: { top: number; left: number };
+    backdropOffset?: {
+        top?: number;
+        left?: number;
+        right?: number;
+        bottom?: number;
+    };
 }
+
+// Helper function to format date and time
+const formatDateTime = (dateObj: Date) => {
+    if (!dateObj || !(dateObj instanceof Date) || isNaN(dateObj.getTime())) {
+        return 'Invalid date';
+    }
+    
+    const time = dateObj.toLocaleString('en-US', {
+        hour: 'numeric',
+        hour12: true,
+    }).toLowerCase();
+    
+    const dateStr = dateObj.toLocaleString('en-US', {
+        month: 'long',
+        day: 'numeric',
+    });
+    
+    return (
+        <>
+            <Text as="span" color='basic.grey900' fontWeight="400">{time}</Text>
+            <Text as="span" color='basic.grey900' fontWeight="300">, {dateStr}</Text>
+        </>
+    );
+};
 
 const PopupReserved: React.FC<PopupReservedProps> = ({
     isOpen,
     rowId,
     boat,
-    timeOfDay
+    day,
 }) => {
+
+
+    useEffect(() => {
+        if (isOpen && boat) {
+            // Function to safely apply opacity style
+            const applyStyles = (elements: NodeListOf<Element>, style: Record<string, string>) => {
+                for (let i = 0; i < elements.length; i++) {
+                    try {
+                        const element = elements[i] as HTMLElement;
+                        Object.entries(style).forEach(([property, value]) => {
+                            element.style.setProperty(property, value);
+                        });
+                    } catch (e) {
+                        console.error('Error applying styles:', e);
+                    }
+                }
+            };
+
+            // Определяем, с какой таблицей работаем (Day или Week/Month)
+            const isTableDay = document.querySelector('td[data-hour]') !== null;
+            console.log('Table type detected:', isTableDay ? 'TableDay' : 'TableWeek/Month');
+            
+            // Найдем ячейки с лодками
+            const boatContainers = document.querySelectorAll('.boat-cell-container');
+            const tableCells = document.querySelectorAll('td[data-boat-id]');
+            
+            console.log(`Found: ${boatContainers.length} containers, ${tableCells.length} table cells`);
+            
+            // Затемняем ВСЕ ячейки и контейнеры
+            applyStyles(boatContainers, { opacity: '0.4', transition: 'opacity 0.2s ease-in-out' });
+            
+            // Определяем селектор в зависимости от типа таблицы
+            let foundExactCell = false;
+            
+            if (isTableDay) {
+                // Для TableDay используем день и ID лодки
+                const dayBoatSelector = `td[data-boat-id="${boat.id}"][data-day="${day}"]`;
+                const exactTdCell = document.querySelector(dayBoatSelector);
+                
+                if (exactTdCell) {
+                    const containerInside = exactTdCell.querySelector('.boat-cell-container');
+                    if (containerInside) {
+                        (containerInside as HTMLElement).style.opacity = '1';
+                        foundExactCell = true;
+                        console.log('Found exact TableDay cell:', dayBoatSelector);
+                    }
+                }
+            } else {
+                // Для TableWeek/Month используем rowId, day и ID лодки
+                // 1. Перебираем ячейки таблицы и ищем точное совпадение
+                const currentCellKey = `boat-${rowId}-${day}-${boat.id}`;
+                console.log('Looking for cell with key containing:', currentCellKey);
+                
+                tableCells.forEach(cell => {
+                    const cellKey = cell.getAttribute('key');
+                    if (cellKey && cellKey.includes(currentCellKey)) {
+                        // Нашли точную ячейку
+                        const containerInside = cell.querySelector('.boat-cell-container');
+                        if (containerInside) {
+                            (containerInside as HTMLElement).style.opacity = '1';
+                            foundExactCell = true;
+                            console.log('Found exact cell by key:', cellKey);
+                        }
+                    }
+                });
+            }
+            
+            // Если не нашли по ключу, ищем по выделенной ячейке
+            if (!foundExactCell) {
+                // Ищем выделенную ячейку
+                const selectedCells = document.querySelectorAll('td.selected-cell');
+                if (selectedCells.length > 0) {
+                    const selectedCell = selectedCells[0];
+                    const containerInside = selectedCell.querySelector('.boat-cell-container');
+                    if (containerInside) {
+                        (containerInside as HTMLElement).style.opacity = '1';
+                        foundExactCell = true;
+                        console.log('Found by selected-cell class');
+                    }
+                }
+            }
+            
+            // Если все еще не нашли, используем ID лодки как последний вариант
+            if (!foundExactCell) {
+                // Последний способ - просто по ID лодки
+                const allBoatContainers = document.querySelectorAll(`.boat-cell-container[data-boat-id="${boat.id}"]`);
+                if (allBoatContainers.length > 0) {
+                    (allBoatContainers[0] as HTMLElement).style.opacity = '1';
+                    console.log('Found by boat ID only (fallback)');
+                }
+            }
+            
+            // Cleanup function
+            return () => {
+                // Reset opacity for all cells
+                applyStyles(boatContainers, { opacity: '1' });
+            };
+        }
+    }, [isOpen, boat, rowId, day]);
+
     if (!isOpen || !boat) return null;
 
-    return (
-        <Box
-            bg="white"
-            overflow="hidden"
-            padding="var(--chakra-space-xl)"
-            borderRadius="var(--chakra-space-xl)"
-        >
-            {/* Header */}
-            <Flex 
-                borderBottom="1px solid"
-                borderColor="gray.100"
-                justify="space-between"
-                align="center"
-                bg="white"
-            >
-                <Flex align="center" gap="12px">
-                    <Image
-                        src={boat.vessel_type === 'power' 
-                            ? "/assets/images/power-boat.svg"
-                            : boat.vessel_type === 'catamaran'
-                            ? "/assets/images/catamaran-boat.svg"
-                            : "/assets/images/monohul-boat.svg"}
-                        alt={boat.name}
-                        width="32px"
-                        height="32px"
-                    />
-                    <Box>
-                        <Text fontSize="18px" fontWeight="600" color="gray.900">{boat.name}</Text>
-                        <Text fontSize="14px" color="gray.500">{boat.code}</Text>
-                        <Text fontSize="14px" color="gray.500">Time: {timeOfDay || 'Full Day'}</Text>
-                    </Box>
-                </Flex>
-             
-            </Flex>
+    // Get user name from the boat object if available
+    const hasUserInfo = boat.user_first_name && boat.user_last_name;
+    const userName = hasUserInfo ? `${boat.user_first_name} ${boat.user_last_name}` : '';
 
-            {/* Content */}
-            <Box 
-                p="24px"
-                height="calc(100% - 85px)" // 85px - высота header
-                overflowY="auto"
+    return (
+        <>
+            {/* Popup content */}
+            <Flex
+                flexDirection="column"
+                gap="var(--chakra-space-xl)"
+                bg="white"
+                rounded="var(--chakra-space-lg)"
+                zIndex="1000"
+                position="relative"
             >
-                {/* Reservation Info */}
-                <Box mb="24px">
-                    <Text fontSize="14px" fontWeight="600" color="gray.700" mb="16px">
-                        Reservation Info
-                    </Text>
-                    <Flex gap="16px">
-                        <Box flex="1">
-                            <Text fontSize="12px" color="gray.500" mb="4px">Check-in</Text>
-                            <Text fontSize="14px" color="gray.900">
-                                {(() => {
-                                    try {
-                                        const date = boat.startDateObj || new Date(boat.startDay);
-                                        return date.toLocaleString('en-US', { 
-                                            month: 'short',
-                                            day: 'numeric',
-                                            year: 'numeric',
-                                            hour: 'numeric',
-                                            minute: '2-digit',
-                                            hour12: true,
-                                            timeZoneName: 'short'
-                                        });
-                                    } catch (error) {
-                                        return new Date(boat.startDay).toLocaleDateString('en-US', { 
-                                            month: 'short',
-                                            day: 'numeric',
-                                            year: 'numeric'
-                                        });
-                                    }
-                                })()}
-                            </Text>
-                        </Box>
-                        <Box flex="1">
-                            <Text fontSize="12px" color="gray.500" mb="4px">Check-out</Text>
-                            <Text fontSize="14px" color="gray.900">
-                                {(() => {
-                                    try {
-                                        const date = boat.endDateObj || new Date(boat.endDay);
-                                        return date.toLocaleString('en-US', { 
-                                            month: 'short',
-                                            day: 'numeric',
-                                            year: 'numeric',
-                                            hour: 'numeric',
-                                            minute: '2-digit',
-                                            hour12: true,
-                                            timeZoneName: 'short'
-                                        });
-                                    } catch (error) {
-                                        return new Date(boat.endDay).toLocaleDateString('en-US', { 
-                                            month: 'short',
-                                            day: 'numeric',
-                                            year: 'numeric'
-                                        });
-                                    }
-                                })()}
-                            </Text>
+                {/* Header */}
+                <Flex
+                    borderBottom="1px solid"
+                    borderColor="gray.100"
+                    justify="space-between"
+                    align="center"
+                    bg="white"
+                    borderTopRadius="var(--chakra-space-xl)"
+                >
+                    <Flex pt="xl"
+                        pb="lg"
+                        px="24px"
+                        w="100%"
+                        align="center"
+                        gap="12px">
+                        <Image
+                            src={boat.vessel_type === 'power'
+                                ? "/assets/images/power-boat.svg"
+                                : boat.vessel_type === 'catamaran'
+                                    ? "/assets/images/catamaran-boat.svg"
+                                    : "/assets/images/monohul-boat.svg"}
+                            alt={boat.name}
+                            width="32px"
+                            height="32px"
+                            filter="invert(40%) sepia(90%) saturate(2259%) hue-rotate(352deg) brightness(98%) contrast(97%)"
+                        />
+                        <Box w="100%">
+                            <Flex justifyContent="space-between" align="center" gap="4px">
+                                <Flex align="center" gap="4px">
+                                    <Text fontSize="16px" fontWeight="500" color="gray.900">{boat.name}</Text>
+                                    <Text fontSize="12px" fontWeight="300" color="gray.600">|</Text>
+                                    <Text fontSize="12px" fontWeight="300" color="gray.600">{userName}</Text>
+                                </Flex>
+                                <Text bg="basic.grey100" px="sm" py="xs" borderRadius="var(--chakra-space-sm)" fontSize="16px" fontWeight="500" color="gray.900">{boat.code}</Text>
+                            </Flex>
+                            <Flex justifyContent="space-between" align="center">
+                                <Text fontSize="12px" fontWeight="300" color="gray.900">LOA 40ft | Draft 4ft</Text> {/*Откуда это брать?*/}
+                                <Text fontSize="12px" fontWeight="300" color="gray.900">Sail number: {rowId}</Text>
+                            </Flex>
                         </Box>
                     </Flex>
-                </Box>
 
-                <Divider mb="24px" />
+                </Flex>
 
-                {/* Mooring Ball */}
-                <Box mb="24px">
-                    <Text fontSize="14px" fontWeight="600" color="gray.700" mb="16px">
-                        Mooring Ball
-                    </Text>
-                    <Text fontSize="14px" color="gray.900">Ball #{rowId}</Text>
-                </Box>
-            </Box>
-        </Box>
+                {/* Content */}
+                <Flex width="100%" px="24px" align="center" justify="space-between" gap="lg">
+                    <Flex
+                        py='xs'
+                        px='sm'
+                        bg='basic.grey100'
+                        border="1px solid"
+                        borderColor="basic.grey200"
+                        borderRadius="var(--chakra-space-sm)"
+                        align="center"
+                        width="100%"
+                        justify="space-between"
+                    >
+                        <Flex gap="lg">
+                            <Flex align="center" gap="xs">
+                                <Image
+                                    src="/assets/images/bolla-cell-secondary.svg"
+                                    alt={rowId}
+                                />
+                                <Text>{rowId}</Text>
+                            </Flex>
+                            <Flex justify="center" flexDirection="column">
+                                <Flex align="center" gap='xs' whiteSpace="nowrap">
+                                    <Flex
+                                        width="33px"
+                                        height="14px"
+                                        px="xs"
+                                        textAlign="center"
+                                        fontSize="14px"
+                                        fontWeight="400"
+                                        color='white'
+                                        bg='black'
+                                        borderRadius='56px'
+                                        alignItems="center"
+                                        justifyContent="center"
+                                    >In</Flex>
+                                    <Text fontSize="14px" fontWeight="400" color='basic.grey700' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
+                                        {boat.startDateObj ? formatDateTime(boat.startDateObj) : 'N/A'}
+                                    </Text>
+                                </Flex>
+                                <Flex align="center" gap='xs' whiteSpace="nowrap">
+                                    <Flex
+                                        width="33px"
+                                        height="14px"
+                                        px="xs"
+                                        textAlign="center"
+                                        fontSize="14px"
+                                        fontWeight="400"
+                                        color='white'
+                                        bg='black'
+                                        borderRadius='56px'
+                                        alignItems="center"
+                                        justifyContent="center"
+                                    >Out</Flex>
+                                    <Text fontSize="14px" fontWeight="400" color='basic.grey700' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
+                                        {boat.endDateObj ? formatDateTime(boat.endDateObj) : 'N/A'}
+                                    </Text>
+                                </Flex>
+                            </Flex>
+                        </Flex>
+                        <Button px='sm' py='xs' bg='white' border="1px solid" borderColor="basic.grey200" borderRadius="var(--chakra-space-5xl)" fontSize="12px" fontWeight="400" color='brand.secondaryBlue'>Active booking</Button>
+                    </Flex>
+                    <Button
+                        variant="unstyled"
+                        padding="0"
+                        display="flex"
+                        minWidth="0"
+                        height="auto"
+                        minHeight="0"
+                        _hover={{ opacity: 0.8 }}
+                    >
+                        <Image src="/assets/images/chat-icon.svg" alt="Chat" />
+                    </Button>
+                </Flex>
+            </Flex>
+        </>
     );
 };
 

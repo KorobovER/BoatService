@@ -23,10 +23,10 @@ const UserMenu = () => {
   const { logout } = useAuth()
   const [isHovered, setIsHovered] = useState(false)
   const { isOpen, onOpen, onClose } = useDisclosure()
-  
+
   // Стили должны применяться при наведении или когда меню открыто
   const isActive = isHovered || isOpen
-  
+
   // Запрос данных пользователя с типом any для обхода ограничений типизации
   const { data, isLoading } = useQuery({
     queryKey: ['employee'],
@@ -55,9 +55,9 @@ const UserMenu = () => {
               isLoading ? (
                 <Spinner size="sm" color="white" />
               ) : userInitials ? (
-                <Avatar 
-                  name={userInitials} 
-                  size="sm" 
+                <Avatar
+                  name={userInitials}
+                  size="sm"
                   bg={isActive ? "basic.grey200" : "none"}
                   bgGradient={isActive ? "none" : "var(--chakra-colors-gradient-orange)"}
                   color={isActive ? "orange.500" : "white"}
@@ -76,11 +76,11 @@ const UserMenu = () => {
             bgGradient={isActive ? "none" : "var(--chakra-colors-gradient-orange)"}
             isRound
             data-testid="user-menu"
-            _hover={{ 
+            _hover={{
               bg: isActive ? "basic.grey200" : "none",
               bgGradient: isActive ? "none" : "var(--chakra-colors-gradient-orange)"
             }}
-            _active={{ 
+            _active={{
               bg: "basic.grey200",
               bgGradient: "none"
             }}

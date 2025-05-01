@@ -25,7 +25,7 @@ import PopupReserved from './PopupReserved';
 const transformS3Url = (url: string): string => {
     if (!url) return '';
 
-    // Преобразование URL из формата s3://bola-public-assets/... 
+    // Преобразование URL из формата s3://bola-public-assets/...
     // в https://s3.amazonaws.com/bola-public-assets/...
     if (url.startsWith('s3://')) {
         const path = url.substring(5); // Убираем 's3://'
@@ -95,15 +95,15 @@ export const getCellColor = (boat: Boat): { bg: string; textColor: string } => {
     if (boat.admin_status === 'require_action') {
         return { bg: "system-error", textColor: "white" }; // red - требует действия
     }
-    
+
     if (boat.admin_status === 'future_action') {
         return { bg: "system.warningYellow", textColor: "white" }; // yellow - будущее действие
     }
-    
+
     if (boat.admin_status === 'completed') {
         return { bg: "bg.success", textColor: "basic.grey700" }; // light green - завершено
     }
-    
+
     // По умолчанию - нормальное состояние
     return { bg: "system.successGreen", textColor: "white" }; // green (default) - нормальное состояние
 };
@@ -133,7 +133,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
 
     // Добавляем queryClient для инвалидации запросов
     const queryClient = useQueryClient();
-    
+
     // Функция для обновления временной зоны
     const updateTimeZone = () => {
         setCurrentTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
@@ -146,21 +146,21 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         if (typeof window !== 'undefined' && 'Intl' in window) {
             // Обновляем при загрузке
             updateTimeZone();
-            
+
             // В идеале нужно слушать событие изменения временной зоны,
             // но такого стандартного события нет. Вместо этого,
             // мы можем отслеживать другие события, которые могут
             // указывать на изменение временной зоны.
-            
+
             // Слушаем событие изменения языка
             window.addEventListener('languagechange', updateTimeZone);
-            
+
             // Слушаем события фокуса/расфокуса окна
             window.addEventListener('focus', updateTimeZone);
-            
+
             // Периодически проверяем временную зону
             const intervalId = setInterval(updateTimeZone, 60000); // каждую минуту
-            
+
             // Очистка при размонтировании
             return () => {
                 window.removeEventListener('languagechange', updateTimeZone);
@@ -341,8 +341,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
             const enrichedBoat = {
                 ...boat,
                 selectedTimeOfDay: timeOfDay,
-                displayTime: timeOfDay === 'AM' ? 
-                    `${boat.startTime} (AM)` : 
+                displayTime: timeOfDay === 'AM' ?
+                    `${boat.startTime} (AM)` :
                     `${boat.endTime} (PM)`
             };
             setSelectedCell({ rowId, day, boat: enrichedBoat, timeOfDay });
@@ -356,10 +356,10 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     // Функция для локализованного отображения дня недели
     const getLocalizedDayOfWeek = (dateString: string) => {
         const [year, month, day] = dateString.split('-').map(Number);
-        
+
         // Создаем дату в локальной временной зоне
         const date = new Date(year, month - 1, day);
-        
+
         return date.toLocaleDateString(undefined, { weekday: 'short' });
     };
 
@@ -368,13 +368,13 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         try {
             const [year, month, day] = dateString.split('-').map(Number);
             const date = new Date(year, month - 1, day);
-            
+
             // Format the date in a localized way based on timezone
             const formattedDate = date.toLocaleDateString(undefined, {
                 day: 'numeric',
                 month: 'numeric',
             });
-            
+
             return formattedDate;
         } catch (e) {
             console.error('Error formatting date:', e);
@@ -396,7 +396,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         if (typeof renderHeader === 'function') {
             return renderHeader(day);
         }
-        
+
         // Базовый рендеринг, если пользовательская функция не предоставлена
         return (
             <Flex direction="column" alignItems="center">
@@ -575,13 +575,13 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 // Ищем последовательные ячейки той же резервации
                                 while (nextIndex < occupiedHalfDays.length) {
                                     const nextBoat = occupiedHalfDays[nextIndex];
-                                    
+
                                     // Проверяем, относится ли следующая ячейка к той же резервации
                                     // Сравниваем ID, имя, дату начала и окончания
-                                    if (nextBoat && 
-                                        boatMatch.id === nextBoat.id && 
-                                        boatMatch.name === nextBoat.name && 
-                                        boatMatch.startDay === nextBoat.startDay && 
+                                    if (nextBoat &&
+                                        boatMatch.id === nextBoat.id &&
+                                        boatMatch.name === nextBoat.name &&
+                                        boatMatch.startDay === nextBoat.startDay &&
                                         boatMatch.endDay === nextBoat.endDay) {
                                         halfDayColspan++;
                                         occupiedHalfDays[nextIndex] = null; // Отмечаем как обработанную
@@ -625,7 +625,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 // 2. Или это день начала резервации и:
                                 //    - для AM: всегда
                                 //    - для PM: только если резервация начинается после полудня
-                                needsLeftRadius = (isFirstDayOfWeek && !startsBeforeVisiblePeriod) || 
+                                needsLeftRadius = (isFirstDayOfWeek && !startsBeforeVisiblePeriod) ||
                                                 (isStartDay && (isAM || boatMatch.startsInSecondHalf));
 
                                 // Правый край скруглен, если:
@@ -634,7 +634,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 //    - для AM: только если резервация заканчивается до полудня
                                 //    - для PM: всегда
                                 const lastHalfDay = (halfDayIndex + halfDayColspan - 1) % 2 === 0; // Последняя часть - AM
-                                needsRightRadius = (isLastDayOfWeek && !endsAfterVisiblePeriod) || 
+                                needsRightRadius = (isLastDayOfWeek && !endsAfterVisiblePeriod) ||
                                                  (isEndDay && ((!lastHalfDay) || boatMatch.endsInFirstHalf));
 
                                 // Определяем итоговый borderRadius
@@ -746,7 +746,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                         day={selectedCell.day}
                         timeOfDay={selectedCell.timeOfDay}
                     />
-                    <PopupReserved 
+                    <PopupReserved
                         isOpen={isReservedOpen}
                         onClose={onReservedClose}
                         rowId={selectedCell.rowId}

@@ -91,13 +91,13 @@ const PopoverBoatContent: React.FC<PopoverBoatContentProps> = ({ boat }) => {
                     </Flex>
                 </Flex>
                 <Flex gap='24px' alignItems="flex-end">
-                    <Button 
-                        borderRadius='full' 
+                    <Button
+                        borderRadius='full'
                         bg="var(--chakra-colors-system-warningYellow)"
-                        fontSize='14px' 
+                        fontSize='14px'
                         fontWeight='400'
-                        color='black' 
-                        sx={{ 
+                        color='black'
+                        sx={{
                             padding: '4px 8px !important',
                             minHeight: 'unset',
                             height: 'auto',
@@ -113,4 +113,4 @@ const PopoverBoatContent: React.FC<PopoverBoatContentProps> = ({ boat }) => {
     );
 };
 
-export default PopoverBoatContent; 
+export default PopoverBoatContent;

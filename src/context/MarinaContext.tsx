@@ -29,8 +29,8 @@ export const MarinaProvider = ({ children }: { children: ReactNode }) => {
     const [fullMarinaData, setFullMarinaData] = useState<MarinaPublic | null>(null);
 
     return (
-        <MarinaContext.Provider value={{ 
-            selectedMarina, 
+        <MarinaContext.Provider value={{
+            selectedMarina,
             setSelectedMarina,
             fullMarinaData,
             setFullMarinaData

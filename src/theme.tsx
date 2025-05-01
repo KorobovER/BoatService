@@ -69,7 +69,7 @@ const theme = extendTheme({
       dim: "#A0AEC0",
     },
   },
-  
+
   space: {
     zero: 0,
     xs: "4px",
@@ -87,7 +87,7 @@ const theme = extendTheme({
   styles: {
     global: {
       body: {
-        bg: "ui.light", 
+        bg: "ui.light",
       },
     },
   },

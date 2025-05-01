@@ -125,7 +125,7 @@ const TableDay: React.FC<TableDayProps> = ({
             window.addEventListener('languagechange', updateTimeZone);
             window.addEventListener('focus', updateTimeZone);
             const intervalId = setInterval(updateTimeZone, 60000);
-            
+
             return () => {
                 window.removeEventListener('languagechange', updateTimeZone);
                 window.removeEventListener('focus', updateTimeZone);
@@ -204,12 +204,12 @@ const TableDay: React.FC<TableDayProps> = ({
 
                 // Parse current date for day boundaries
                 const [year, month, day] = currentDate.split('-').map(Number);
-                
+
                 // Create Date objects for current day boundaries using local time (not UTC)
                 const currentDayStart = new Date(year, month - 1, day, 0, 0, 0);
                 const currentDayEnd = new Date(year, month - 1, day, 23, 59, 59, 999);
-                
-                
+
+
                 // Filter reservations that overlap with the current day
                 const apiBoats = reservations.data
                     .filter(reservation => {
@@ -223,7 +223,7 @@ const TableDay: React.FC<TableDayProps> = ({
                             // 1. It starts before the end of the day AND
                             // 2. It ends after the start of the day
                             const overlapsWithDay = (
-                                startDate <= currentDayEnd && 
+                                startDate <= currentDayEnd &&
                                 endDate >= currentDayStart
                             );
                             return overlapsWithDay;
@@ -243,11 +243,11 @@ const TableDay: React.FC<TableDayProps> = ({
                             // If the reservation ends after this day, use the end of the day
                             const effectiveStartTime = startDate < currentDayStart ? currentDayStart : startDate;
                             const effectiveEndTime = endDate > currentDayEnd ? currentDayEnd : endDate;
-                            
+
                             // Check if this reservation crosses day boundaries
                             const startsBefore = startDate < currentDayStart;
                             const endsAfter = endDate > currentDayEnd;
-                            
+
                             // To better handle reservations that cross days, let's add paddingZero function
                             const paddingZero = (num: number): string => {
                                 return num < 10 ? `0${num}` : `${num}`;
@@ -257,7 +257,7 @@ const TableDay: React.FC<TableDayProps> = ({
                             // Format times for raw calculations (ensuring they're in 24h format with leading zeros)
                             const rawStartTime = `${paddingZero(effectiveStartTime.getHours())}:${paddingZero(effectiveStartTime.getMinutes())}`;
                             const rawEndTime = `${paddingZero(effectiveEndTime.getHours())}:${paddingZero(effectiveEndTime.getMinutes())}`;
-                            
+
                             return {
                                 id: reservation.mooring_ball.ball_number.toString(),
                                 name: reservation.boat?.boatname || 'N/A',
@@ -265,15 +265,15 @@ const TableDay: React.FC<TableDayProps> = ({
                                 startDay: currentDate,
                                 endDay: currentDate,
                                 // Format times for display
-                                startTime: effectiveStartTime.toLocaleTimeString('en-US', { 
-                                    hour: '2-digit', 
-                                    minute: '2-digit', 
-                                    hour12: true 
+                                startTime: effectiveStartTime.toLocaleTimeString('en-US', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    hour12: true
                                 }),
-                                endTime: effectiveEndTime.toLocaleTimeString('en-US', { 
-                                    hour: '2-digit', 
-                                    minute: '2-digit', 
-                                    hour12: true 
+                                endTime: effectiveEndTime.toLocaleTimeString('en-US', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    hour12: true
                                 }),
                                 // Raw times for cell calculations
                                 rawStartTime,
@@ -318,7 +318,7 @@ const TableDay: React.FC<TableDayProps> = ({
                 console.error('Error processing reservations:', error);
             }
         } else {
-            console.log("No reservation data available or currentDate not set", { 
+            console.log("No reservation data available or currentDate not set", {
                 hasReservations: !!reservations?.data,
                 currentDate
             });
@@ -399,12 +399,12 @@ const TableDay: React.FC<TableDayProps> = ({
                         {allRows.map(row => {
                             // For each hour, we have two half-hour slots (0-29 min and 30-59 min)
                             const occupiedHalfHours = Array(hours.length * 2).fill(null);
-                            
+
                             // Mark occupied half-hours
                             hours.forEach((_hour, hourIndex) => {
                                 const firstHalfIndex = hourIndex * 2;
                                 const secondHalfIndex = hourIndex * 2 + 1;
-                                
+
                                 // Convert hour index to 24-hour format hour (0-23)
                                 let realHour: number;
                                 if (hourIndex === 0) {
@@ -416,98 +416,98 @@ const TableDay: React.FC<TableDayProps> = ({
                                 } else {
                                     realHour = hourIndex; // 1pm-11pm (already in 24-hour format: 13-23)
                                 }
-                                
-                                
+
+
                                 // Find boats for this hour and row
                                 const boatsForHour = boats.filter(boat => {
                                     if (boat.id !== row.id) return false;
-                                    
+
                                     // Parse the hour and minute from the raw times
                                     // Using padded format HH:MM for consistency
                                     const [boatStartHour, boatStartMinute] = boat.rawStartTime.split(':').map(Number);
                                     const [boatEndHour, boatEndMinute] = boat.rawEndTime.split(':').map(Number);
-                                    
+
                                     // Calculate total minutes since midnight
                                     const boatStartMinutes = boatStartHour * 60 + boatStartMinute;
                                     const boatEndMinutes = boatEndHour * 60 + boatEndMinute;
                                     const hourStartMinutes = realHour * 60;
                                     const hourEndMinutes = (realHour + 1) * 60 - 1; // End at XX:59
-                                    
 
-                        
+
+
                                     const spansHour = (
                                         (boatStartMinutes <= hourEndMinutes) && // Boat starts before or during this hour
                                         (boatEndMinutes >= hourStartMinutes)    // Boat ends after or during this hour
                                     );
-                                    
+
                                     return spansHour;
                                 });
-                                
+
                                 // Check first half (0-29 min)
                                 const firstHalfBoat = boatsForHour.find(boat => {
                                     // Parse times using consistent approach
                                     const [boatStartHour, boatStartMinute] = boat.rawStartTime.split(':').map(Number);
                                     const [boatEndHour, boatEndMinute] = boat.rawEndTime.split(':').map(Number);
-                                    
+
                                     // Calculate minutes for first half-hour of this hour (XX:00 to XX:29)
                                     const boatStartMinutes = boatStartHour * 60 + boatStartMinute;
                                     const boatEndMinutes = boatEndHour * 60 + boatEndMinute;
                                     const halfHourStartMinutes = realHour * 60;
                                     const halfHourEndMinutes = realHour * 60 + 29;
-                                    
+
                                     // For multi-day reservations that start before the current day
                                     if (boat.startsBefore && realHour === 0) {
                                         return true;
                                     }
-                                    
+
                                     // There is overlap if:
                                     const spansFirstHalf = (
-                                        (boatStartMinutes <= halfHourEndMinutes) && 
+                                        (boatStartMinutes <= halfHourEndMinutes) &&
                                         (boatEndMinutes >= halfHourStartMinutes)
                                     );
-                                    
+
                                     return spansFirstHalf;
                                 });
-                                
+
                                 // Check second half (30-59 min)
                                 const secondHalfBoat = boatsForHour.find(boat => {
                                     // Parse times using consistent approach
                                     const [boatStartHour, boatStartMinute] = boat.rawStartTime.split(':').map(Number);
                                     const [boatEndHour, boatEndMinute] = boat.rawEndTime.split(':').map(Number);
-                                    
+
                                     // Calculate minutes for second half-hour of this hour (XX:30 to XX:59)
                                     const boatStartMinutes = boatStartHour * 60 + boatStartMinute;
                                     const boatEndMinutes = boatEndHour * 60 + boatEndMinute;
                                     const halfHourStartMinutes = realHour * 60 + 30;
                                     const halfHourEndMinutes = realHour * 60 + 59;
-                                    
+
                                     // For multi-day reservations that end after the current day
                                     if (boat.endsAfter && realHour === 23) {
                                         return true;
                                     }
-                                    
+
                                     // There is overlap if:
                                     const spansSecondHalf = (
-                                        (boatStartMinutes <= halfHourEndMinutes) && 
+                                        (boatStartMinutes <= halfHourEndMinutes) &&
                                         (boatEndMinutes >= halfHourStartMinutes)
                                     );
-                                    
+
                                     return spansSecondHalf;
                                 });
-                                
+
                                 // Set occupied half-hours
                                 if (firstHalfBoat) {
                                     occupiedHalfHours[firstHalfIndex] = firstHalfBoat;
                                 }
-                                
+
                                 if (secondHalfBoat) {
                                     occupiedHalfHours[secondHalfIndex] = secondHalfBoat;
                                 }
                             });
-                            
+
                             // Generate cells
                             const cells: JSX.Element[] = [];
-                            
+
                             // Process all half-hour slots
                             let halfHourIndex = 0;
                             while (halfHourIndex < occupiedHalfHours.length) {
@@ -516,7 +516,7 @@ const TableDay: React.FC<TableDayProps> = ({
                                 const isFirstHalf = halfHourIndex % 2 === 0;
                                 const halfHour = isFirstHalf ? 'first' : 'second';
                                 const boatForHalfHour = occupiedHalfHours[halfHourIndex];
-                                
+
                                 if (!boatForHalfHour) {
                                     // Empty cell
                                     cells.push(
@@ -539,16 +539,16 @@ const TableDay: React.FC<TableDayProps> = ({
                                     halfHourIndex++;
                                     continue;
                                 }
-                                
+
                                 // Determine consecutive half-hours with the same reservation
                                 let halfHourColspan = 1;
                                 let nextIndex = halfHourIndex + 1;
-                                
+
                                 while (nextIndex < occupiedHalfHours.length) {
                                     const nextBoat = occupiedHalfHours[nextIndex];
-                                    
-                                    if (nextBoat && 
-                                        boatForHalfHour.id === nextBoat.id && 
+
+                                    if (nextBoat &&
+                                        boatForHalfHour.id === nextBoat.id &&
                                         boatForHalfHour.name === nextBoat.name &&
                                         // Make sure they are from the same reservation, by comparing raw start/end times
                                         boatForHalfHour.startDateObj.getTime() === nextBoat.startDateObj.getTime() &&
@@ -560,17 +560,17 @@ const TableDay: React.FC<TableDayProps> = ({
                                         break;
                                     }
                                 }
-                                
+
                                 // Add debugging log for cell span
                                 console.log(`Boat: ${boatForHalfHour.name}, Cell colspan: ${halfHourColspan}, Start: ${halfHourIndex}, End: ${halfHourIndex + halfHourColspan}`);
-                                
+
                                 // Получаем время начала и конца резервации
                                 const boatStartTime = boatForHalfHour.startDateObj;
                                 const boatEndTime = boatForHalfHour.endDateObj;
-                                
+
                                 // Получаем дату и время, соответствующие текущей ячейке
                                 const [year, month, day] = currentDate.split('-').map(Number);
-                                
+
                                 // Преобразуем индекс часа в реальный час (0 = 12am, 1 = 1am, ..., 12 = 12pm, ...)
                                 let currentHourStart;
                                 if (hourIndex === 0) {
@@ -582,19 +582,19 @@ const TableDay: React.FC<TableDayProps> = ({
                                 } else {
                                     currentHourStart = hourIndex; // 1pm-11pm
                                 }
-                                
+
                                 // Создаем даты для начала и конца текущего часового блока
                                 const cellStart = new Date(year, month - 1, day, currentHourStart, isFirstHalf ? 0 : 30);
                                 const cellEnd = new Date(year, month - 1, day, currentHourStart, isFirstHalf ? 30 : 59);
-                                
+
                                 // Проверяем, начинается ли резервация в этой ячейке
                                 const isStartCell = boatStartTime >= cellStart && boatStartTime <= cellEnd;
-                                
+
                                 // Проверяем, заканчивается ли резервация в этой ячейке (с учетом последующих ячеек)
                                 const lastCellIndex = halfHourIndex + halfHourColspan - 1;
                                 const lastHourIndex = Math.floor(lastCellIndex / 2);
                                 const isLastHalfHour = lastCellIndex % 2 === 1; // 1 = second half, 0 = first half
-                                
+
                                 // Преобразуем индекс последнего часа в реальный час
                                 let lastCellHour;
                                 if (lastHourIndex === 0) {
@@ -606,28 +606,28 @@ const TableDay: React.FC<TableDayProps> = ({
                                 } else {
                                     lastCellHour = lastHourIndex; // 1pm-11pm
                                 }
-                                
+
                                 const lastCellStart = new Date(year, month - 1, day, lastCellHour, isLastHalfHour ? 30 : 0);
                                 const lastCellEnd = new Date(year, month - 1, day, lastCellHour, isLastHalfHour ? 59 : 29);
-                                
+
                                 const isEndCell = boatEndTime >= lastCellStart && boatEndTime <= lastCellEnd;
-                                
+
                                 // Проверяем, является ли эта ячейка первой или последней в видимой области
                                 const isFirstVisibleCell = halfHourIndex === 0;
                                 const isLastVisibleCell = nextIndex >= occupiedHalfHours.length;
-                                
+
                                 // Учитываем особые случаи - полностью внутридневные резервации
                                 // Получаем начало и конец дня для сравнения
                                 const dayStart = new Date(year, month - 1, day, 0, 0, 0);
                                 const dayEnd = new Date(year, month - 1, day, 23, 59, 59);
-                                
+
                                 // Проверяем, находится ли вся резервация внутри текущего дня
                                 const isFullyContainedInDay = boatStartTime >= dayStart && boatEndTime <= dayEnd;
-                                
+
                                 // Проверяем, является ли лодка началом или концом резервации в принципе (не только в этой ячейке)
                                 const isFirstCellOfReservation = Math.abs(boatStartTime.getTime() - boatForHalfHour.startDateObj.getTime()) < 60000;
                                 const isLastCellOfReservation = Math.abs(boatEndTime.getTime() - boatForHalfHour.endDateObj.getTime()) < 60000;
-                                
+
                                 console.log("Debug info:", {
                                     boat: boatForHalfHour.name,
                                     hourIndex,
@@ -641,10 +641,10 @@ const TableDay: React.FC<TableDayProps> = ({
                                     isLastCellOfReservation,
                                     halfHourColspan
                                 });
-                                
+
                                 // Определяем скругление для разных случаев:
                                 let borderRadius = "1000px"; // По умолчанию полное скругление
-                                
+
                                 // Use the new properties directly
                                 if (boatForHalfHour.startsBefore && boatForHalfHour.endsAfter) {
                                     // Reservation spans the entire day, both edges straight
@@ -656,11 +656,11 @@ const TableDay: React.FC<TableDayProps> = ({
                                     // Right edge straight (reservation continues to next day)
                                     borderRadius = "1000px 0px 0px 1000px";
                                 }
-                                
+
                                 console.log(`Applied borderRadius for ${boatForHalfHour.name}: ${borderRadius}, startsBefore: ${boatForHalfHour.startsBefore}, endsAfter: ${boatForHalfHour.endsAfter}`);
 
                                 const textColor = getCellColor(boatForHalfHour).textColor;
-                                    
+
                                     cells.push(
                                         <Td
                                             height="52px"
@@ -698,7 +698,7 @@ const TableDay: React.FC<TableDayProps> = ({
                                             </Flex>
                                         </Td>
                                     );
-                                
+
                                 halfHourIndex += halfHourColspan;
                                 }
 

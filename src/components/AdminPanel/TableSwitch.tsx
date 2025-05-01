@@ -94,7 +94,7 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
                     alignItems="center"
                     border="1px solid var(--chakra-colors-basic-grey300)"
                     borderRadius="full"
-                    px="lg" 
+                    px="lg"
                     py="sm"
                     bg={currentView === 'month' ? 'var(--chakra-colors-gradient-blue)' : 'white'}
                     color={currentView === 'month' ? 'white' : 'var(--chakra-colors-basic-grey700)'}
@@ -109,7 +109,7 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
                     alignItems="center"
                     border="1px solid var(--chakra-colors-basic-grey300)"
                     borderRadius="full"
-                    px="lg" 
+                    px="lg"
                     py="sm"
                     bg={currentView === 'week' ? 'var(--chakra-colors-gradient-blue)' : 'white'}
                     color={currentView === 'week' ? 'white' : 'var(--chakra-colors-basic-grey700)'}
@@ -124,7 +124,7 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
                     alignItems="center"
                     border="1px solid var(--chakra-colors-basic-grey300)"
                     borderRadius="full"
-                    px="lg" 
+                    px="lg"
                     py="sm"
                     bg={currentView === 'day' ? 'var(--chakra-colors-gradient-blue)' : 'white'}
                     color={currentView === 'day' ? 'white' : 'var(--chakra-colors-basic-grey700)'}

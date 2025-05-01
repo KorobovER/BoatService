@@ -26,8 +26,8 @@ interface Marina {
 // Добавляем функцию преобразования URL в начало файла, перед компонентом
 const transformS3Url = (url: string): string => {
     if (!url) return '';
-    
-    // Преобразование URL из формата s3://bola-public-assets/... 
+
+    // Преобразование URL из формата s3://bola-public-assets/...
     // в https://s3.amazonaws.com/bola-public-assets/...
     if (url.startsWith('s3://')) {
         const path = url.substring(5); // Убираем 's3://'
@@ -36,7 +36,7 @@ const transformS3Url = (url: string): string => {
         const key = parts.slice(1).join('/');
         return `https://s3.amazonaws.com/${bucket}/${key}`;
     }
-    
+
     return url;
 };
 

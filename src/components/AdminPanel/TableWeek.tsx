@@ -17,24 +17,24 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
         const utcToday = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
         const day = utcToday.getUTCDay();
         const diff = utcToday.getUTCDate() - day + (day === 0 ? -6 : 1); // Корректировка для недели, начинающейся с понедельника
-        
+
         const monday = new Date(utcToday);
         monday.setUTCDate(diff);
-        
+
         const year = monday.getUTCFullYear();
         const month = String(monday.getUTCMonth() + 1).padStart(2, '0');
         const date = String(monday.getUTCDate()).padStart(2, '0');
-        
+
         return `${year}-${month}-${date}`;
     };
-    
+
     const getWeekDates = (startDate: string): string[] => {
         try {
             // Если startDate пустая, используем текущий понедельник
-            const effectiveStartDate = startDate && startDate.trim() !== '' 
-                ? startDate 
+            const effectiveStartDate = startDate && startDate.trim() !== ''
+                ? startDate
                 : getCurrentMonday();
-            
+
             // Если всё еще проблемы с датой, логируем и возвращаем пустой массив
             if (!effectiveStartDate || typeof effectiveStartDate !== 'string' || effectiveStartDate.trim() === '') {
                 console.error('Invalid startDate even after fallback:', effectiveStartDate);
@@ -43,17 +43,17 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
 
             // Разбираем дату вручную для избежания проблем с часовыми поясами
             const [year, month, day] = effectiveStartDate.split('-').map(num => parseInt(num, 10));
-            
+
             // Проверяем корректность компонентов даты
-            if (isNaN(year) || isNaN(month) || isNaN(day) || 
+            if (isNaN(year) || isNaN(month) || isNaN(day) ||
                 month < 1 || month > 12 || day < 1 || day > 31) {
                 console.error('Invalid date components:', { year, month, day });
                 return [];
             }
-            
+
             // Создаем дату в UTC
             const baseDate = new Date(Date.UTC(year, month - 1, day));
-            
+
             // Проверяем, что baseDate - валидная дата
             if (isNaN(baseDate.getTime())) {
                 console.error('Invalid date created:', baseDate);
@@ -65,12 +65,12 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
                 // Создаем новую дату для каждого дня недели
                 const currentDate = new Date(baseDate);
                 currentDate.setUTCDate(baseDate.getUTCDate() + i);
-                
+
                 // Форматируем дату в UTC
                 const currentYear = currentDate.getUTCFullYear();
                 const currentMonth = String(currentDate.getUTCMonth() + 1).padStart(2, '0');
                 const currentDay = String(currentDate.getUTCDate()).padStart(2, '0');
-                
+
                 return `${currentYear}-${currentMonth}-${currentDay}`;
             });
         } catch (error) {
@@ -98,11 +98,11 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
             const todayYear = today.getFullYear();
             const todayMonth = today.getMonth() + 1; // +1 потому что в JS месяцы от 0 до 11
             const todayDay = today.getDate();
-            
+
             // Парсим дату из строки
             const [year, month, dayOfMonth] = day.split('-').map(Number);
             if (isNaN(year) || isNaN(month) || isNaN(dayOfMonth)) return false;
-            
+
             // Сравниваем компоненты даты с системными
             return (
                 dayOfMonth === todayDay &&
@@ -117,8 +117,8 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
 
     const renderHeader = (day: string) => (
         <>
-            <Text 
-                color={isToday(day) ? "basic.grey900" : "basic.grey600"} 
+            <Text
+                color={isToday(day) ? "basic.grey900" : "basic.grey600"}
                 fontSize="14px"
                 fontWeight="500"
                 textAlign="center"

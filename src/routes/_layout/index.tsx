@@ -41,22 +41,22 @@ function Dashboard() {
     // Инициализация начальных дат
     useEffect(() => {
         const today = new Date();
-        
+
         // Устанавливаем текущую неделю
         setCurrentWeekStart(getCurrentWeekMonday(today));
-        
+
         // Устанавливаем текущий день
         setCurrentDay(formatDateString(today));
-        
+
         // Устанавливаем текущий месяц и год напрямую (1-12 для месяца)
         setCurrentMonth(today.getUTCMonth() + 1);
         setCurrentYear(today.getUTCFullYear());
-        
+
         // Ensure we're in week view by default
         setCurrentView('week');
     }, []);
 
-    // Simple function to get date string from month/year 
+    // Simple function to get date string from month/year
     const getMonthDateString = () => {
         return `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
     };
@@ -115,7 +115,7 @@ function Dashboard() {
     // Обработчик кнопки "Today"
     const handleToday = () => {
         const today = new Date();
-        
+
         if (currentView === 'month') {
             setCurrentMonth(today.getUTCMonth() + 1);
             setCurrentYear(today.getUTCFullYear());
@@ -152,7 +152,7 @@ function Dashboard() {
     // Обработчик переключения между режимами
     const handleViewChange = (view: TableView) => {
         setCurrentView(view);
-        
+
         // When switching to day view, always set the current day to today
         if (view === 'day') {
             const today = new Date();
@@ -183,7 +183,7 @@ function Dashboard() {
     };
 
     return (
-        <Box 
+        <Box
             bg="var(--chakra-colors-ui-light)"
             padding="var(--chakra-space-xl)"
             minH="100vh"
@@ -213,13 +213,13 @@ function Dashboard() {
                     >
                         {currentView === 'week' && (
                             <TableWeek
-                                currentWeekStart={currentWeekStart} 
+                                currentWeekStart={currentWeekStart}
                                 onReservationClick={handleReservationClick}
                             />
                         )}
                         {currentView === 'month' && currentMonth > 0 && (
                             <TableMonth
-                                key={`month-${currentYear}-${currentMonth}`} 
+                                key={`month-${currentYear}-${currentMonth}`}
                                 currentMonthDate={getMonthDateString()}
                                 onReservationClick={handleReservationClick}
                             />

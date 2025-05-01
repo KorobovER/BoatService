@@ -103,4 +103,4 @@ const BoatCell: React.FC<BoatCellProps> = ({ boat, textColor, colspan = 0, isMon
     );
 };
 
-export default BoatCell; 
+export default BoatCell;

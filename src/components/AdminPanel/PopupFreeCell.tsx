@@ -31,8 +31,8 @@ const PopupFreeCell: React.FC<PopupFreeCellProps> = ({ isOpen, onClose, rowId, d
                         <Text>Date: {(() => {
                             try {
                                 const date = new Date(day);
-                                return date.toLocaleDateString('en-US', { 
-                                    month: 'short', 
+                                return date.toLocaleDateString('en-US', {
+                                    month: 'short',
                                     day: 'numeric',
                                     year: 'numeric'
                                 });

@@ -11,7 +11,7 @@ const HoverReservation: React.FC<HoverReservationProps> = ({ boat }) => {
     const hasServiceRequests = serviceRequests.length > 0;
     const buttonStyle = {
         bg: hasServiceRequests ? 'system.warningYellow' : 'system.successGreen',
-        text: hasServiceRequests 
+        text: hasServiceRequests
             ? `${serviceRequests.length} service request${serviceRequests.length > 1 ? 's' : ''}`
             : 'No pending items',
         color: hasServiceRequests ? 'basic.grey900' : 'white'
@@ -22,17 +22,17 @@ const HoverReservation: React.FC<HoverReservationProps> = ({ boat }) => {
         if (!dateObj || !(dateObj instanceof Date) || isNaN(dateObj.getTime())) {
             return 'Invalid date';
         }
-        
+
         const time = dateObj.toLocaleString('en-US', {
             hour: 'numeric',
             hour12: true,
         }).toLowerCase();
-        
+
         const dateStr = dateObj.toLocaleString('en-US', {
             month: 'long',
             day: 'numeric',
         });
-        
+
         return (
             <>
                 <Text as="span" color='basic.grey900' fontWeight="400">{time}</Text>
@@ -100,13 +100,13 @@ const HoverReservation: React.FC<HoverReservationProps> = ({ boat }) => {
                 </Flex>
             </Flex>
             <Flex gap='24px' alignItems="flex-end">
-                <Button 
-                    borderRadius='full' 
+                <Button
+                    borderRadius='full'
                     bg={buttonStyle.bg}
-                    fontSize='14px' 
+                    fontSize='14px'
                     fontWeight='400'
                     color={buttonStyle.color}
-                    sx={{ 
+                    sx={{
                         padding: '4px 8px !important',
                         minHeight: 'unset',
                         height: 'auto',
@@ -121,4 +121,4 @@ const HoverReservation: React.FC<HoverReservationProps> = ({ boat }) => {
     );
 };
 
-export default HoverReservation; 
+export default HoverReservation;

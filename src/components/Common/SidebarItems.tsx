@@ -44,7 +44,7 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
             key={title}
             height='42px'
             pl='xl'
-            pr='xl' 
+            pr='xl'
             color='basic.grey700'
             activeProps={{
               style: {

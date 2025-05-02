@@ -13,7 +13,8 @@ import {
     Tbody,
     Tr,
     Th,
-    Td
+    Td,
+    Button
 } from '@chakra-ui/react';
 import BolaCell from "/assets/images/bola-cell.svg";
 import { ReservationsService, MarinasService } from '../../client';
@@ -78,6 +79,9 @@ export interface Boat {
     effectiveEndDate?: Date;
     user_first_name?: string;
     user_last_name?: string;
+    loa?: number;
+    draft?: number;
+    sailId?: string;
 }
 
 interface TableReservationsProps {
@@ -107,6 +111,47 @@ export const getCellColor = (boat: Boat): { bg: string; textColor: string } => {
     // По умолчанию - нормальное состояние
     return { bg: "system.successGreen", textColor: "white" }; // green (default) - нормальное состояние
 };
+
+// Функция для создания опций запроса на получение швартовок
+function getMooringBallsQueryOptions(marinaId: string | undefined, currentTimeZone: string) {
+    return {
+        queryKey: ['mooringBalls', marinaId, currentTimeZone],
+        queryFn: async () => {
+            try {
+                let result = { mooring_balls: [] as Array<any> };
+
+                if (marinaId) {
+                    // Если выбрана марина, запрашиваем её данные напрямую
+                    const marinaData = await MarinasService.readMarina({ id: marinaId });
+                    if (marinaData.mooring_balls) result.mooring_balls = marinaData.mooring_balls;
+                } else {
+                    // Если марина не выбрана, просто возвращаем пустой список без запроса к API
+                    console.warn('No marina selected, skipping mooring balls request.');
+                }
+                return result;
+            } catch (error) {
+                console.error('Error fetching mooring balls:', error);
+                throw error;
+            }
+        },
+        // Запрос активен только если марина выбрана
+        enabled: !!marinaId,
+    };
+}
+
+// Функция для создания опций запроса на получение резерваций
+function getReservationsQueryOptions(currentDate: string, marinaId: string | undefined, currentTimeZone: string) {
+    return {
+        queryKey: ['reservations', currentDate, marinaId, currentTimeZone],
+        queryFn: () => ReservationsService.readReservations({
+            limit: 500,
+            marinaId: marinaId || undefined,
+        }),
+        enabled: !!currentDate,
+        staleTime: 60000, // Данные считаются актуальными в течение 1 минуты
+        refetchOnWindowFocus: true, // Перезапрашивать данные при фокусе окна
+    };
+}
 
 const TableReservations: React.FC<TableReservationsProps> = ({
     days,
@@ -139,7 +184,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         setCurrentTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
     };
 
-
     // Эффект для отслеживания изменений временной зоны
     useEffect(() => {
         // Проверяем доступность API Intl
@@ -170,6 +214,21 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         }
     }, []);
 
+    // Запрос швартовок с использованием TanStack Query и созданных опций
+    const {
+        data: mooringBalls,
+        isLoading: isLoadingMooringBalls,
+        isFetching: isFetchingMooringBalls,
+    } = useQuery(getMooringBallsQueryOptions(selectedMarina?.marina_id, currentTimeZone));
+
+    // Запрос резерваций с использованием TanStack Query и созданных опций
+    const {
+        data: reservations,
+        isLoading: isLoadingReservations,
+        isFetching: isFetchingReservations,
+        isError,
+    } = useQuery(getReservationsQueryOptions(currentDate, selectedMarina?.marina_id, currentTimeZone));
+
     // Перезагружаем данные при изменении временной зоны
     useEffect(() => {
         if (boats.length > 0) {
@@ -179,46 +238,13 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         }
     }, [currentTimeZone, queryClient, boats.length]);
 
-    // Запрос швартовок (общий для обоих компонентов)
-    const { data: mooringBalls, isLoading: isLoadingMooringBalls } = useQuery({
-        queryKey: ['mooringBalls', selectedMarina?.marina_id, currentTimeZone],
-        queryFn: async () => {
-            try {
-                let result = { mooring_balls: [] as Array<any> };
-
-                if (selectedMarina?.marina_id) {
-                    // Если выбрана марина, запрашиваем её данные напрямую
-                    const marinaData = await MarinasService.readMarina({ id: selectedMarina.marina_id });
-                    if (marinaData.mooring_balls) result.mooring_balls = marinaData.mooring_balls;
-                } else {
-                    // Если марина не выбрана, просто возвращаем пустой список без запроса к API
-                    console.warn('No marina selected, skipping mooring balls request.');
-                    return result;
-                }
-                return result;
-            } catch (error) {
-                console.error('Error fetching mooring balls:', error);
-                throw error;
-            }
-        },
-        // Запрос активен только если марина выбрана и есть текущая дата
-        enabled: !!selectedMarina?.marina_id && !!currentDate,
-    });
-
-    // Запрос резерваций (общий для обоих компонентов)
-    const { data: reservations, isLoading: isLoadingReservations, isError } = useQuery({
-        queryKey: ['reservations', currentDate, selectedMarina?.marina_id, currentTimeZone],
-        queryFn: () => ReservationsService.readReservations({
-            limit: 500,
-            marinaId: selectedMarina?.marina_id || undefined,
-        }),
-        enabled: !!currentDate,
-    });
-
-    // Debugging for days array
+    // Prefetch следующей марины, если есть ID
     useEffect(() => {
-        // Array changes are tracked
-    }, [days]);
+        if (selectedMarina?.marina_id) {
+            const nextMarinaId = (parseInt(selectedMarina.marina_id) + 1).toString();
+            queryClient.prefetchQuery(getMooringBallsQueryOptions(nextMarinaId, currentTimeZone));
+        }
+    }, [selectedMarina?.marina_id, currentTimeZone, queryClient]);
 
     // Обработка швартовок (общая логика)
     useEffect(() => {
@@ -318,6 +344,9 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 effectiveEndDate: endDateUTC > periodEndDate ? endDateUTC : undefined,
                                 user_first_name: reservation.user?.first_name,
                                 user_last_name: reservation.user?.last_name,
+                                loa: reservation.boat?.loa,
+                                draft: reservation.boat?.draft,
+                                sailId: '00', // Дефолтное значение, так как отсутствует в API
                             };
                             return boat;
                         } catch (error) {
@@ -406,28 +435,63 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         );
     };
 
+    // Определяем состояние загрузки и ошибки
     const isLoading = isLoadingMooringBalls || isLoadingReservations;
+    const isFetching = isFetchingMooringBalls || isFetchingReservations;
 
+    // Показываем индикатор загрузки при первоначальной загрузке данных
     if (isLoading) return (
         <Flex width="98%" m="auto" height="100vh" alignItems="center" justifyContent="center" bg="white" rounded='25px'>
             <Spinner size="xl" color="ui.main" />
         </Flex>
     );
 
+    // Показываем ошибку, если запрос завершился ошибкой
     if (isError) return (
-        <Center width="100vw" height="100vh" bg="white">
-            <Text color="red.500" fontSize="xl">Error loading data</Text>
+        <Center width="100%" height="100vh" bg="white">
+            <Flex direction="column" alignItems="center">
+                <Text color="red.500" fontSize="xl">Error loading data</Text>
+                <Button 
+                    mt={4} 
+                    colorScheme="blue" 
+                    onClick={() => {
+                        queryClient.invalidateQueries({ queryKey: ['reservations'] });
+                        queryClient.invalidateQueries({ queryKey: ['mooringBalls'] });
+                    }}
+                >
+                    Retry
+                </Button>
+            </Flex>
         </Center>
     );
 
+    // Проверяем наличие необходимых данных
     if (!currentDate || days.length === 0) return (
-        <Center width="100vw" height="100vh" bg="white">
+        <Center width="100%" height="100vh" bg="white">
             <Text fontSize="xl">Initializing calendar...</Text>
         </Center>
     );
 
     return (
-        <Box display="flex" alignItems="flex-start" width="100%">
+        <Box display="flex" alignItems="flex-start" width="100%" position="relative">
+            {/* Показываем оверлей при обновлении данных */}
+            {isFetching && !isLoading && (
+                <Box 
+                    position="absolute" 
+                    top={0} 
+                    left={0} 
+                    right={0} 
+                    bottom={0} 
+                    bg="rgba(255, 255, 255, 0.5)" 
+                    zIndex={10}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                >
+                    <Spinner size="md" color="ui.main" />
+                </Box>
+            )}
+            
             <Box flex="1" overflowX="auto" sx={{
                 '&:focus': { outline: 'none' },
                 '&:focus-visible': { outline: 'none' },

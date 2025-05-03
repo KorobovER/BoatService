@@ -41,8 +41,6 @@ const HoverReservation: React.FC<HoverReservationProps> = ({ boat }) => {
         );
     };
 
-     // todo: fix margin issue on right side
-
     return (
         <Flex flexDirection='column' gap='8px'>
             <Flex gap='8px' alignItems='center'>

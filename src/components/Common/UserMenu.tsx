@@ -12,8 +12,6 @@ import {
 import { Link } from "@tanstack/react-router"
 import { FaUserAlt } from "react-icons/fa"
 import { FiLogOut, FiUser } from "react-icons/fi"
-import { useQuery } from '@tanstack/react-query'
-import { EmployeesService } from '../../client'
 import { useState } from 'react'
 
 import useAuth from "../../hooks/useAuth"
@@ -21,27 +19,18 @@ import useAuth from "../../hooks/useAuth"
 
 const UserMenu = () => {
   const { logout } = useAuth()
+  const { user: currentUser, isLoading } = useAuth();
   const [isHovered, setIsHovered] = useState(false)
   const { isOpen, onOpen, onClose } = useDisclosure()
 
   // Стили должны применяться при наведении или когда меню открыто
   const isActive = isHovered || isOpen
 
-  // Запрос данных пользователя с типом any для обхода ограничений типизации
-  const { data, isLoading } = useQuery({
-    queryKey: ['employee'],
-    queryFn: async () => {
-      const result = await EmployeesService.readEmployeeMe();
-      return result;
-    }
-  });
-
   const handleLogout = async () => {
     logout()
   }
 
-  // Получаем инициалы пользователя из display_name
-  const userInitials = data?.display_initials;
+  const userInitials = currentUser?.display_initials;
 
   return (
     <>

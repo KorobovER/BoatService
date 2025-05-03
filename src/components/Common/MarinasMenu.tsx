@@ -11,9 +11,9 @@ import {
     Spinner,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
-import { EmployeesService, MarinasService } from '../../client';
+import { MarinasService } from '../../client';
 import { useMarina } from '../../context/MarinaContext';
-import { useQuery } from '@tanstack/react-query';
+import useAuth from "../../hooks/useAuth";
 
 // Определяем тип Marina
 interface Marina {
@@ -41,14 +41,9 @@ const transformS3Url = (url: string): string => {
 };
 
 const MarinasMenu = () => {
+    const { user: currentUser, isLoading } = useAuth();
     const { selectedMarina, setSelectedMarina, setFullMarinaData } = useMarina();
     const [marinas, setMarinas] = useState<Marina[]>([]);
-
-    // Запрос данных сотрудника через readEmployeeMe
-    const { data: employeeData, isLoading, isError } = useQuery({
-        queryKey: ['employee'],
-        queryFn: EmployeesService.readEmployeeMe
-    });
 
     // Функция для получения полных данных марины при выборе
     const handleMarinaSelect = async (marina: Marina) => {
@@ -77,11 +72,9 @@ const MarinasMenu = () => {
     */
 
     useEffect(() => {
-        console.log('Employee data:', employeeData);
-
-        if (employeeData && employeeData.marinas && employeeData.marinas.length > 0) {
+        if (currentUser && currentUser.marinas && currentUser.marinas.length > 0) {
             // Преобразуем все марины сотрудника в массив для компонента
-            const marinasArray = employeeData.marinas.map(marina => ({
+            const marinasArray = currentUser.marinas.map(marina => ({
                 marina_id: marina.marina_id,
                 name: marina.name,
                 logo_url: marina.logo_url,
@@ -96,20 +89,12 @@ const MarinasMenu = () => {
                 handleMarinaSelect(marinasArray[0]);
             }
         }
-    }, [employeeData, selectedMarina]);
+    }, [currentUser, selectedMarina]);
 
     if (isLoading) {
         return (
             <Flex align="center" justify="center" w="300px">
                 <Spinner size="sm" color="ui.main" />
-            </Flex>
-        );
-    }
-
-    if (isError) {
-        return (
-            <Flex align="center" justify="center" w="300px" color="bg.error">
-                Failed to load marina information
             </Flex>
         );
     }

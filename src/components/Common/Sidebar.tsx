@@ -12,22 +12,20 @@ import {
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
-import { useQueryClient } from "@tanstack/react-query";
 import { FiLogOut, FiMenu } from "react-icons/fi";
 
 import LogoPrimary from "/assets/images/logo-primary.svg";
 import LogoSecondary from "/assets/images/logo-secondary.svg";
-import type { EmployeePublic } from "../../client";
 import useAuth from "../../hooks/useAuth";
 import SidebarItems from "./SidebarItems";
 
 const Sidebar = () => {
-  const queryClient = useQueryClient();
   const bgColor = useColorModeValue("ui.light", "ui.dark");
   const textColor = useColorModeValue("ui.light", "ui.light");
-  const currentUser = queryClient.getQueryData<EmployeePublic>(["currentUser"]);
+
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { logout } = useAuth();
+  const { user: currentUser } = useAuth();
 
   const handleLogout = async () => {
     logout();

@@ -1,39 +1,24 @@
 // src/context/MarinaContext.tsx
 import { createContext, useContext, useState, ReactNode } from "react";
-import { MarinaPublic } from "../client";
-
-// Базовый интерфейс марины для выбора в UI
-interface Marina {
-    marina_id: string;
-    name: string;
-    logo_url: string | null;
-    subregion: string;
-}
+import { MarinaPublicBase } from "../client";
 
 interface MarinaContextType {
-    selectedMarina: Marina | null;
-    setSelectedMarina: (marina: Marina | null) => void;
-    fullMarinaData: MarinaPublic | null;
-    setFullMarinaData: (data: MarinaPublic | null) => void;
+    selectedMarina: MarinaPublicBase | null;
+    setSelectedMarina: (marina: MarinaPublicBase | null) => void;
 }
 
 const MarinaContext = createContext<MarinaContextType>({
     selectedMarina: null,
     setSelectedMarina: () => { },
-    fullMarinaData: null,
-    setFullMarinaData: () => { },
 });
 
 export const MarinaProvider = ({ children }: { children: ReactNode }) => {
-    const [selectedMarina, setSelectedMarina] = useState<Marina | null>(null);
-    const [fullMarinaData, setFullMarinaData] = useState<MarinaPublic | null>(null);
+    const [selectedMarina, setSelectedMarina] = useState<MarinaPublicBase | null>(null);
 
     return (
         <MarinaContext.Provider value={{
             selectedMarina,
             setSelectedMarina,
-            fullMarinaData,
-            setFullMarinaData
         }}>
             {children}
         </MarinaContext.Provider>

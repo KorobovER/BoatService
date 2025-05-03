@@ -238,14 +238,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         }
     }, [currentTimeZone, queryClient, boats.length]);
 
-    // Prefetch следующей марины, если есть ID
-    useEffect(() => {
-        if (selectedMarina?.marina_id) {
-            const nextMarinaId = (parseInt(selectedMarina.marina_id) + 1).toString();
-            queryClient.prefetchQuery(getMooringBallsQueryOptions(nextMarinaId, currentTimeZone));
-        }
-    }, [selectedMarina?.marina_id, currentTimeZone, queryClient]);
-
     // Обработка швартовок (общая логика)
     useEffect(() => {
         if (mooringBalls?.mooring_balls) {
@@ -451,9 +443,9 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         <Center width="100%" height="100vh" bg="white">
             <Flex direction="column" alignItems="center">
                 <Text color="red.500" fontSize="xl">Error loading data</Text>
-                <Button 
-                    mt={4} 
-                    colorScheme="blue" 
+                <Button
+                    mt={4}
+                    colorScheme="blue"
                     onClick={() => {
                         queryClient.invalidateQueries({ queryKey: ['reservations'] });
                         queryClient.invalidateQueries({ queryKey: ['mooringBalls'] });
@@ -476,13 +468,13 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         <Box display="flex" alignItems="flex-start" width="100%" position="relative">
             {/* Показываем оверлей при обновлении данных */}
             {isFetching && !isLoading && (
-                <Box 
-                    position="absolute" 
-                    top={0} 
-                    left={0} 
-                    right={0} 
-                    bottom={0} 
-                    bg="rgba(255, 255, 255, 0.5)" 
+                <Box
+                    position="absolute"
+                    top={0}
+                    left={0}
+                    right={0}
+                    bottom={0}
+                    bg="rgba(255, 255, 255, 0.5)"
                     zIndex={10}
                     display="flex"
                     alignItems="center"
@@ -491,7 +483,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                     <Spinner size="md" color="ui.main" />
                 </Box>
             )}
-            
+
             <Box flex="1" overflowX="auto" sx={{
                 '&:focus': { outline: 'none' },
                 '&:focus-visible': { outline: 'none' },

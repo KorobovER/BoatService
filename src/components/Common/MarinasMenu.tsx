@@ -10,18 +10,10 @@ import {
     HStack,
     Spinner,
 } from "@chakra-ui/react";
-import { useState, useEffect } from "react";
-import { MarinasService } from '../../client';
+import { useEffect } from "react";
+import { MarinaPublicBase } from '../../client';
 import { useMarina } from '../../context/MarinaContext';
 import useAuth from "../../hooks/useAuth";
-
-// Определяем тип Marina
-interface Marina {
-    marina_id: string;
-    name: string;
-    logo_url: string | null;
-    subregion: string;
-}
 
 // Добавляем функцию преобразования URL в начало файла, перед компонентом
 const transformS3Url = (url: string): string => {
@@ -42,54 +34,19 @@ const transformS3Url = (url: string): string => {
 
 const MarinasMenu = () => {
     const { user: currentUser, isLoading } = useAuth();
-    const { selectedMarina, setSelectedMarina, setFullMarinaData } = useMarina();
-    const [marinas, setMarinas] = useState<Marina[]>([]);
+    const { selectedMarina, setSelectedMarina } = useMarina();
 
-    // Функция для получения полных данных марины при выборе
-    const handleMarinaSelect = async (marina: Marina) => {
-        try {
-            console.log(`Fetching complete data for marina: ${marina.name} (${marina.marina_id})`);
-            const fullMarinaData = await MarinasService.readMarina({ id: marina.marina_id });
-            console.log('Full marina data:', fullMarinaData);
-
-            // Сохраняем базовые и полные данные марины
-            setSelectedMarina(marina);
-            setFullMarinaData(fullMarinaData);
-        } catch (error) {
-            console.error('Error fetching marina data:', error);
-            // Даже в случае ошибки устанавливаем выбранную марину
-            setSelectedMarina(marina);
-            setFullMarinaData(null);
-        }
+    const handleMarinaSelect = async (marina: MarinaPublicBase) => {
+        setSelectedMarina(marina);
     };
-
-    // Обработчик для опции "All marinas"
-    /*
-    const handleSelectAllMarinas = () => {
-        setSelectedMarina(null);
-        setFullMarinaData(null);
-    };
-    */
 
     useEffect(() => {
-        if (currentUser && currentUser.marinas && currentUser.marinas.length > 0) {
-            // Преобразуем все марины сотрудника в массив для компонента
-            const marinasArray = currentUser.marinas.map(marina => ({
-                marina_id: marina.marina_id,
-                name: marina.name,
-                logo_url: marina.logo_url,
-                subregion: marina.subregion
-            }));
-
-            setMarinas(marinasArray);
-            console.log('Marinas array:', marinasArray);
-
-            if (!selectedMarina && marinasArray.length > 0) {
-                // При первой загрузке получаем полные данные выбранной марины
-                handleMarinaSelect(marinasArray[0]);
+        if (currentUser?.marinas && currentUser?.marinas.length > 0) {
+            if (!selectedMarina && currentUser?.marinas.length > 0) {
+                handleMarinaSelect(currentUser?.marinas[0]);
             }
         }
-    }, [currentUser, selectedMarina]);
+    }, [currentUser]);
 
     if (isLoading) {
         return (
@@ -99,7 +56,7 @@ const MarinasMenu = () => {
         );
     }
 
-    if (marinas.length === 0) {
+    if (currentUser?.marinas.length === 0) {
         return (
             <Flex align="center" justify="center" w="300px" color="basic.grey600">
                 No marinas available
@@ -143,7 +100,7 @@ const MarinasMenu = () => {
                     </Flex>
                 </MenuButton>
                 <MenuList minWidth="240px" rounded='xl' boxShadow="md" py={0} zIndex={1000}>
-                    {marinas.map((marina) => (
+                    {currentUser?.marinas.map((marina) => (
                         <MenuItem
                             key={marina.marina_id}
                             rounded='xl'

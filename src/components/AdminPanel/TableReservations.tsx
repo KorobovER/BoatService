@@ -49,6 +49,7 @@ interface Row {
 
 export interface Boat {
     id: string;
+    mooring_ball_id: string;
     name: string;
     code: string;
     startDay: string;
@@ -82,6 +83,7 @@ export interface Boat {
     loa?: number;
     draft?: number;
     sailId?: string;
+    reservation_id: string;
 }
 
 interface TableReservationsProps {
@@ -303,7 +305,9 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                             };
                             // Используем локальное время для всей таблицы
                             const boat = {
-                                id: reservation.mooring_ball.ball_number.toString(),
+                                id: reservation.boat_id?.toString(),
+                                mooring_ball_id: reservation.mooring_ball.ball_number.toString(),
+                                reservation_id: reservation.reservation_id,
                                 name: reservation.boat?.boatname || 'N/A',
                                 code: reservation.boat?.registration_number || 'N/A',
                                 // Сохраняем даты в локальном формате для внутренних расчетов
@@ -547,9 +551,9 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                         const startDate = new Date(startYear, startMonth - 1, startDay);
 
                                         const [endYear, endMonth, endDay] = b.endDay.split('-').map(Number);
-                                        const endDate = new Date(endYear, endMonth - 1, endDay);
+                                        const endDate = new Date(endYear, endMonth - 1, endDay, 23, 59, 59);
 
-                                        return b.id === row.id && currentDay >= startDate && currentDay <= endDate;
+                                        return b.mooring_ball_id === row.id && currentDay >= startDate && currentDay <= endDate;
                                     } catch (error) {
                                         return false;
                                     }
@@ -636,6 +640,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                     // Сравниваем ID, имя, дату начала и окончания
                                     if (nextBoat &&
                                         boatMatch.id === nextBoat.id &&
+                                        boatMatch.mooring_ball_id === nextBoat.mooring_ball_id &&
                                         boatMatch.name === nextBoat.name &&
                                         boatMatch.startDay === nextBoat.startDay &&
                                         boatMatch.endDay === nextBoat.endDay) {
@@ -717,6 +722,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                         borderRight={dayIndex < days.length - 1 && (halfDayIndex + halfDayColspan) % 2 === 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
                                         borderTop="1px solid var(--chakra-colors-basic-grey100)"
                                         data-boat-id={boatMatch.id}
+                                        data-mooring-ball-id={boatMatch.mooring_ball_id}
                                         data-boat-name={boatMatch.name}
                                         data-boat-code={boatMatch.code}
                                         sx={{
@@ -736,6 +742,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                             borderRadius={borderRadius}
                                             className="boat-cell-container"
                                             data-boat-id={boatMatch.id}
+                                            data-mooring-ball-id={boatMatch.mooring_ball_id}
                                         >
                                             {/* Показываем информацию о лодке */}
                                             {renderBoatCell(boatMatch, halfDayColspan / 2, getCellColor(boatMatch).textColor)}

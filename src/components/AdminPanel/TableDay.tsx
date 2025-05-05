@@ -21,6 +21,7 @@ import { useMarina } from '../../context/MarinaContext';
 import PopupFreeCell from './PopupFreeCell';
 import PopupReserved from './ServiceView/Services';
 import BoatCell, { getCellColor } from './BoatCell';
+import { Boat as ReservationsBoat } from './TableReservations';
 
 // Функция для преобразования S3 URL
 const transformS3Url = (url: string): string => {
@@ -77,6 +78,8 @@ export interface Boat {
     effectiveEndDate: Date;
     user_first_name?: string;
     user_last_name?: string;
+    mooring_ball_id?: string;
+    reservation_id?: string;
 }
 
 interface TableDayProps {
@@ -300,7 +303,11 @@ const TableDay: React.FC<TableDayProps> = ({
                                 endsAfter,
                                 // Добавляем данные о пользователе
                                 user_first_name: reservation.user?.first_name,
-                                user_last_name: reservation.user?.last_name
+                                user_last_name: reservation.user?.last_name,
+                                mooring_ball_id: reservation.mooring_ball.ball_number?.toString(),
+                                reservation_id: reservation.reservation_id,
+                                loa: reservation.boat?.loa,
+                                draft: reservation.boat?.draft,
                             };
                         } catch (error) {
                             console.error('Error processing reservation:', error);
@@ -327,7 +334,7 @@ const TableDay: React.FC<TableDayProps> = ({
 
     // Компонент для отображения содержимого ячейки с резервацией
     const renderBoatCell = (boat: Boat, textColor: string) => {
-        return <BoatCell boat={boat} textColor={textColor} />;
+        return <BoatCell boat={boat as unknown as ReservationsBoat} textColor={textColor} />;
     };
 
     const handleCellClick = (rowId: string, hour: string, halfHour?: 'first' | 'second', boat?: Boat) => {
@@ -762,7 +769,7 @@ const TableDay: React.FC<TableDayProps> = ({
                         onClose={onReservedClose}
                         rowId={selectedCell.rowId}
                         day={currentDate}
-                        boat={selectedCell.boat}
+                        boat={selectedCell.boat as unknown as ReservationsBoat}
                         timeOfDay={selectedCell.hour.includes('am') ? 'AM' : 'PM'}
                     />
                 </>

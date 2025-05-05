@@ -12,9 +12,11 @@ import {
     Image,
     Flex,
     Button,
-    Center
+    Center,
+    useToast
 } from '@chakra-ui/react';
-import { MarinaServicePublic } from '../../../client/models';
+import { MarinaServicePublic, ServiceOnReservationCreate, SubServiceRequest, ReservationPublic } from '../../../client/models';
+import { ReservationsService } from '../../../client/services';
 import { Boat } from '../TableReservations';
 
 // Иконки для разных типов услуг
@@ -52,14 +54,19 @@ const getServiceIcon = (name: string): string => {
     }
 };
 
-// Функция для определения типа элемента управления
+// Функция для определения типа элемента управления (не использует поле type)
 const getItemType = (item: any): 'unit' | 'measured' => {
-    // Проверка типа предмета
-    if (item.type && typeof item.type === 'string') {
-        if (item.type.toLowerCase() === 'measured') {
+    // Определяем по единице измерения (unit)
+    if (item.unit && typeof item.unit === 'string') {
+        // Единицы, которые обычно измеряются (measured)
+        const measuredUnits = ['gallon', 'liter', 'kg', 'lb', 'hour'];
+        
+        // Если единица измерения соответствует измеряемым, это measured
+        if (measuredUnits.some(u => item.unit.toLowerCase().includes(u))) {
             return 'measured';
         }
     }
+    
     // По умолчанию возвращаем unit
     return 'unit';
 };
@@ -73,12 +80,23 @@ interface ServicePopupProps {
     rowId?: string;
 }
 
+// Функция для извлечения ID резервации из объекта Boat
+const getReservationId = (boat?: Boat): string | undefined => {
+    // Используем reservation_id из объекта Boat
+    // Если его нет, используем id как запасной вариант (для обратной совместимости)
+    return boat?.reservation_id || boat?.id;
+};
+
 const ServicePopup: React.FC<ServicePopupProps> = ({ isOpen, onClose, services, boat, userName = '', rowId = '' }) => {
-    // Extract all service items from all services
+    const toast = useToast();
+    
+    // Извлекаем все элементы сервисов из всех сервисов с нужными полями
     const allServiceItems = services.flatMap((service, serviceIndex) =>
         service.service_items 
             ? service.service_items.map(item => ({
                 ...item,
+                // Сохраняем title из родительского сервиса
+                parentServiceTitle: service.title,
                 // Имитация типа для демонстрации - каждый второй элемент будет иметь тип 'measured'
                 type: serviceIndex % 2 === 0 ? 'unit' : 'measured'
             })) 
@@ -114,10 +132,240 @@ const ServicePopup: React.FC<ServicePopupProps> = ({ isOpen, onClose, services, 
         setQuantities({});
     };
 
-    // Add services
+    // Функция для подготовки выбранных сервисов
+    const getSelectedServices = (): SubServiceRequest[] => {
+        const selectedServices: SubServiceRequest[] = [];
+        
+        for (const [idx, qty] of Object.entries(quantities)) {
+            const index = parseInt(idx, 10);
+            if (qty > 0 && index < allServiceItems.length) {
+                const item = allServiceItems[index];
+                
+                try {
+                    // Validate title
+                    if (!item.parentServiceTitle || typeof item.parentServiceTitle !== 'string') {
+                        console.warn('Invalid service title:', item.parentServiceTitle);
+                        continue;
+                    }
+                    
+                    // Validate name
+                    if (!item.name || typeof item.name !== 'string') {
+                        console.warn('Invalid service name:', item.name);
+                        continue;
+                    }
+                    
+                    // Validate and convert price
+                    let price: number;
+                    if (typeof item.price === 'number') {
+                        price = item.price;
+                    } else if (typeof item.price === 'string') {
+                        price = parseFloat(item.price);
+                        if (isNaN(price)) {
+                            console.warn('Invalid service price (NaN):', item.price);
+                            continue;
+                        }
+                    } else {
+                        console.warn('Invalid service price type:', typeof item.price);
+                        continue;
+                    }
+                    
+                    // Validate unit
+                    if (!item.unit || typeof item.unit !== 'string') {
+                        console.warn('Invalid service unit:', item.unit);
+                        continue;
+                    }
+                    
+                    // Validate quantity
+                    if (typeof qty !== 'number' || qty <= 0) {
+                        console.warn('Invalid quantity:', qty);
+                        continue;
+                    }
+                    
+                    // All validations passed, create the SubServiceRequest object
+                    selectedServices.push({
+                        title: item.parentServiceTitle,
+                        name: item.name,
+                        price: price,
+                        unit: item.unit,
+                        quantity: qty
+                    });
+                    
+                    console.log('Added valid service:', {
+                        title: item.parentServiceTitle,
+                        name: item.name,
+                        price,
+                        unit: item.unit,
+                        quantity: qty
+                    });
+                } catch (error) {
+                    console.error('Error validating service item:', error, item);
+                }
+            }
+        }
+        
+        return selectedServices;
+    };
+
+    // Функция для добавления сервисов к резервации
+    const submitServices = async () => {
+        try {
+            const selectedServices = getSelectedServices();
+            
+            if (selectedServices.length === 0) {
+                toast({
+                    title: "No services selected",
+                    description: "Please select at least one service to add",
+                    status: "warning",
+                    duration: 3000,
+                    isClosable: true,
+                });
+                return;
+            }
+
+            // Используем функцию для извлечения ID резервации
+            const reservationId = getReservationId(boat);
+            
+            if (!reservationId) {
+                console.error('Missing reservation ID', { boat });
+                toast({
+                    title: "Error",
+                    description: "No reservation ID found. Please make sure a valid reservation is selected.",
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                });
+                return;
+            }
+
+            // Debug log the boat object to see what fields are available
+            console.log('Boat object in submitServices:', {
+                id: boat?.id,
+                reservation_id: boat?.reservation_id,
+                resolved_id: reservationId
+            });
+
+            // Создаем объект ServiceOnReservationCreate
+            const serviceRequest: ServiceOnReservationCreate = {
+                requested_date: new Date().toISOString(),
+                services: selectedServices,
+                special_instructions: null
+            };
+
+            console.log('Creating service request:', JSON.stringify(serviceRequest, null, 2));
+            console.log('For reservation ID:', reservationId);
+
+            try {
+                // Используем ReservationsService для добавления сервисов
+                console.log('API Request Payload:', {
+                    reservationId,
+                    requestBody: JSON.parse(JSON.stringify(serviceRequest))
+                });
+                
+                // Log auth token status from local storage (if available)
+                try {
+                    const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+                    console.log('Auth token available:', !!token);
+                    if (token) {
+                        console.log('Token first 10 chars:', token.substring(0, 10) + '...');
+                    }
+                } catch (e) {
+                    console.error('Error checking token:', e);
+                }
+                
+                const response = await ReservationsService.requestReservationService({
+                    reservationId,
+                    requestBody: serviceRequest
+                });
+                
+                console.log('Service creation response:', response);
+                
+                // Показываем уведомление об успешном добавлении
+                toast({
+                    title: "Services added",
+                    description: `Successfully added ${selectedServices.length} services to reservation`,
+                    status: "success",
+                    duration: 3000,
+                    isClosable: true,
+                });
+                
+                // Закрываем модальное окно
+                onClose();
+            } catch (error: any) {
+                console.error('API error details:', {
+                    error,
+                    message: error.message,
+                    body: error.body,
+                    status: error.status,
+                    statusText: error.statusText
+                });
+                
+                // Подробная информация об ошибке
+                let errorMessage = "Failed to add services to reservation.";
+                
+                // Check specifically for 422 Validation Error
+                if (error.status === 422) {
+                    errorMessage = "Validation Error (422): The data format doesn't match API requirements.";
+                    
+                    if (error.body?.detail) {
+                        // Попытка извлечь детали ошибки валидации
+                        const details = Array.isArray(error.body.detail) ? error.body.detail : [error.body.detail];
+                        errorMessage = details.map((d: any) => 
+                            `Field '${d.loc?.join('.')}': ${d.msg}`
+                        ).join('\n');
+                        
+                        console.error('Validation error details:', details);
+                    }
+                } else if (error.status === 403) {
+                    errorMessage = "Permission Error (403): You don't have permission to access this resource.";
+                    console.error('Permission error details:', {
+                        reservationId: getReservationId(boat),
+                        boat: boat,
+                        error: {
+                            status: error.status,
+                            statusText: error.statusText,
+                            message: error.message,
+                            body: error.body
+                        }
+                    });
+                    // Show a more user-friendly message with more details
+                    toast({
+                        title: "Permission Error",
+                        description: "You don't have sufficient permissions for this action. This might be because:\n- You're not logged in\n- Your session expired\n- You don't have access to this reservation",
+                        status: "error",
+                        duration: 5000,
+                        isClosable: true,
+                    });
+                    return; // Exit early
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+                
+                toast({
+                    title: "Error adding services",
+                    description: errorMessage,
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+                
+                // Не пробрасываем ошибку выше, обрабатываем здесь
+            }
+            
+        } catch (error) {
+            console.error('Error in service request preparation:', error);
+            toast({
+                title: "Error adding services",
+                description: "Failed to prepare service request. Please try again.",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+        }
+    };
+
+    // Обновляем функцию addServices
     const addServices = () => {
-        // Тут будет логика добавления услуг
-        onClose();
+        submitServices();
     };
 
     return (
@@ -143,7 +391,9 @@ const ServicePopup: React.FC<ServicePopupProps> = ({ isOpen, onClose, services, 
                                 />
                                 <Text fontSize="14px" fontWeight="500" color="gray.600" pl="lg" pr="4px">{boat.name}</Text>
                                 <Text fontSize="12px" fontWeight="300" color="gray.600">|</Text>
-                                <Text fontSize="12px" fontWeight="300" color="gray.600" pl="4px">{userName}</Text>
+                                <Text fontSize="12px" fontWeight="300" color="gray.600" pl="4px">
+                                    {userName || `${boat.user_first_name || ''} ${boat.user_last_name || ''}`}
+                                </Text>
                             </>
                         )}
                     </Flex>

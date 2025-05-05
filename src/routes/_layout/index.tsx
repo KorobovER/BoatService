@@ -7,6 +7,8 @@ import TableDay from '../../components/AdminPanel/TableDay';
 import TableMonth from '../../components/AdminPanel/TableMonth';
 import PopupReserved from '../../components/AdminPanel/ServiceView/Services';
 import { Boat } from '../../components/AdminPanel/TableReservations';
+// Import the Boat type from TableDay as TableDayBoat to avoid conflicts
+import { Boat as TableDayBoat } from '../../components/AdminPanel/TableDay';
 
 type TableView = 'month' | 'week' | 'day';
 
@@ -191,6 +193,22 @@ function Dashboard() {
         }
     };
 
+    // Adapter for TableDay component
+    const handleTableDayReservationClick = (rowId: string, hour: string, boat?: any) => {
+        // If a boat was passed, make it compatible with TableReservations.Boat
+        if (boat) {
+            // Add the required fields that might be missing in TableDay.Boat
+            const compatibleBoat = {
+                ...boat,
+                mooring_ball_id: boat.mooring_ball_id || rowId,
+                reservation_id: boat.reservation_id || boat.id
+            };
+            handleReservationClick(rowId, hour, compatibleBoat);
+        } else {
+            handleReservationClick(rowId, hour, undefined);
+        }
+    };
+
     const handleClosePopup = () => {
         setSelectedReservation(null);
     };
@@ -240,7 +258,7 @@ function Dashboard() {
                         {currentView === 'day' && (
                             <TableDay
                                 currentDate={currentDay}
-                                onReservationClick={handleReservationClick}
+                                onReservationClick={handleTableDayReservationClick}
                             />
                         )}
                     </Box>

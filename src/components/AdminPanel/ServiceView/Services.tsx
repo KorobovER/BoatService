@@ -1,6 +1,7 @@
-import React, { useEffect} from 'react';
+import React, { useEffect } from 'react';
 import { Box, Text, Image, Flex, Button } from '@chakra-ui/react';
-import { Boat } from './TableReservations';
+import { Boat } from '../TableReservations';
+import NoService from './NoService';
 
 interface PopupReservedProps {
     isOpen: boolean;
@@ -218,7 +219,6 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                     </Flex>
                 </Flex>
 
-                {/* Content*/}
                 <Flex
                     flexDirection="column"
                     gap="2xl"
@@ -299,16 +299,21 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                             <Image src="/assets/images/chat-icon.svg" alt="Chat" />
                         </Button>
                     </Flex>
-
-                    <Flex alignSelf="stretch" gap='sm' justifyContent="center" alignItems="center" flexDirection="column" border="1px dashed" borderColor="brand.primaryOrange" borderRadius="var(--chakra-space-sm)" w="100%">
-                        <Flex flexDirection="column" alignItems="center" gap='20px' py='3xl' px='md' w="100%">
-                            <Image width="52px" height="52px" src="/assets/images/service.svg" alt="service" />
-                            <Flex flexDirection="column" alignItems="center">
-                                <Text textAlign="center" fontSize="20px" fontWeight="500" color="brand.primaryOrange">No service requests</Text>
-                                <Text textAlign="center" fontSize="14px" fontWeight="300" color="brand.primaryOrange">Click here to add a service</Text>
+                    {/* Content*/}
+                    <Flex>
+                        {(!boat.service_requests || boat.service_requests.length === 0) ? (
+                            <NoService />
+                        ) : (
+                            // Отображение списка сервисов, когда они есть
+                            <Flex flexDirection="column" w="100%" py="3xl" px="md">
+                                {boat.service_requests.map((service, index) => (
+                                    <Flex key={index} w="100%">
+                                        {/* Здесь будет содержимое для отображения каждого сервиса */}
+                                        <Text>Service Request #{index + 1}: {service.is_completed ? 'Completed' : 'Pending'}</Text>
+                                    </Flex>
+                                ))}
                             </Flex>
-                            <Button variant="unstyled" _hover={{ opacity: 0.8 }} borderRadius="100%"><Image src="/assets/images/button-plus.svg" alt="plus" /></Button>
-                        </Flex>
+                        )}
                     </Flex>
                 </Flex>
             </Flex>

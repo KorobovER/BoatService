@@ -5,7 +5,7 @@ import TableSwitch from '../../components/AdminPanel/TableSwitch';
 import { useEffect, useState, useRef } from 'react';
 import TableDay from '../../components/AdminPanel/TableDay';
 import TableMonth from '../../components/AdminPanel/TableMonth';
-import PopupReserved from '../../components/AdminPanel/PopupReserved';
+import PopupReserved from '../../components/AdminPanel/ServiceView/Services';
 import { Boat } from '../../components/AdminPanel/TableReservations';
 
 type TableView = 'month' | 'week' | 'day';

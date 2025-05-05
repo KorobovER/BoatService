@@ -20,7 +20,7 @@ import BolaCell from "/assets/images/bola-cell.svg";
 import { ReservationsService, MarinasService } from '../../client';
 import { useMarina } from '../../context/MarinaContext';
 import PopupFreeCell from './PopupFreeCell';
-import PopupReserved from './PopupReserved';
+import PopupReserved from './ServiceView/Services';
 
 // Функция для преобразования S3 URL
 const transformS3Url = (url: string): string => {

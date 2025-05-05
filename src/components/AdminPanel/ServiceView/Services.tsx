@@ -302,7 +302,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                     {/* Content*/}
                     <Flex>
                         {(!boat.service_requests || boat.service_requests.length === 0) ? (
-                            <NoService />
+                            <NoService rowId={rowId} boat={boat} userName={userName} />
                         ) : (
                             // Отображение списка сервисов, когда они есть
                             <Flex flexDirection="column" w="100%" py="3xl" px="md">

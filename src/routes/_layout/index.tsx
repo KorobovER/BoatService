@@ -10,6 +10,16 @@ import { Boat } from '../../components/AdminPanel/TableReservations';
 
 type TableView = 'month' | 'week' | 'day';
 
+// Date format configuration
+const DATE_CONFIG = {
+  LOCALE: 'en-US',
+  FORMAT_OPTIONS: {
+    monthYear: { month: 'long', year: 'numeric', timeZone: 'UTC' } as Intl.DateTimeFormatOptions,
+    monthDay: { month: 'long', day: 'numeric', timeZone: 'UTC' } as Intl.DateTimeFormatOptions,
+    weekday: { weekday: 'long', timeZone: 'UTC' } as Intl.DateTimeFormatOptions,
+  }
+};
+
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
 })
@@ -24,6 +34,20 @@ function Dashboard() {
     const [selectedReservation, setSelectedReservation] = useState<{rowId: string; day: string; boat?: Boat} | null>(null);
     const tableContainerRef = useRef<HTMLDivElement>(null);
 
+    // Date utility functions
+    const formatDateToYMD = (date: Date): string => {
+        return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
+    };
+
+    const parseYMDToDate = (dateString: string): Date => {
+        const [year, month, day] = dateString.split('-').map(Number);
+        return new Date(Date.UTC(year, month - 1, day));
+    };
+
+    const formatDateWithOptions = (date: Date, options: Intl.DateTimeFormatOptions): string => {
+        return date.toLocaleDateString(DATE_CONFIG.LOCALE, options);
+    };
+
     const getCurrentWeekMonday = (date: Date = new Date()) => {
         // Create a copy of the date to avoid modifying the original
         const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
@@ -31,11 +55,7 @@ function Dashboard() {
         // If it's Sunday (0), go back 6 days, otherwise go back (day-1) days
         const diff = day === 0 ? 6 : day - 1;
         d.setUTCDate(d.getUTCDate() - diff);
-        return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
-    };
-
-    const formatDateString = (date: Date) => {
-        return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
+        return formatDateToYMD(d);
     };
 
     // Инициализация начальных дат
@@ -46,7 +66,7 @@ function Dashboard() {
         setCurrentWeekStart(getCurrentWeekMonday(today));
 
         // Устанавливаем текущий день
-        setCurrentDay(formatDateString(today));
+        setCurrentDay(formatDateToYMD(today));
 
         // Устанавливаем текущий месяц и год напрямую (1-12 для месяца)
         setCurrentMonth(today.getUTCMonth() + 1);
@@ -63,34 +83,28 @@ function Dashboard() {
 
     // Обработчики для дневного представления
     const handlePrevDay = () => {
-        const [year, month, day] = currentDay.split('-').map(Number);
-        const date = new Date(Date.UTC(year, month - 1, day));
+        const date = parseYMDToDate(currentDay);
         date.setUTCDate(date.getUTCDate() - 1);
-        setCurrentDay(formatDateString(date));
+        setCurrentDay(formatDateToYMD(date));
     };
 
     const handleNextDay = () => {
-        const [year, month, day] = currentDay.split('-').map(Number);
-        const date = new Date(Date.UTC(year, month - 1, day));
+        const date = parseYMDToDate(currentDay);
         date.setUTCDate(date.getUTCDate() + 1);
-        setCurrentDay(formatDateString(date));
+        setCurrentDay(formatDateToYMD(date));
     };
 
     // Обработчики для недельного представления
     const handlePrevWeek = () => {
-        const [year, month, day] = currentWeekStart.split('-').map(Number);
-        const date = new Date(Date.UTC(year, month - 1, day));
+        const date = parseYMDToDate(currentWeekStart);
         date.setUTCDate(date.getUTCDate() - 7);
-        const newDate = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
-        setCurrentWeekStart(newDate);
+        setCurrentWeekStart(formatDateToYMD(date));
     };
 
     const handleNextWeek = () => {
-        const [year, month, day] = currentWeekStart.split('-').map(Number);
-        const date = new Date(Date.UTC(year, month - 1, day));
+        const date = parseYMDToDate(currentWeekStart);
         date.setUTCDate(date.getUTCDate() + 7);
-        const newDate = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
-        setCurrentWeekStart(newDate);
+        setCurrentWeekStart(formatDateToYMD(date));
     };
 
     // Simplified month navigation - just increment/decrement numbers
@@ -120,7 +134,7 @@ function Dashboard() {
             setCurrentMonth(today.getUTCMonth() + 1);
             setCurrentYear(today.getUTCFullYear());
         } else if (currentView === 'day') {
-            setCurrentDay(formatDateString(today));
+            setCurrentDay(formatDateToYMD(today));
         } else {
             setCurrentWeekStart(getCurrentWeekMonday(today));
         }
@@ -131,19 +145,18 @@ function Dashboard() {
         if (currentView === 'month' && currentMonth > 0) {
             // Create date for formatting month name
             const date = new Date(Date.UTC(currentYear, currentMonth - 1, 1));
-            return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+            return formatDateWithOptions(date, DATE_CONFIG.FORMAT_OPTIONS.monthYear);
         } else if (currentView === 'week' && currentWeekStart) {
-            const [year, month, day] = currentWeekStart.split('-').map(Number);
-            const start = new Date(Date.UTC(year, month - 1, day));
-            const end = new Date(Date.UTC(year, month - 1, day));
+            const start = parseYMDToDate(currentWeekStart);
+            const end = new Date(start);
             end.setUTCDate(end.getUTCDate() + 6);
-            return `${start.toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' })} - ${end.toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' })}`;
+            
+            return `${formatDateWithOptions(start, DATE_CONFIG.FORMAT_OPTIONS.monthDay)} - ${formatDateWithOptions(end, DATE_CONFIG.FORMAT_OPTIONS.monthDay)}`;
         } else if (currentView === 'day' && currentDay) {
-            const [year, month, day] = currentDay.split('-').map(Number);
-            const date = new Date(Date.UTC(year, month - 1, day));
+            const date = parseYMDToDate(currentDay);
             // Format as "Tuesday 3/4"
-            const weekday = date.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
-            const shortDate = `${month}/${day}`;
+            const weekday = formatDateWithOptions(date, DATE_CONFIG.FORMAT_OPTIONS.weekday);
+            const shortDate = `${date.getUTCMonth() + 1}/${date.getUTCDate()}`;
             return `${weekday} ${shortDate}`;
         }
         return '';
@@ -156,7 +169,7 @@ function Dashboard() {
         // When switching to day view, always set the current day to today
         if (view === 'day') {
             const today = new Date();
-            setCurrentDay(formatDateString(today));
+            setCurrentDay(formatDateToYMD(today));
         }
     };
 

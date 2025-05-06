@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Box, Text, Image, Flex, Button, useDisclosure } from '@chakra-ui/react';
+import { Box, Text, Image, Flex, Button, useDisclosure, Collapse, Icon } from '@chakra-ui/react';
 import { ReservationExtenstion } from '../TableReservations';
 import ServicePopup from './ServicePopup';
 import { useMarina } from '../../../context/MarinaContext';
@@ -93,7 +93,8 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     const { selectedMarina } = useMarina();
     const { isOpen: isServicePopupOpen, onOpen: onServicePopupOpen, onClose: onServicePopupClose } = useDisclosure();
     const [currentServiceRequest, setCurrentServiceRequest] = useState<ServiceOnReservationPublic | null>(null);
-    
+    const [isPaymentDetailsOpen, setIsPaymentDetailsOpen] = useState(false);
+
     // Fetch marina services
     const { data: servicesData } = useQuery({
         queryKey: ['marina-services'],
@@ -104,15 +105,34 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     // Get all existing services from all service requests
     const existingServices = useMemo(() => {
         if (!reservation?.service_requests) return [];
-        
+
         // Flatten all services from all requests
-        return reservation.service_requests.flatMap(request => 
+        return reservation.service_requests.flatMap(request =>
             request.services.map(service => ({
                 ...service,
                 requestId: request.service_reservation_id
             }))
         );
     }, [reservation]);
+
+    // Check if there are any completed services
+    const hasCompletedServices = useMemo(() => {
+        if (!reservation?.service_requests) return false;
+        return reservation.service_requests.some(service => service.status === 'completed');
+    }, [reservation]);
+
+    // Calculate total price for completed services
+    const calculateTotalForCompleted = () => {
+        if (!reservation?.service_requests) return "0.00";
+
+        const completedServices = reservation.service_requests.filter(service => service.status === 'completed');
+
+        return completedServices.reduce((total, service) => {
+            return total + service.services.reduce((serviceTotal, item) => {
+                return serviceTotal + (item.price * item.quantity);
+            }, 0);
+        }, 0).toFixed(2);
+    };
 
     useEffect(() => {
         if (isOpen && reservation) {
@@ -372,19 +392,67 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                     </Flex>
                     {/* Content*/}
                     <Flex flexDirection="column" w="100%" gap="xl">
-                        <ServicesList 
-                            reservation={reservation} 
-                            rowId={rowId} 
-                            userName={userName} 
-                            handleAddMoreServices={handleAddMoreServices} 
+                        <ServicesList
+                            reservation={reservation}
+                            rowId={rowId}
+                            userName={userName}
+                            handleAddMoreServices={handleAddMoreServices}
                         />
                     </Flex>
                 </Flex>
+                {/* Payment details block (Footer) */}
+                {hasCompletedServices && (
+                    <Flex direction="column" w="100%" borderTop="1px solid" borderColor="gray.200">
+                        <Flex
+                            w="100%"
+                            py={3}
+                            justifyContent="center"
+                            alignItems="center"
+                            cursor="pointer"
+                            onClick={() => setIsPaymentDetailsOpen(!isPaymentDetailsOpen)}
+                        >
+                            <Text fontSize="14px" fontWeight="400" color="gray.600">
+                                Payment details
+                            </Text>
+                            <Icon
+                                viewBox="0 0 24 24"
+                                w={5}
+                                h={5}
+                                ml={2}
+                                transform={isPaymentDetailsOpen ? 'rotate(180deg)' : 'none'}
+                                transition="transform 0.2s"
+                            >
+                                <path
+                                    fill="currentColor"
+                                    d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"
+                                />
+                            </Icon>
+                        </Flex>
+
+                        <Collapse in={isPaymentDetailsOpen} animateOpacity>
+                            <Flex w="100%" justifyContent="center" p={4}>
+                                <Button
+                                    leftIcon={<Box as="span" mr={2}>💳</Box>}
+                                    bg="system.successGreen"
+                                    color="white"
+                                    size="lg"
+                                    borderRadius="full"
+                                    px={8}
+                                    py={6}
+                                    fontWeight="500"
+                                    _hover={{ bg: "teal.400" }}
+                                >
+                                    <Flex gap="4px" fontSize="16px" fontWeight="400" color="white">CHARGE<Text fontWeight="700">${calculateTotalForCompleted()}</Text> NOW <Flex align="end" fontSize="12px">(Completed services ONLY)</Flex></Flex>
+                                </Button>
+                            </Flex>
+                        </Collapse>
+                    </Flex>
+                )}
             </Flex>
 
             {/* Service Popup */}
             {reservation && (
-                <ServicePopup 
+                <ServicePopup
                     isOpen={isServicePopupOpen}
                     onClose={handleCloseServicePopup}
                     services={servicesData?.data || []}

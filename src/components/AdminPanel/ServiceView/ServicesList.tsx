@@ -171,7 +171,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
             });
             
             // Invalidate queries to refresh data
-            queryClient.invalidateQueries({ queryKey: ['reservation', localReservation.reservation_id] });
+            queryClient.invalidateQueries();
             
             // Close the modal
             handleQuantityModalClose();
@@ -268,7 +268,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
                 });
                 
                 // Invalidate queries to refresh data
-                queryClient.invalidateQueries({ queryKey: ['reservation', localReservation.reservation_id] });
+                queryClient.invalidateQueries();
             }
         } catch (error) {
             console.error('Error updating service status:', error);
@@ -293,7 +293,32 @@ const ServicesList: React.FC<ServicesListProps> = ({
     if (!localReservation.service_requests || localReservation.service_requests.length === 0) {
         return (
             <Flex flexDirection="column" w="100%">
-                <NoService rowId={rowId} reservation={localReservation} userName={userName} />
+                <NoService 
+                    rowId={rowId} 
+                    reservation={localReservation} 
+                    userName={userName}
+                    onServicesAdded={() => {
+                        // Принудительно запрашиваем актуальные данные перед обновлением UI
+                        console.log('ServicesList: Services added callback triggered');
+                        queryClient.invalidateQueries();
+                        
+                        // Добавляем небольшую задержку для гарантии получения обновленных данных
+                        setTimeout(() => {
+                            if (localReservation?.reservation_id) {
+                                console.log('ServicesList: Refreshing reservation data after services added');
+                                ReservationsService.readReservation({ id: localReservation.reservation_id })
+                                    .then(updatedReservation => {
+                                        console.log('ServicesList: Got updated reservation data:', 
+                                            updatedReservation.service_requests?.length || 0, 'services');
+                                        setLocalReservation(updatedReservation as ReservationExtenstion);
+                                    })
+                                    .catch(error => {
+                                        console.error('Error refreshing reservation after services added:', error);
+                                    });
+                            }
+                        }, 1000); // Даем API время на обработку и обновление данных
+                    }}
+                />
             </Flex>
         );
     }

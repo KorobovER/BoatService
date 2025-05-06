@@ -1,10 +1,10 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Box, Text, Image, Flex, Button, useDisclosure, Collapse, Icon } from '@chakra-ui/react';
 import { ReservationExtenstion } from '../TableReservations';
 import ServicePopup from './ServicePopup';
 import { useMarina } from '../../../context/MarinaContext';
-import { useQuery } from '@tanstack/react-query';
-import { MarinasService } from '../../../client/services';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { MarinasService, ReservationsService } from '../../../client/services';
 import { ServiceOnReservationPublic } from '../../../client/models';
 import ServicesList from './ServicesList';
 
@@ -94,6 +94,13 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     const { isOpen: isServicePopupOpen, onOpen: onServicePopupOpen, onClose: onServicePopupClose } = useDisclosure();
     const [currentServiceRequest, setCurrentServiceRequest] = useState<ServiceOnReservationPublic | null>(null);
     const [isPaymentDetailsOpen, setIsPaymentDetailsOpen] = useState(false);
+    const [localReservation, setLocalReservation] = useState(reservation);
+    const queryClient = useQueryClient();
+
+    // Обновляем localReservation при изменении пропса reservation
+    useEffect(() => {
+        setLocalReservation(reservation);
+    }, [reservation]);
 
     // Fetch marina services
     const { data: servicesData } = useQuery({
@@ -104,28 +111,37 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
 
     // Get all existing services from all service requests
     const existingServices = useMemo(() => {
-        if (!reservation?.service_requests) return [];
+        if (!localReservation?.service_requests && !reservation?.service_requests) return [];
 
+        const currentReservation = localReservation || reservation;
+        // Если currentReservation все еще undefined, возвращаем пустой массив
+        if (!currentReservation?.service_requests) return [];
+        
         // Flatten all services from all requests
-        return reservation.service_requests.flatMap(request =>
+        return currentReservation.service_requests.flatMap(request =>
             request.services.map(service => ({
                 ...service,
                 requestId: request.service_reservation_id
             }))
         );
-    }, [reservation]);
+    }, [localReservation, reservation]);
 
     // Check if there are any completed services
     const hasCompletedServices = useMemo(() => {
-        if (!reservation?.service_requests) return false;
-        return reservation.service_requests.some(service => service.status === 'completed');
-    }, [reservation]);
+        if (!localReservation?.service_requests && !reservation?.service_requests) return false;
+        
+        const currentReservation = localReservation || reservation;
+        if (!currentReservation?.service_requests) return false;
+        
+        return currentReservation.service_requests.some(service => service.status === 'completed');
+    }, [localReservation, reservation]);
 
     // Calculate total price for completed services
     const calculateTotalForCompleted = () => {
-        if (!reservation?.service_requests) return "0.00";
+        const currentReservation = localReservation || reservation;
+        if (!currentReservation?.service_requests) return "0.00";
 
-        const completedServices = reservation.service_requests.filter(service => service.status === 'completed');
+        const completedServices = currentReservation.service_requests.filter(service => service.status === 'completed');
 
         return completedServices.reduce((total, service) => {
             return total + service.services.reduce((serviceTotal, item) => {
@@ -232,6 +248,27 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
         }
     }, [isOpen, reservation, rowId, day]);
 
+    // Функция для принудительного обновления данных о резервации
+    const forceRefresh = useCallback(() => {
+        if (reservation?.reservation_id) {
+            console.log('Forcing reservation data refresh...');
+            
+            // Инвалидируем все запросы
+            queryClient.invalidateQueries();
+            
+            // Принудительно запрашиваем актуальные данные с сервера
+            ReservationsService.readReservation({ id: reservation.reservation_id })
+                .then(updatedReservation => {
+                    console.log('Received updated reservation data:', updatedReservation);
+                    // Обновляем локальное состояние
+                    setLocalReservation(updatedReservation as ReservationExtenstion);
+                })
+                .catch(error => {
+                    console.error('Failed to refresh reservation data in forceRefresh:', error);
+                });
+        }
+    }, [reservation?.reservation_id, queryClient]);
+
     if (!isOpen || !reservation) return null;
 
     // Get user name from the boat object if available
@@ -243,10 +280,13 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
         onServicePopupOpen();
     };
 
-    // When closing the popup, reset the current service request
+    // When closing the popup, reset the current service request and update data
     const handleCloseServicePopup = () => {
         setCurrentServiceRequest(null);
         onServicePopupClose();
+        
+        // После закрытия попапа обновляем данные о резервации 
+        forceRefresh();
     };
 
     return (
@@ -393,7 +433,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                     {/* Content*/}
                     <Flex flexDirection="column" w="100%" gap="xl">
                         <ServicesList
-                            reservation={reservation}
+                            reservation={localReservation || reservation}
                             rowId={rowId}
                             userName={userName}
                             handleAddMoreServices={handleAddMoreServices}
@@ -451,12 +491,12 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
             </Flex>
 
             {/* Service Popup */}
-            {reservation && (
+            {(localReservation || reservation) && (
                 <ServicePopup
                     isOpen={isServicePopupOpen}
                     onClose={handleCloseServicePopup}
                     services={servicesData?.data || []}
-                    reservation={reservation}
+                    reservation={localReservation || reservation}
                     userName={userName}
                     rowId={rowId}
                     existingServices={existingServices}

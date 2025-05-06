@@ -18,6 +18,7 @@ import {
 import { MarinaServicePublic, ServiceOnReservationCreate, SubServiceRequest, ReservationPublic, ServiceOnReservationPublic } from '../../../client/models';
 import { ReservationsService } from '../../../client/services';
 import { getServiceIcon } from './Services';
+import { useQueryClient } from '@tanstack/react-query';
 
 // Функция для определения типа элемента управления (не использует поле type)
 const getItemType = (item: any): 'unit' | 'measured' => {
@@ -65,6 +66,7 @@ const ServicePopup: React.FC<ServicePopupProps> = ({
     currentServiceRequest = null
 }) => {
     const toast = useToast();
+    const queryClient = useQueryClient();
 
     // Извлекаем все элементы сервисов из всех сервисов с нужными полями
     const allServiceItems = services.flatMap((service, serviceIndex) =>
@@ -291,6 +293,28 @@ const ServicePopup: React.FC<ServicePopupProps> = ({
                     duration: 3000,
                     isClosable: true,
                 });
+                
+                // Инвалидируем кэш React Query для обновления списка сервисов
+                if (reservationId) {
+                    console.log('ServicePopup: Services added, invalidating queries');
+                    // Инвалидируем ЛЮБЫЕ ключи запросов, связанные с резервациями
+                    queryClient.invalidateQueries();
+                    
+                    // Даем время на обновление данных перед закрытием
+                    setTimeout(() => {
+                        // Перед закрытием еще раз инвалидируем кэш для гарантии обновления
+                        queryClient.invalidateQueries();
+                        
+                        // Проверяем failCount внутри таймаута для правильной последовательности
+                        if (failCount === 0) {
+                            console.log('ServicePopup: All services added successfully, closing popup');
+                            onClose();
+                        }
+                    }, 500);
+                    
+                    // Сразу возвращаемся из метода, чтобы не выполнять onClose() ниже
+                    return;
+                }
             }
 
             if (failCount > 0) {
@@ -304,10 +328,8 @@ const ServicePopup: React.FC<ServicePopupProps> = ({
                 });
             }
 
-            // Закрываем модальное окно только если все успешно
-            if (failCount === 0) {
-                onClose();
-            }
+            // Закрытие модального окна теперь обрабатывается в таймауте выше
+            // если все сервисы добавлены успешно
         } catch (error: any) {
             console.error('Error in service request preparation:', error);
             toast({

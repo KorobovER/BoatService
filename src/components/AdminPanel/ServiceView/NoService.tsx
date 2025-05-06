@@ -1,25 +1,58 @@
 import { Flex, Text, Button, Image } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useMarina } from '../../../context/MarinaContext';
 import ServicePopup from './ServicePopup';
 import { ReservationExtenstion } from '../TableReservations';
+import { useQueryClient } from '@tanstack/react-query';
+import { ReservationsService } from '../../../client/services';
 
 interface NoServiceProps {
     reservation?: ReservationExtenstion;
     userName?: string;
     rowId?: string;
+    onServicesAdded?: () => void;
 }
 
-const NoService = ({ reservation, userName, rowId }: NoServiceProps) => {
+const NoService = ({ reservation, userName, rowId, onServicesAdded }: NoServiceProps) => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const { selectedMarina } = useMarina();
+    const queryClient = useQueryClient();
 
     const openServicePopup = () => {
         setIsPopupOpen(true);
     };
 
+    // Функция для принудительного обновления данных о резервации
+    const refreshReservationData = useCallback(async () => {
+        if (!reservation?.reservation_id) return;
+
+        console.log('NoService: Refreshing reservation data...');
+        
+        try {
+            // Принудительно запрашиваем актуальные данные с сервера
+            await ReservationsService.readReservation({ id: reservation.reservation_id });
+            
+            // Инвалидируем кэш, чтобы данные были заново загружены
+            queryClient.invalidateQueries();
+            
+            // Вызываем коллбэк, если он передан
+            if (onServicesAdded) {
+                console.log('NoService: Calling onServicesAdded callback');
+                onServicesAdded();
+            }
+        } catch (error) {
+            console.error('Failed to refresh reservation data in NoService:', error);
+        }
+    }, [reservation?.reservation_id, queryClient, onServicesAdded]);
+
     const closeServicePopup = () => {
         setIsPopupOpen(false);
+        
+        // Обновляем данные после закрытия окна
+        setTimeout(() => {
+            // Добавляем небольшую задержку, чтобы API успело обновить данные
+            refreshReservationData();
+        }, 500);
     };
 
     return (

@@ -236,114 +236,74 @@ const ServicePopup: React.FC<ServicePopupProps> = ({ isOpen, onClose, services, 
                 return;
             }
 
-            // Создаем объект ServiceOnReservationCreate
-            const serviceRequest: ServiceOnReservationCreate = {
-                requested_date: new Date().toISOString(),
-                services: selectedServices,
-                special_instructions: null
-            };
+            // Отправляем каждую услугу отдельно
+            const results = await Promise.all(
+                selectedServices.map(async (service) => {
+                    try {
+                        // Создаем объект ServiceOnReservationCreate для каждой услуги отдельно
+                        const serviceRequest: ServiceOnReservationCreate = {
+                            requested_date: new Date().toISOString(),
+                            services: [service], // Только одна услуга в массиве
+                            special_instructions: null
+                        };
 
-            console.log('Creating service request:', JSON.stringify(serviceRequest, null, 2));
-            console.log('For reservation ID:', reservationId);
+                        console.log('Creating individual service request:', JSON.stringify(serviceRequest, null, 2));
+                        console.log('For reservation ID:', reservationId);
 
-            try {
-                // Используем ReservationsService для добавления сервисов
-                console.log('API Request Payload:', {
-                    reservationId,
-                    requestBody: JSON.parse(JSON.stringify(serviceRequest))
-                });
+                        // Используем ReservationsService для добавления сервиса
+                        const response = await ReservationsService.requestReservationService({
+                            reservationId,
+                            requestBody: serviceRequest
+                        });
 
-                // Log auth token status from local storage (if available)
-                try {
-                    const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-                    console.log('Auth token available:', !!token);
-                    if (token) {
-                        console.log('Token first 10 chars:', token.substring(0, 10) + '...');
+                        console.log('Service creation response:', response);
+                        return { success: true, service };
+                    } catch (error: any) {
+                        console.error('API error for service:', service.name, error);
+                        return { 
+                            success: false, 
+                            service,
+                            error: {
+                                status: error.status,
+                                message: error.message,
+                                body: error.body
+                            } 
+                        };
                     }
-                } catch (e) {
-                    console.error('Error checking token:', e);
-                }
+                })
+            );
 
-                const response = await ReservationsService.requestReservationService({
-                    reservationId,
-                    requestBody: serviceRequest
-                });
+            // Подсчитываем количество успешных и неуспешных запросов
+            const successCount = results.filter(r => r.success).length;
+            const failCount = results.length - successCount;
 
-                console.log('Service creation response:', response);
-
+            if (successCount > 0) {
                 // Показываем уведомление об успешном добавлении
                 toast({
                     title: "Services added",
-                    description: `Successfully added ${selectedServices.length} services to reservation`,
+                    description: `Successfully added ${successCount} ${successCount === 1 ? 'service' : 'services'} to reservation`,
                     status: "success",
                     duration: 3000,
                     isClosable: true,
                 });
+            }
 
-                // Закрываем модальное окно
-                onClose();
-            } catch (error: any) {
-                console.error('API error details:', {
-                    error,
-                    message: error.message,
-                    body: error.body,
-                    status: error.status,
-                    statusText: error.statusText
-                });
-
-                // Подробная информация об ошибке
-                let errorMessage = "Failed to add services to reservation.";
-
-                // Check specifically for 422 Validation Error
-                if (error.status === 422) {
-                    errorMessage = "Validation Error (422): The data format doesn't match API requirements.";
-
-                    if (error.body?.detail) {
-                        // Попытка извлечь детали ошибки валидации
-                        const details = Array.isArray(error.body.detail) ? error.body.detail : [error.body.detail];
-                        errorMessage = details.map((d: any) =>
-                            `Field '${d.loc?.join('.')}': ${d.msg}`
-                        ).join('\n');
-
-                        console.error('Validation error details:', details);
-                    }
-                } else if (error.status === 403) {
-                    errorMessage = "Permission Error (403): You don't have permission to access this resource.";
-                    console.error('Permission error details:', {
-                        reservationId: getReservationId(reservation),
-                        reservation: reservation,
-                        error: {
-                            status: error.status,
-                            statusText: error.statusText,
-                            message: error.message,
-                            body: error.body
-                        }
-                    });
-                    // Show a more user-friendly message with more details
-                    toast({
-                        title: "Permission Error",
-                        description: "You don't have sufficient permissions for this action. This might be because:\n- You're not logged in\n- Your session expired\n- You don't have access to this reservation",
-                        status: "error",
-                        duration: 5000,
-                        isClosable: true,
-                    });
-                    return; // Exit early
-                } else if (error.message) {
-                    errorMessage = error.message;
-                }
-
+            if (failCount > 0) {
+                // Показываем уведомление о неуспешных запросах
                 toast({
-                    title: "Error adding services",
-                    description: errorMessage,
-                    status: "error",
+                    title: "Some services failed",
+                    description: `Failed to add ${failCount} ${failCount === 1 ? 'service' : 'services'} to reservation`,
+                    status: "warning",
                     duration: 5000,
                     isClosable: true,
                 });
-
-                // Не пробрасываем ошибку выше, обрабатываем здесь
             }
 
-        } catch (error) {
+            // Закрываем модальное окно только если все успешно
+            if (failCount === 0) {
+                onClose();
+            }
+        } catch (error: any) {
             console.error('Error in service request preparation:', error);
             toast({
                 title: "Error adding services",

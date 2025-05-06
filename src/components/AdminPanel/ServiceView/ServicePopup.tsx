@@ -17,7 +17,6 @@ import {
 } from '@chakra-ui/react';
 import { MarinaServicePublic, ServiceOnReservationCreate, SubServiceRequest, ReservationPublic } from '../../../client/models';
 import { ReservationsService } from '../../../client/services';
-import { Boat } from '../TableReservations';
 
 // Иконки для разных типов услуг
 const SERVICE_ICONS = {
@@ -60,13 +59,13 @@ const getItemType = (item: any): 'unit' | 'measured' => {
     if (item.unit && typeof item.unit === 'string') {
         // Единицы, которые обычно измеряются (measured)
         const measuredUnits = ['gallon', 'liter', 'kg', 'lb', 'hour'];
-        
+
         // Если единица измерения соответствует измеряемым, это measured
         if (measuredUnits.some(u => item.unit.toLowerCase().includes(u))) {
             return 'measured';
         }
     }
-    
+
     // По умолчанию возвращаем unit
     return 'unit';
 };
@@ -75,31 +74,31 @@ interface ServicePopupProps {
     isOpen: boolean;
     onClose: () => void;
     services: MarinaServicePublic[];
-    boat?: Boat;
+    reservation?: ReservationPublic;
     userName?: string;
     rowId?: string;
 }
 
 // Функция для извлечения ID резервации из объекта Boat
-const getReservationId = (boat?: Boat): string | undefined => {
+const getReservationId = (reservation?: ReservationPublic): string | undefined => {
     // Используем reservation_id из объекта Boat
     // Если его нет, используем id как запасной вариант (для обратной совместимости)
-    return boat?.reservation_id || boat?.id;
+    return reservation ? reservation.reservation_id : undefined;
 };
 
-const ServicePopup: React.FC<ServicePopupProps> = ({ isOpen, onClose, services, boat, userName = '', rowId = '' }) => {
+const ServicePopup: React.FC<ServicePopupProps> = ({ isOpen, onClose, services, reservation, userName = '', rowId = '' }) => {
     const toast = useToast();
-    
+
     // Извлекаем все элементы сервисов из всех сервисов с нужными полями
     const allServiceItems = services.flatMap((service, serviceIndex) =>
-        service.service_items 
+        service.service_items
             ? service.service_items.map(item => ({
                 ...item,
                 // Сохраняем title из родительского сервиса
                 parentServiceTitle: service.title,
                 // Имитация типа для демонстрации - каждый второй элемент будет иметь тип 'measured'
                 type: serviceIndex % 2 === 0 ? 'unit' : 'measured'
-            })) 
+            }))
             : []
     );
 
@@ -135,25 +134,25 @@ const ServicePopup: React.FC<ServicePopupProps> = ({ isOpen, onClose, services, 
     // Функция для подготовки выбранных сервисов
     const getSelectedServices = (): SubServiceRequest[] => {
         const selectedServices: SubServiceRequest[] = [];
-        
+
         for (const [idx, qty] of Object.entries(quantities)) {
             const index = parseInt(idx, 10);
             if (qty > 0 && index < allServiceItems.length) {
                 const item = allServiceItems[index];
-                
+
                 try {
                     // Validate title
                     if (!item.parentServiceTitle || typeof item.parentServiceTitle !== 'string') {
                         console.warn('Invalid service title:', item.parentServiceTitle);
                         continue;
                     }
-                    
+
                     // Validate name
                     if (!item.name || typeof item.name !== 'string') {
                         console.warn('Invalid service name:', item.name);
                         continue;
                     }
-                    
+
                     // Validate and convert price
                     let price: number;
                     if (typeof item.price === 'number') {
@@ -168,19 +167,19 @@ const ServicePopup: React.FC<ServicePopupProps> = ({ isOpen, onClose, services, 
                         console.warn('Invalid service price type:', typeof item.price);
                         continue;
                     }
-                    
+
                     // Validate unit
                     if (!item.unit || typeof item.unit !== 'string') {
                         console.warn('Invalid service unit:', item.unit);
                         continue;
                     }
-                    
+
                     // Validate quantity
                     if (typeof qty !== 'number' || qty <= 0) {
                         console.warn('Invalid quantity:', qty);
                         continue;
                     }
-                    
+
                     // All validations passed, create the SubServiceRequest object
                     selectedServices.push({
                         title: item.parentServiceTitle,
@@ -189,7 +188,7 @@ const ServicePopup: React.FC<ServicePopupProps> = ({ isOpen, onClose, services, 
                         unit: item.unit,
                         quantity: qty
                     });
-                    
+
                     console.log('Added valid service:', {
                         title: item.parentServiceTitle,
                         name: item.name,
@@ -202,7 +201,7 @@ const ServicePopup: React.FC<ServicePopupProps> = ({ isOpen, onClose, services, 
                 }
             }
         }
-        
+
         return selectedServices;
     };
 
@@ -210,7 +209,7 @@ const ServicePopup: React.FC<ServicePopupProps> = ({ isOpen, onClose, services, 
     const submitServices = async () => {
         try {
             const selectedServices = getSelectedServices();
-            
+
             if (selectedServices.length === 0) {
                 toast({
                     title: "No services selected",
@@ -223,10 +222,10 @@ const ServicePopup: React.FC<ServicePopupProps> = ({ isOpen, onClose, services, 
             }
 
             // Используем функцию для извлечения ID резервации
-            const reservationId = getReservationId(boat);
-            
+            const reservationId = getReservationId(reservation);
+
             if (!reservationId) {
-                console.error('Missing reservation ID', { boat });
+                console.error('Missing reservation ID', { reservation });
                 toast({
                     title: "Error",
                     description: "No reservation ID found. Please make sure a valid reservation is selected.",
@@ -236,13 +235,6 @@ const ServicePopup: React.FC<ServicePopupProps> = ({ isOpen, onClose, services, 
                 });
                 return;
             }
-
-            // Debug log the boat object to see what fields are available
-            console.log('Boat object in submitServices:', {
-                id: boat?.id,
-                reservation_id: boat?.reservation_id,
-                resolved_id: reservationId
-            });
 
             // Создаем объект ServiceOnReservationCreate
             const serviceRequest: ServiceOnReservationCreate = {
@@ -260,7 +252,7 @@ const ServicePopup: React.FC<ServicePopupProps> = ({ isOpen, onClose, services, 
                     reservationId,
                     requestBody: JSON.parse(JSON.stringify(serviceRequest))
                 });
-                
+
                 // Log auth token status from local storage (if available)
                 try {
                     const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
@@ -271,14 +263,14 @@ const ServicePopup: React.FC<ServicePopupProps> = ({ isOpen, onClose, services, 
                 } catch (e) {
                     console.error('Error checking token:', e);
                 }
-                
+
                 const response = await ReservationsService.requestReservationService({
                     reservationId,
                     requestBody: serviceRequest
                 });
-                
+
                 console.log('Service creation response:', response);
-                
+
                 // Показываем уведомление об успешном добавлении
                 toast({
                     title: "Services added",
@@ -287,7 +279,7 @@ const ServicePopup: React.FC<ServicePopupProps> = ({ isOpen, onClose, services, 
                     duration: 3000,
                     isClosable: true,
                 });
-                
+
                 // Закрываем модальное окно
                 onClose();
             } catch (error: any) {
@@ -298,28 +290,28 @@ const ServicePopup: React.FC<ServicePopupProps> = ({ isOpen, onClose, services, 
                     status: error.status,
                     statusText: error.statusText
                 });
-                
+
                 // Подробная информация об ошибке
                 let errorMessage = "Failed to add services to reservation.";
-                
+
                 // Check specifically for 422 Validation Error
                 if (error.status === 422) {
                     errorMessage = "Validation Error (422): The data format doesn't match API requirements.";
-                    
+
                     if (error.body?.detail) {
                         // Попытка извлечь детали ошибки валидации
                         const details = Array.isArray(error.body.detail) ? error.body.detail : [error.body.detail];
-                        errorMessage = details.map((d: any) => 
+                        errorMessage = details.map((d: any) =>
                             `Field '${d.loc?.join('.')}': ${d.msg}`
                         ).join('\n');
-                        
+
                         console.error('Validation error details:', details);
                     }
                 } else if (error.status === 403) {
                     errorMessage = "Permission Error (403): You don't have permission to access this resource.";
                     console.error('Permission error details:', {
-                        reservationId: getReservationId(boat),
-                        boat: boat,
+                        reservationId: getReservationId(reservation),
+                        reservation: reservation,
                         error: {
                             status: error.status,
                             statusText: error.statusText,
@@ -339,7 +331,7 @@ const ServicePopup: React.FC<ServicePopupProps> = ({ isOpen, onClose, services, 
                 } else if (error.message) {
                     errorMessage = error.message;
                 }
-                
+
                 toast({
                     title: "Error adding services",
                     description: errorMessage,
@@ -347,10 +339,10 @@ const ServicePopup: React.FC<ServicePopupProps> = ({ isOpen, onClose, services, 
                     duration: 5000,
                     isClosable: true,
                 });
-                
+
                 // Не пробрасываем ошибку выше, обрабатываем здесь
             }
-            
+
         } catch (error) {
             console.error('Error in service request preparation:', error);
             toast({
@@ -375,24 +367,24 @@ const ServicePopup: React.FC<ServicePopupProps> = ({ isOpen, onClose, services, 
                 <ModalHeader display="flex" alignItems="center" gap="lg">
                     <Flex flex="1" alignItems="center">
                         <Text fontSize="20px" fontWeight="500" color="gray.900" borderRight="1px solid" borderColor="gray.200" pr="lg">Add Services</Text>
-                        {boat && (
+                        {reservation && (
                             <>
                                 <Image
-                                    src={boat.vessel_type === 'power'
+                                    src={reservation.boat.vessel_type === 'power'
                                         ? "/assets/images/power-boat.svg"
-                                        : boat.vessel_type === 'catamaran'
+                                        : reservation.boat.vessel_type === 'catamaran'
                                             ? "/assets/images/catamaran-boat.svg"
                                             : "/assets/images/monohul-boat.svg"}
-                                    alt={boat.name}
+                                    alt={reservation.boat.boatname}
                                     width="40px"
                                     height="40px"
                                     filter="invert(40%) sepia(90%) saturate(2259%) hue-rotate(352deg) brightness(98%) contrast(97%)"
                                     marginLeft="lg"
                                 />
-                                <Text fontSize="14px" fontWeight="500" color="gray.600" pl="lg" pr="4px">{boat.name}</Text>
+                                <Text fontSize="14px" fontWeight="500" color="gray.600" pl="lg" pr="4px">{reservation.boat.boatname}</Text>
                                 <Text fontSize="12px" fontWeight="300" color="gray.600">|</Text>
                                 <Text fontSize="12px" fontWeight="300" color="gray.600" pl="4px">
-                                    {userName || `${boat.user_first_name || ''} ${boat.user_last_name || ''}`}
+                                    {userName || `${reservation.user.first_name || ''} ${reservation.user.last_name || ''}`}
                                 </Text>
                             </>
                         )}
@@ -468,16 +460,16 @@ const ServicePopup: React.FC<ServicePopupProps> = ({ isOpen, onClose, services, 
                                             / {item.unit}
                                         </Text>
                                     </Flex>
-                                    
+
                                     {getItemType(item) === 'unit' ? (
-                                        <Flex 
-                                            borderWidth="1px" 
-                                            borderRadius="md" 
-                                            borderColor="gray.200" 
+                                        <Flex
+                                            borderWidth="1px"
+                                            borderRadius="md"
+                                            borderColor="gray.200"
                                             overflow="hidden"
                                             alignItems="center"
                                         >
-                                            <Button 
+                                            <Button
                                                 onClick={() => decrementQuantity(idx)}
                                                 variant="unstyled"
                                                 minW="42px"
@@ -492,7 +484,7 @@ const ServicePopup: React.FC<ServicePopupProps> = ({ isOpen, onClose, services, 
                                             <Center width="46px" flex={1}>
                                                 <Text>{quantities[idx] || 0}</Text>
                                             </Center>
-                                            <Button 
+                                            <Button
                                                 onClick={() => incrementQuantity(idx)}
                                                 variant="unstyled"
                                                 minW="42px"
@@ -596,4 +588,4 @@ const ServicePopup: React.FC<ServicePopupProps> = ({ isOpen, onClose, services, 
     );
 };
 
-export default ServicePopup; 
+export default ServicePopup;

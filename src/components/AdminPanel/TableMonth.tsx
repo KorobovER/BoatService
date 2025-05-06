@@ -1,12 +1,12 @@
 // TableMonth.tsx
 import React from 'react';
 import { Box, Text, Flex} from '@chakra-ui/react';
-import TableReservations, { Boat } from './TableReservations';
+import TableReservations, { ReservationExtenstion } from './TableReservations';
 import BoatCell from './BoatCell';
 
 interface TableMonthProps {
     currentMonthDate: string;
-    onReservationClick: (rowId: string, day: string, boat?: Boat) => void;
+    onReservationClick: (rowId: string, day: string, boat?: ReservationExtenstion) => void;
 }
 
 const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservationClick }) => {
@@ -107,8 +107,8 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
         </Flex>
     );
 
-    const renderBoatCell = (boat: Boat, colspan: number, textColor: string) => {
-        return <BoatCell boat={boat} textColor={textColor} colspan={colspan} isMonthView={true} />;
+    const renderBoatCell = (boat: ReservationExtenstion, colspan: number, textColor: string) => {
+        return <BoatCell reservation={boat} textColor={textColor} colspan={colspan} isMonthView={true} />;
     };
 
     // Get the dates once

@@ -2,15 +2,15 @@ import { Flex, Text, Button, Image } from '@chakra-ui/react';
 import { useState } from 'react';
 import { useMarina } from '../../../context/MarinaContext';
 import ServicePopup from './ServicePopup';
-import { Boat } from '../TableReservations';
+import { ReservationExtenstion } from '../TableReservations';
 
 interface NoServiceProps {
-    boat?: Boat;
+    reservation?: ReservationExtenstion;
     userName?: string;
     rowId?: string;
 }
 
-const NoService = ({ boat, userName, rowId }: NoServiceProps) => {
+const NoService = ({ reservation, userName, rowId }: NoServiceProps) => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const { selectedMarina } = useMarina();
 
@@ -34,13 +34,13 @@ const NoService = ({ boat, userName, rowId }: NoServiceProps) => {
                     <Image src="/assets/images/button-plus.svg" alt="plus" />
                 </Button>
             </Flex>
-            
+
             {selectedMarina && (
-                <ServicePopup 
-                    isOpen={isPopupOpen} 
-                    onClose={closeServicePopup} 
-                    services={selectedMarina.active_services || []} 
-                    boat={boat}
+                <ServicePopup
+                    isOpen={isPopupOpen}
+                    onClose={closeServicePopup}
+                    services={selectedMarina.active_services || []}
+                    reservation={reservation}
                     userName={userName}
                     rowId={rowId}
                 />
@@ -49,4 +49,4 @@ const NoService = ({ boat, userName, rowId }: NoServiceProps) => {
     );
 };
 
-export default NoService; 
+export default NoService;

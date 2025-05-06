@@ -51,3 +51,17 @@ export const handleError = (err: ApiError, showToast: any) => {
   }
   showToast("Error", errorMessage, "error")
 }
+
+export const transformS3Url = (url: string): string => {
+  if (!url) return '';
+
+  if (url.startsWith('s3://')) {
+      const path = url.substring(5);
+      const parts = path.split('/');
+      const bucket = parts[0];
+      const key = parts.slice(1).join('/');
+      return `https://s3.amazonaws.com/${bucket}/${key}`;
+  }
+
+  return url;
+};

@@ -1,12 +1,12 @@
 // TableWeek.tsx
 import React, { useMemo } from 'react';
 import { Box, Text, Spinner, Center } from '@chakra-ui/react';
-import TableReservations, { Boat } from './TableReservations';
+import TableReservations, { ReservationExtenstion } from './TableReservations';
 import BoatCell from './BoatCell';
 
 interface TableWeekProps {
     currentWeekStart: string;
-    onReservationClick: (rowId: string, day: string, boat?: Boat) => void;
+    onReservationClick: (rowId: string, day: string, reservation?: ReservationExtenstion) => void;
 }
 
 const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationClick }) => {
@@ -154,8 +154,8 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
         </>
     );
 
-    const renderBoatCell = (boat: Boat, colspan: number, textColor: string) => {
-        return <BoatCell boat={boat} textColor={textColor} colspan={colspan} />;
+    const renderBoatCell = (reservation: ReservationExtenstion, colspan: number, textColor: string) => {
+        return <BoatCell reservation={reservation} textColor={textColor} colspan={colspan} />;
     };
 
     return (

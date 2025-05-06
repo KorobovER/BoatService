@@ -1,13 +1,13 @@
 import React from 'react';
 import { Text, Image, Flex, Button, Link } from '@chakra-ui/react';
-import { Boat } from './TableReservations';
+import { ReservationExtenstion } from './TableReservations';
 
 interface HoverReservationProps {
-    boat: Boat;
+    reservation: ReservationExtenstion;
 }
 
-const HoverReservation: React.FC<HoverReservationProps> = ({ boat }) => {
-    const serviceRequests = boat.service_requests || [];
+const HoverReservation: React.FC<HoverReservationProps> = ({ reservation }) => {
+    const serviceRequests = reservation.service_requests || [];
     const hasServiceRequests = serviceRequests.length > 0;
     const buttonStyle = {
         bg: hasServiceRequests ? 'system.warningYellow' : 'system.successGreen',
@@ -44,30 +44,30 @@ const HoverReservation: React.FC<HoverReservationProps> = ({ boat }) => {
     return (
         <Flex flexDirection='column' gap='8px'>
             <Flex gap='8px' alignItems='center'>
-                {boat.vessel_type === 'power' ? (
+                {reservation.boat.vessel_type === 'power' ? (
                     <Image
                         src="/assets/images/power-boat.svg"
-                        alt={boat.name}
+                        alt={reservation.boat.boatname}
                         width="22px"
                         height="22px"
                         objectFit="cover"
                         borderRadius="4px"
                         filter="brightness(0)"
                     />
-                ) : boat.vessel_type === 'catamaran' ? (
+                ) : reservation.boat.vessel_type === 'catamaran' ? (
                     <Image
                         src="/assets/images/catamaran-boat.svg"
-                        alt={boat.name}
+                        alt={reservation.boat.boatname}
                         width="22px"
                         height="22px"
                         objectFit="cover"
                         borderRadius="4px"
                         filter="brightness(0)"
                     />
-                ) : boat.vessel_type === 'monohull' ? (
+                ) : reservation.boat.vessel_type === 'monohull' ? (
                     <Image
                         src="/assets/images/monohul-boat.svg"
-                        alt={boat.name}
+                        alt={reservation.boat.boatname}
                         width="22px"
                         height="22px"
                         objectFit="cover"
@@ -75,25 +75,25 @@ const HoverReservation: React.FC<HoverReservationProps> = ({ boat }) => {
                         filter="brightness(0)"
                     />
                 ) : (
-                    <Text color="white" fontSize="14px" fontWeight="500">{boat.name}</Text>
+                    <Text color="white" fontSize="14px" fontWeight="500">{reservation.boat.boatname}</Text>
                 )}
-                <Text color='basic.grey900' fontSize="14px" fontWeight="400">{boat.name}</Text>
+                <Text color='basic.grey900' fontSize="14px" fontWeight="400">{reservation.boat.boatname}</Text>
                 <Text fontSize="14px" fontWeight="400" color='basic.grey600'>|</Text>
                 <Text color='basic.grey600' fontSize="14px" fontWeight="400">
-                    {boat.code}
+                    {reservation.boat.registration_number}
                 </Text>
             </Flex>
             <Flex gap='lg'>
                 <Flex gap='4px' whiteSpace="nowrap">
                     <Text fontSize="14px" fontWeight="400" color='white' bg='black' p='0 8px' borderRadius='56px'>In</Text>
                     <Text fontSize="14px" fontWeight="400" color='basic.grey700' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
-                        {boat.startDateObj ? formatDateTime(boat.startDateObj) : 'N/A'}
+                        {reservation.startDateObj ? formatDateTime(reservation.startDateObj) : 'N/A'}
                     </Text>
                 </Flex>
                 <Flex gap='4px' whiteSpace="nowrap">
                     <Text fontSize="14px" fontWeight="400" color='white' bg='black' p='0 8px' borderRadius='56px'>Out</Text>
                     <Text fontSize="14px" fontWeight="400" color='basic.grey700' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
-                        {boat.endDateObj ? formatDateTime(boat.endDateObj) : 'N/A'}
+                        {reservation.endDateObj ? formatDateTime(reservation.endDateObj) : 'N/A'}
                     </Text>
                 </Flex>
             </Flex>

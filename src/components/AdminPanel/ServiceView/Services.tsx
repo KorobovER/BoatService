@@ -1,14 +1,14 @@
 import React, { useEffect } from 'react';
 import { Box, Text, Image, Flex, Button } from '@chakra-ui/react';
-import { Boat } from '../TableReservations';
 import NoService from './NoService';
+import { ReservationExtenstion } from '../TableReservations';
 
 interface PopupReservedProps {
     isOpen: boolean;
     onClose: () => void;
     rowId: string;
     day: string;
-    boat?: Boat;
+    reservation?: ReservationExtenstion;
     timeOfDay?: 'AM' | 'PM';
     position?: { top: number; left: number };
     backdropOffset?: {
@@ -46,14 +46,13 @@ const formatDateTime = (dateObj: Date) => {
 const PopupReserved: React.FC<PopupReservedProps> = ({
     isOpen,
     rowId,
-    boat,
-
+    reservation,
     day,
 }) => {
 
 
     useEffect(() => {
-        if (isOpen && boat) {
+        if (isOpen && reservation) {
             // Function to safely apply opacity style
             const applyStyles = (elements: NodeListOf<Element>, style: Record<string, string>) => {
                 for (let i = 0; i < elements.length; i++) {
@@ -86,7 +85,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
 
             if (isTableDay) {
                 // Для TableDay используем день и ID лодки
-                const dayBoatSelector = `td[data-boat-id="${boat.id}"][data-day="${day}"]`;
+                const dayBoatSelector = `td[data-boat-id="${reservation.reservation_id}"][data-day="${day}"]`;
                 const exactTdCell = document.querySelector(dayBoatSelector);
 
                 if (exactTdCell) {
@@ -100,7 +99,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
             } else {
                 // Для TableWeek/Month используем rowId, day и ID лодки
                 // 1. Перебираем ячейки таблицы и ищем точное совпадение
-                const currentCellKey = `boat-${rowId}-${day}-${boat.id}`;
+                const currentCellKey = `boat-${rowId}-${day}-${reservation.reservation_id}`;
                 console.log('Looking for cell with key containing:', currentCellKey);
 
                 tableCells.forEach(cell => {
@@ -135,7 +134,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
             // Если все еще не нашли, используем ID лодки как последний вариант
             if (!foundExactCell) {
                 // Последний способ - просто по ID лодки
-                const allBoatContainers = document.querySelectorAll(`.boat-cell-container[data-boat-id="${boat.id}"]`);
+                const allBoatContainers = document.querySelectorAll(`.boat-cell-container[data-boat-id="${reservation.reservation_id}"]`);
                 if (allBoatContainers.length > 0) {
                     (allBoatContainers[0] as HTMLElement).style.opacity = '1';
                     console.log('Found by boat ID only (fallback)');
@@ -148,13 +147,12 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 applyStyles(boatContainers, { opacity: '1' });
             };
         }
-    }, [isOpen, boat, rowId, day]);
+    }, [isOpen, reservation, rowId, day]);
 
-    if (!isOpen || !boat) return null;
+    if (!isOpen || !reservation) return null;
 
     // Get user name from the boat object if available
-    const hasUserInfo = boat.user_first_name && boat.user_last_name;
-    const userName = hasUserInfo ? `${boat.user_first_name} ${boat.user_last_name}` : '';
+    const userName = `${reservation.user.first_name} ${reservation.user.last_name}`
 
     return (
         <>
@@ -192,12 +190,12 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                         align="center"
                         gap="12px">
                         <Image
-                            src={boat.vessel_type === 'power'
+                            src={reservation.boat.vessel_type === 'power'
                                 ? "/assets/images/power-boat.svg"
-                                : boat.vessel_type === 'catamaran'
+                                : reservation.boat.vessel_type === 'catamaran'
                                     ? "/assets/images/catamaran-boat.svg"
                                     : "/assets/images/monohul-boat.svg"}
-                            alt={boat.name}
+                            alt={reservation.boat.boatname}
                             width="32px"
                             height="32px"
                             filter="invert(40%) sepia(90%) saturate(2259%) hue-rotate(352deg) brightness(98%) contrast(97%)"
@@ -205,15 +203,14 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                         <Box w="100%">
                             <Flex justifyContent="space-between" align="center" gap="4px">
                                 <Flex align="center" gap="4px">
-                                    <Text fontSize="16px" fontWeight="500" color="gray.900">{boat.name}</Text>
+                                    <Text fontSize="16px" fontWeight="500" color="gray.900">{reservation.boat.boatname}</Text>
                                     <Text fontSize="12px" fontWeight="300" color="gray.600">|</Text>
                                     <Text fontSize="12px" fontWeight="300" color="gray.600">{userName}</Text>
                                 </Flex>
-                                <Text bg="basic.grey100" px="sm" py="xs" borderRadius="var(--chakra-space-sm)" fontSize="16px" fontWeight="500" color="gray.900">{boat.code}</Text>
+                                <Text bg="basic.grey100" px="sm" py="xs" borderRadius="var(--chakra-space-sm)" fontSize="16px" fontWeight="500" color="gray.900">{reservation.boat.registration_number}</Text>
                             </Flex>
                             <Flex justifyContent="space-between" align="center">
-                                <Text fontSize="12px" fontWeight="300" color="gray.900">LOA {boat.loa ? `${boat.loa}ft` : 'N/A'} | Draft {boat.draft ? `${boat.draft}ft` : 'N/A'}</Text>
-                                <Text fontSize="12px" fontWeight="300" color="gray.900">Sail number: {boat.sailId}</Text>
+                                <Text fontSize="12px" fontWeight="300" color="gray.900">LOA {reservation.boat.loa}ft | Draft {reservation.boat.draft}ft</Text>
                             </Flex>
                         </Box>
                     </Flex>
@@ -262,7 +259,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                                             justifyContent="center"
                                         >In</Flex>
                                         <Text fontSize="14px" fontWeight="400" color='basic.grey700' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
-                                            {boat.startDateObj ? formatDateTime(boat.startDateObj) : 'N/A'}
+                                            {reservation.startDateObj ? formatDateTime(reservation.startDateObj) : 'N/A'}
                                         </Text>
                                     </Flex>
                                     <Flex align="center" gap='xs' whiteSpace="nowrap">
@@ -280,7 +277,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                                             justifyContent="center"
                                         >Out</Flex>
                                         <Text fontSize="14px" fontWeight="400" color='basic.grey700' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
-                                            {boat.endDateObj ? formatDateTime(boat.endDateObj) : 'N/A'}
+                                            {reservation.endDateObj ? formatDateTime(reservation.endDateObj) : 'N/A'}
                                         </Text>
                                     </Flex>
                                 </Flex>
@@ -301,12 +298,12 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                     </Flex>
                     {/* Content*/}
                     <Flex>
-                        {(!boat.service_requests || boat.service_requests.length === 0) ? (
-                            <NoService rowId={rowId} boat={boat} userName={userName} />
+                        {(!reservation.service_requests || reservation.service_requests.length === 0) ? (
+                            <NoService rowId={rowId} reservation={reservation} userName={userName} />
                         ) : (
                             // Отображение списка сервисов, когда они есть
                             <Flex flexDirection="column" w="100%" py="3xl" px="md">
-                                {boat.service_requests.map((service, index) => (
+                                {reservation.service_requests.map((service, index) => (
                                     <Flex key={index} w="100%">
                                         {/* Здесь будет содержимое для отображения каждого сервиса */}
                                         <Text>Service Request #{index + 1}: {service.is_completed ? 'Completed' : 'Pending'}</Text>

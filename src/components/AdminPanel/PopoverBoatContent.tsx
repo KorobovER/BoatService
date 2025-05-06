@@ -1,40 +1,40 @@
 import React from 'react';
 import { Box, Text, Image, Flex, Button, Link } from '@chakra-ui/react';
-import { Boat } from './TableReservations';
+import { ReservationExtenstion } from './TableReservations';
 
 interface PopoverBoatContentProps {
-    boat: Boat;
+    reservation: ReservationExtenstion;
 }
 
-const PopoverBoatContent: React.FC<PopoverBoatContentProps> = ({ boat }) => {
+const PopoverBoatContent: React.FC<PopoverBoatContentProps> = ({ reservation }) => {
     return (
         <Flex gap='8px' alignItems='center' color="black">
             <Box>
                 <Flex gap='8px' alignItems='center'>
-                    {boat.vessel_type === 'power' ? (
+                    {reservation.boat.vessel_type === 'power' ? (
                         <Image
                             src="/assets/images/power-boat.svg"
-                            alt={boat.name}
+                            alt={reservation.boat.boatname}
                             width="22px"
                             height="22px"
                             objectFit="cover"
                             borderRadius="4px"
                             filter="brightness(0)"
                         />
-                    ) : boat.vessel_type === 'catamaran' ? (
+                    ) : reservation.boat.vessel_type === 'catamaran' ? (
                         <Image
                             src="/assets/images/catamaran-boat.svg"
-                            alt={boat.name}
+                            alt={reservation.boat.boatname}
                             width="22px"
                             height="22px"
                             objectFit="cover"
                             borderRadius="4px"
                             filter="brightness(0)"
                         />
-                    ) : boat.vessel_type === 'monohull' ? (
+                    ) : reservation.boat.vessel_type === 'monohull' ? (
                         <Image
                             src="/assets/images/monohul-boat.svg"
-                            alt={boat.name}
+                            alt={reservation.boat.boatname}
                             width="22px"
                             height="22px"
                             objectFit="cover"
@@ -42,12 +42,12 @@ const PopoverBoatContent: React.FC<PopoverBoatContentProps> = ({ boat }) => {
                             filter="brightness(0)"
                         />
                     ) : (
-                        <Text color="white" fontSize="14px" fontWeight="500">{boat.name}</Text>
+                        <Text color="white" fontSize="14px" fontWeight="500">{reservation.boat.boatname}</Text>
                     )}
-                    <Text color='basic.grey900' fontSize="14px" fontWeight="400" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{boat.name}</Text>
+                    <Text color='basic.grey900' fontSize="14px" fontWeight="400" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">{reservation.boat.boatname}</Text>
                     <Text fontSize="14px" fontWeight="400" color='basic.grey600'>|</Text>
                     <Text color='basic.grey600' fontSize="14px" fontWeight="400" whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
-                        {boat.code}
+                        {reservation.boat.registration_number}
                     </Text>
                 </Flex>
                 <Flex p='8px 0px' gap='16px'>
@@ -56,7 +56,7 @@ const PopoverBoatContent: React.FC<PopoverBoatContentProps> = ({ boat }) => {
                         <Text fontSize="14px" fontWeight="400" color='basic.grey700' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
                             {(() => {
                                 try {
-                                    const date = boat.startDateObj || new Date(boat.startDay);
+                                    const date = reservation.startDateObj || new Date(reservation.startDay);
                                     return date.toLocaleString('en-US', {
                                         day: 'numeric',
                                         month: 'long',
@@ -65,7 +65,7 @@ const PopoverBoatContent: React.FC<PopoverBoatContentProps> = ({ boat }) => {
                                         hour12: true,
                                     }).replace(',', ' •');
                                 } catch (error) {
-                                    return `${boat.startDay} • ${boat.startTime || '--:--'}`;
+                                    return `${reservation.startDay} • ${reservation.startTime || '--:--'}`;
                                 }
                             })()}
                         </Text>
@@ -75,7 +75,7 @@ const PopoverBoatContent: React.FC<PopoverBoatContentProps> = ({ boat }) => {
                         <Text fontSize="14px" fontWeight="400" color='basic.grey700' whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
                             {(() => {
                                 try {
-                                    const date = boat.endDateObj || new Date(boat.endDay);
+                                    const date = reservation.endDateObj || new Date(reservation.endDay);
                                     return date.toLocaleString('en-US', {
                                         day: 'numeric',
                                         month: 'long',
@@ -84,7 +84,7 @@ const PopoverBoatContent: React.FC<PopoverBoatContentProps> = ({ boat }) => {
                                         hour12: true,
                                     }).replace(',', ' •');
                                 } catch (error) {
-                                    return `${boat.endDay} • ${boat.endTime || '--:--'}`;
+                                    return `${reservation.endDay} • ${reservation.endTime || '--:--'}`;
                                 }
                             })()}
                         </Text>

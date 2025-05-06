@@ -17,57 +17,25 @@ import {
     Button
 } from '@chakra-ui/react';
 import BolaCell from "/assets/images/bola-cell.svg";
-import { ReservationsService, MarinasService } from '../../client';
+import { ReservationsService, MarinasService, ReservationPublic } from '../../client';
 import { useMarina } from '../../context/MarinaContext';
 import PopupFreeCell from './PopupFreeCell';
 import PopupReserved from './ServiceView/Services';
 
-// Функция для преобразования S3 URL
-const transformS3Url = (url: string): string => {
-    if (!url) return '';
-
-    // Преобразование URL из формата s3://bola-public-assets/...
-    // в https://s3.amazonaws.com/bola-public-assets/...
-    if (url.startsWith('s3://')) {
-        const path = url.substring(5); // Убираем 's3://'
-        const parts = path.split('/');
-        const bucket = parts[0];
-        const key = parts.slice(1).join('/');
-        return `https://s3.amazonaws.com/${bucket}/${key}`;
-    }
-
-    return url;
-};
-
 interface Row {
     id: string;
     label: string;
-    marina?: {
-        logo_url: string | null;
-    };
 }
 
-export interface Boat {
-    id: string;
-    mooring_ball_id: string;
-    name: string;
-    code: string;
+export type ReservationExtenstion = ReservationPublic & {
     startDay: string;
     endDay: string;
     startTime?: string;
     endTime?: string;
-    marina_id?: string;
-    registration_image_url?: string;
-    vessel_type?: string;
-    service_requests?: Array<{
-        is_completed: boolean;
-    }>;
-    is_completed?: boolean;
     rawStartTime: string;
     rawEndTime: string;
     startsInSecondHalf: boolean;
     endsInFirstHalf: boolean;
-    admin_status?: string;
     selectedTimeOfDay?: 'AM' | 'PM';
     displayTime?: string;
     startDateObj: Date;
@@ -78,35 +46,30 @@ export interface Boat {
     endsAfter?: boolean;
     effectiveStartDate?: Date;
     effectiveEndDate?: Date;
-    user_first_name?: string;
-    user_last_name?: string;
-    loa?: number;
-    draft?: number;
-    sailId?: string;
-    reservation_id: string;
-}
+  }
+
 
 interface TableReservationsProps {
     days: string[];
     cellWidth: string;
     renderHeader: (day: string) => React.ReactNode;
-    renderBoatCell: (boat: Boat, colspan: number, textColor: string) => React.ReactNode;
+    renderBoatCell: (reservation: ReservationExtenstion, colspan: number, textColor: string) => React.ReactNode;
     currentDate: string;
-    onReservationClick: (rowId: string, day: string, boat?: Boat, timeOfDay?: 'AM' | 'PM') => void;
+    onReservationClick: (rowId: string, day: string, reservation?: ReservationExtenstion, timeOfDay?: 'AM' | 'PM') => void;
     isMonthView?: boolean;
 }
 
-export const getCellColor = (boat: Boat): { bg: string; textColor: string } => {
+export const getCellColor = (reservation: ReservationExtenstion): { bg: string; textColor: string } => {
     // Используем статусы из API через поле admin_status
-    if (boat.admin_status === 'require_action') {
+    if (reservation.admin_status === 'require_action') {
         return { bg: "system-error", textColor: "white" }; // red - требует действия
     }
 
-    if (boat.admin_status === 'future_action') {
+    if (reservation.admin_status === 'future_action') {
         return { bg: "system.warningYellow", textColor: "white" }; // yellow - будущее действие
     }
 
-    if (boat.admin_status === 'completed') {
+    if (reservation.admin_status === 'completed') {
         return { bg: "bg.success", textColor: "basic.grey700" }; // light green - завершено
     }
 
@@ -163,14 +126,14 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     onReservationClick,
 }) => {
     const { selectedMarina } = useMarina();
-    const [boats, setBoats] = useState<Boat[]>([]);
+    const [reservations, setReservations] = useState<ReservationExtenstion[]>([]);
     const [allRows, setAllRows] = useState<Row[]>([]);
     const { isOpen: isFreeCellOpen, onClose: onFreeCellClose } = useDisclosure();
     const { isOpen: isReservedOpen, onClose: onReservedClose } = useDisclosure();
     const [selectedCell, setSelectedCell] = useState<{
         rowId: string;
         day: string;
-        boat?: Boat;
+        reservation?: ReservationExtenstion;
         timeOfDay?: 'AM' | 'PM';
     } | null>(null);
     // Добавляем состояние для отслеживания текущей временной зоны
@@ -225,7 +188,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
 
     // Запрос резерваций с использованием TanStack Query и созданных опций
     const {
-        data: reservations,
+        data: dataReservations,
         isLoading: isLoadingReservations,
         isFetching: isFetchingReservations,
         isError,
@@ -233,12 +196,12 @@ const TableReservations: React.FC<TableReservationsProps> = ({
 
     // Перезагружаем данные при изменении временной зоны
     useEffect(() => {
-        if (boats.length > 0) {
+        if (reservations.length > 0) {
             // Принудительно инвалидируем кэш для обновления данных
             queryClient.invalidateQueries({ queryKey: ['mooringBalls'] });
             queryClient.invalidateQueries({ queryKey: ['reservations'] });
         }
-    }, [currentTimeZone, queryClient, boats.length]);
+    }, [currentTimeZone, queryClient, reservations.length]);
 
     // Обработка швартовок (общая логика)
     useEffect(() => {
@@ -249,23 +212,20 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                 if (apiMooringBalls[0].number) numberField = 'number';
                 else if (apiMooringBalls[0].id) numberField = 'id';
             }
-
             const rows = apiMooringBalls
                 .filter(ball => ball && ball[numberField])
                 .map(ball => ({
                     id: ball[numberField].toString(),
                     label: ball[numberField].toString(),
-                    marina: ball.marina
                 }))
                 .sort((a, b) => parseInt(a.id) - parseInt(b.id));
-
             setAllRows(rows);
         }
     }, [mooringBalls]);
 
     // Обработка резерваций (общая логика)
     useEffect(() => {
-        if (reservations?.data && days.length > 0) {
+        if (dataReservations?.data && days.length > 0) {
             try {
                 // Создаем диапазон дат в локальной временной зоне
                 const [startYear, startMonth, startDay] = days[0].split('-').map(Number);
@@ -274,7 +234,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                 const [endYear, endMonth, endDay] = days[days.length - 1].split('-').map(Number);
                 const periodEndDate = new Date(endYear, endMonth - 1, endDay, 23, 59, 59);
 
-                const apiBoats = reservations.data
+                const apiBoats = dataReservations.data
                     .filter(reservation => {
                         try {
                             // Создаем даты из строк ISO 8601 (они приходят в UTC из API)
@@ -304,13 +264,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
                             };
                             // Используем локальное время для всей таблицы
-                            const boat = {
-                                id: reservation.boat_id?.toString(),
-                                mooring_ball_id: reservation.mooring_ball.ball_number.toString(),
-                                reservation_id: reservation.reservation_id,
-                                name: reservation.boat?.boatname || 'N/A',
-                                code: reservation.boat?.registration_number || 'N/A',
-                                // Сохраняем даты в локальном формате для внутренних расчетов
+                            const r: ReservationExtenstion =  {
+                                ...reservation,
                                 startDay: formatLocalDate(startDateUTC),
                                 endDay: formatLocalDate(endDateUTC),
                                 // Сохраняем время в локальном формате с учетом AM/PM
@@ -325,56 +280,44 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 // Сохраняем локальные значения
                                 startsInSecondHalfLocal: startDateUTC.getHours() >= 12,
                                 endsInFirstHalfLocal: endDateUTC.getHours() < 12,
-                                marina_id: reservation.marina?.marina_id,
-                                registration_image_url: (reservation.boat as any)?.registration_image_url,
-                                vessel_type: reservation.boat?.vessel_type,
-                                service_requests: reservation.service_requests,
-                                is_completed: reservation.is_completed,
-                                admin_status: reservation.admin_status,
-                                // Сохраняем оригинальные объекты Date для использования в компонентах
                                 startDateObj: startDateUTC,
                                 endDateObj: endDateUTC,
                                 startsBefore: startDateUTC < periodStartDate,
                                 endsAfter: endDateUTC > periodEndDate,
                                 effectiveStartDate: startDateUTC < periodStartDate ? startDateUTC : undefined,
                                 effectiveEndDate: endDateUTC > periodEndDate ? endDateUTC : undefined,
-                                user_first_name: reservation.user?.first_name,
-                                user_last_name: reservation.user?.last_name,
-                                loa: reservation.boat?.loa,
-                                draft: reservation.boat?.draft,
-                                sailId: '00', // Дефолтное значение, так как отсутствует в API
                             };
-                            return boat;
+                            return r;
                         } catch (error) {
                             console.error('Error processing reservation:', reservation);
                             return null;
                         }
                     })
-                    .filter(Boolean) as Boat[];
+                    .filter(Boolean) as ReservationExtenstion[];
 
-                setBoats(apiBoats);
+                    setReservations(apiBoats);
             } catch (error) {
                 console.error('Error processing reservations:', error);
             }
         }
-    }, [reservations, days, currentTimeZone]);
+    }, [dataReservations, days, currentTimeZone]);
 
-    const handleCellClick = (rowId: string, day: string, boat?: Boat, timeOfDay?: 'AM' | 'PM') => {
+    const handleCellClick = (rowId: string, day: string, reservation?: ReservationExtenstion, timeOfDay?: 'AM' | 'PM') => {
         // Добавляем timeOfDay в объект лодки, если он передан
-        if (boat && timeOfDay) {
+        if (reservation && timeOfDay) {
             // Создаем обогащенный объект лодки с явным указанием времени дня
             const enrichedBoat = {
-                ...boat,
+                ...reservation,
                 selectedTimeOfDay: timeOfDay,
                 displayTime: timeOfDay === 'AM' ?
-                    `${boat.startTime} (AM)` :
-                    `${boat.endTime} (PM)`
+                    `${reservation.startTime} (AM)` :
+                    `${reservation.endTime} (PM)`
             };
-            setSelectedCell({ rowId, day, boat: enrichedBoat, timeOfDay });
+            setSelectedCell({ rowId, day, reservation: enrichedBoat, timeOfDay });
             onReservationClick(rowId, day, enrichedBoat, timeOfDay);
         } else {
-            setSelectedCell({ rowId, day, boat, timeOfDay });
-            onReservationClick(rowId, day, boat, timeOfDay);
+            setSelectedCell({ rowId, day, reservation, timeOfDay });
+            onReservationClick(rowId, day, reservation, timeOfDay);
         }
     };
 
@@ -529,7 +472,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                         </Tr>
                     </Thead>
                     <Tbody>
-                        {allRows.map(row => {
+                        {
+                        allRows.map(row => {
                             // Первый проход - отмечаем занятые дни и половины дней
                             // Изменяем массив с boolean на массив с 'AM' | 'PM' | 'FULL' | null
                             const occupiedHalfDays = Array(days.length * 2).fill(null);
@@ -541,19 +485,18 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 if (occupiedHalfDays[amIndex] !== null && occupiedHalfDays[pmIndex] !== null) return;
 
                                 // Находим все лодки для этого дня и стойки
-                                const dayBoats = boats.filter(b => {
+                                const dayBoats = reservations.filter(r => {
                                     try {
                                         // Преобразуем компоненты даты и создаем даты в локальной временной зоне
                                         const [curYear, curMonth, curDay] = day.split('-').map(Number);
                                         const currentDay = new Date(curYear, curMonth - 1, curDay);
 
-                                        const [startYear, startMonth, startDay] = b.startDay.split('-').map(Number);
+                                        const [startYear, startMonth, startDay] = r.startDay.split('-').map(Number);
                                         const startDate = new Date(startYear, startMonth - 1, startDay);
 
-                                        const [endYear, endMonth, endDay] = b.endDay.split('-').map(Number);
+                                        const [endYear, endMonth, endDay] = r.endDay.split('-').map(Number);
                                         const endDate = new Date(endYear, endMonth - 1, endDay, 23, 59, 59);
-
-                                        return b.mooring_ball_id === row.id && currentDay >= startDate && currentDay <= endDate;
+                                        return r.mooring_ball.ball_number.toLocaleString() === row.id && currentDay >= startDate && currentDay <= endDate;
                                     } catch (error) {
                                         return false;
                                     }
@@ -639,7 +582,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                     // Проверяем, относится ли следующая ячейка к той же резервации
                                     // Сравниваем ID, имя, дату начала и окончания
                                     if (nextBoat &&
-                                        boatMatch.id === nextBoat.id &&
+                                        boatMatch.reservation_id === nextBoat.reservation_id &&
                                         boatMatch.mooring_ball_id === nextBoat.mooring_ball_id &&
                                         boatMatch.name === nextBoat.name &&
                                         boatMatch.startDay === nextBoat.startDay &&
@@ -776,7 +719,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                             <Image
                                                 w="24px"
                                                 h="24px"
-                                                src={row.marina?.logo_url ? transformS3Url(row.marina.logo_url) : BolaCell}
+                                                src={BolaCell}
                                                 alt="Bola"
                                             />
                                             <Text
@@ -814,7 +757,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                         onClose={onReservedClose}
                         rowId={selectedCell.rowId}
                         day={selectedCell.day}
-                        boat={selectedCell.boat}
+                        reservation={selectedCell.reservation}
                         timeOfDay={selectedCell.timeOfDay}
                     />
                 </>

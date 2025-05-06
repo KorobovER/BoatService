@@ -6,9 +6,7 @@ import { useEffect, useState, useRef } from 'react';
 import TableDay from '../../components/AdminPanel/TableDay';
 import TableMonth from '../../components/AdminPanel/TableMonth';
 import PopupReserved from '../../components/AdminPanel/ServiceView/Services';
-import { Boat } from '../../components/AdminPanel/TableReservations';
-// Import the Boat type from TableDay as TableDayBoat to avoid conflicts
-import { Boat as TableDayBoat } from '../../components/AdminPanel/TableDay';
+import { ReservationExtenstion } from "../../components/AdminPanel/TableReservations";
 
 type TableView = 'month' | 'week' | 'day';
 
@@ -33,7 +31,7 @@ function Dashboard() {
     const [currentYear, setCurrentYear] = useState<number>(0);
     const [currentView, setCurrentView] = useState<TableView>('week');
     const [currentDay, setCurrentDay] = useState<string>('');
-    const [selectedReservation, setSelectedReservation] = useState<{rowId: string; day: string; boat?: Boat} | null>(null);
+    const [selectedReservation, setSelectedReservation] = useState<{rowId: string; day: string; reservation?: ReservationExtenstion} | null>(null);
     const tableContainerRef = useRef<HTMLDivElement>(null);
 
     // Date utility functions
@@ -152,7 +150,7 @@ function Dashboard() {
             const start = parseYMDToDate(currentWeekStart);
             const end = new Date(start);
             end.setUTCDate(end.getUTCDate() + 6);
-            
+
             return `${formatDateWithOptions(start, DATE_CONFIG.FORMAT_OPTIONS.monthDay)} - ${formatDateWithOptions(end, DATE_CONFIG.FORMAT_OPTIONS.monthDay)}`;
         } else if (currentView === 'day' && currentDay) {
             const date = parseYMDToDate(currentDay);
@@ -186,9 +184,9 @@ function Dashboard() {
         }
     };
 
-    const handleReservationClick = (rowId: string, day: string, boat?: Boat) => {
-        setSelectedReservation({ rowId, day, boat });
-        if (!boat) {
+    const handleReservationClick = (rowId: string, day: string, reservation?: ReservationExtenstion) => {
+        setSelectedReservation({ rowId, day, reservation });
+        if (!reservation) {
             setSelectedReservation(null);
         }
     };
@@ -273,7 +271,7 @@ function Dashboard() {
                             onClose={handleClosePopup}
                             rowId={selectedReservation.rowId}
                             day={selectedReservation.day}
-                            boat={selectedReservation.boat}
+                            reservation={selectedReservation.reservation}
                         />
                     </Box>
                 )}

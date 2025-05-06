@@ -6,6 +6,7 @@ import { ServiceOnReservationPublic, ServiceRequestStatus } from '../../../clien
 import { getServiceIcon } from './Services';
 import { ReservationsService } from '../../../client/services';
 import { useQueryClient } from '@tanstack/react-query';
+import QuantityInputModal from './QuantityInputModal';
 
 interface ServicesListProps {
     reservation: ReservationExtenstion;
@@ -31,6 +32,10 @@ const ServicesList: React.FC<ServicesListProps> = ({
 }) => {
     const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
     const [localReservation, setLocalReservation] = useState<ReservationExtenstion>(reservation);
+    const [isQuantityModalOpen, setIsQuantityModalOpen] = useState(false);
+    const [currentServiceId, setCurrentServiceId] = useState<string | null>(null);
+    const [currentService, setCurrentService] = useState<ServiceOnReservationPublic | null>(null);
+    const [isSubmittingQuantity, setIsSubmittingQuantity] = useState(false);
     const toast = useToast();
     const queryClient = useQueryClient();
 
@@ -57,19 +62,167 @@ const ServicesList: React.FC<ServicesListProps> = ({
         }
     };
 
+    // Handle input quantity button click
+    const handleInputQuantity = (serviceId: string) => {
+        // Find the service by id
+        const service = localReservation.service_requests.find(
+            service => service.service_reservation_id === serviceId
+        );
+        
+        if (service) {
+            setCurrentServiceId(serviceId);
+            setCurrentService(service);
+            setIsQuantityModalOpen(true);
+        }
+    };
+
+    // Handle quantity modal submission
+    const handleQuantitySubmit = async (serviceId: string, newQuantity: number) => {
+        if (!serviceId) return;
+        
+        setIsSubmittingQuantity(true);
+        
+        try {
+            // Find the service
+            const service = localReservation.service_requests.find(
+                service => service.service_reservation_id === serviceId
+            );
+            
+            if (!service || !service.services || service.services.length === 0) {
+                throw new Error("Service not found");
+            }
+            
+            // Update local state for optimistic UI
+            const updatedReservation = {...localReservation};
+            updatedReservation.service_requests = localReservation.service_requests.map(service => {
+                if (service.service_reservation_id === serviceId) {
+                    return {
+                        ...service,
+                        status: 'completed',
+                        services: service.services.map(subService => ({
+                            ...subService,
+                            quantity: newQuantity
+                        }))
+                    };
+                }
+                return service;
+            });
+            
+            // Update UI with optimistic change
+            setLocalReservation(updatedReservation);
+            
+            const initialQuantity = service.services[0].quantity;
+            
+            // If quantity changed, we need to update both quantity and status
+            if (newQuantity !== initialQuantity) {
+                // Use updateReservationService to update quantity and status
+                console.log(`Updating service with new quantity: ${newQuantity} (was ${initialQuantity})`);
+                
+                // Create updated service object that matches ServiceOnReservationUpdate type
+                const updatedService = {
+                    requested_date: service.requested_date,
+                    special_instructions: service.special_instructions,
+                    services: service.services.map(subService => ({
+                        title: subService.title,
+                        name: subService.name,
+                        price: subService.price,
+                        unit: subService.unit,
+                        quantity: subService.name === service.services[0].name ? newQuantity : subService.quantity
+                    }))
+                };
+                
+                // Update local state for display
+                // First update status with status API (since status isn't part of the update model)
+                await ReservationsService.updateReservationServiceStatus({
+                    reservationId: localReservation.reservation_id,
+                    serviceId: serviceId,
+                    statusIn: 'completed'
+                });
+                
+                // Then update the quantity with the service update API
+                try {
+                    await ReservationsService.updateReservationService({
+                        reservationId: localReservation.reservation_id,
+                        serviceId: serviceId,
+                        requestBody: updatedService
+                    });
+                    
+                    console.log('Service quantity updated successfully');
+                } catch (error) {
+                    console.error('Error updating service quantity:', error);
+                    throw error; // Re-throw to trigger the catch block
+                }
+            } else {
+                // If quantity didn't change, just update the status
+                console.log('Quantity unchanged, just updating status to completed');
+                await ReservationsService.updateReservationServiceStatus({
+                    reservationId: localReservation.reservation_id,
+                    serviceId: serviceId,
+                    statusIn: 'completed'
+                });
+            }
+            
+            // Show success message
+            const serviceName = service.services[0].name;
+            const unit = service.services[0].unit;
+            
+            toast({
+                title: "Service completed",
+                description: `${serviceName} has been marked as completed with ${newQuantity} ${unit}`,
+                status: "success",
+                duration: 3000,
+                isClosable: true,
+            });
+            
+            // Invalidate queries to refresh data
+            queryClient.invalidateQueries({ queryKey: ['reservation', localReservation.reservation_id] });
+            
+            // Close the modal
+            handleQuantityModalClose();
+        } catch (error) {
+            console.error('Error updating service:', error);
+            
+            // Revert to original state on error
+            setLocalReservation(reservation);
+            
+            toast({
+                title: "Update failed",
+                description: "There was an error updating the service",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+        } finally {
+            setIsSubmittingQuantity(false);
+        }
+    };
+
+    // Handle quantity modal close
+    const handleQuantityModalClose = () => {
+        setIsQuantityModalOpen(false);
+        setCurrentServiceId(null);
+        setCurrentService(null);
+    };
+
     // Handles actions from the dropdown menu
     const handleServiceAction = async (action: string, serviceId: string, serviceStatus: string) => {
         console.log(`Action: ${action} for service: ${serviceId} with status: ${serviceStatus}`);
-
+        
         // Skip if already loading
         if (isLoading[serviceId]) return;
 
+        // Handle input quantity separately
+        if (action === 'input-quantity') {
+            handleInputQuantity(serviceId);
+            return;
+        }
+        
         // Set loading state for this service
         setIsLoading(prev => ({ ...prev, [serviceId]: true }));
-
+        
         try {
             let newStatus: ServiceRequestStatus | null = null;
-
+            
             // Determine the new status based on action
             switch (action) {
                 case 'mark-in-progress':
@@ -81,10 +234,10 @@ const ServicesList: React.FC<ServicesListProps> = ({
                 case 'cancel-service':
                     newStatus = 'cancelled';
                     break;
-                // For other actions like 'input-quantity' or 'edit-service', 
+                // For other actions like 'edit-service', 
                 // we'd need different API calls or UI components
             }
-
+            
             // If we have a new status, update it through the API
             if (newStatus) {
                 // Update local state immediately for optimistic UI
@@ -155,7 +308,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
     // Get button configuration based on service status
     const getActionButtonConfig = (service: ServiceOnReservationPublic) => {
         const totalPrice = calculateTotalPrice(service);
-
+        
         switch (service.status) {
             case 'pending':
                 return {
@@ -377,52 +530,106 @@ const ServicesList: React.FC<ServicesListProps> = ({
         }
     ];
 
+    // Get the service name for the quantity modal
+    const getServiceName = () => {
+        if (!currentService || !currentService.services || currentService.services.length === 0) {
+            return 'Service';
+        }
+        
+        return currentService.services[0].name;
+    };
+
+    // Get the service icon for the quantity modal
+    const getServiceIconUrl = () => {
+        if (!currentService || !currentService.services || currentService.services.length === 0) {
+            return '/assets/icons/fuel_service.svg';
+        }
+        
+        const iconPath = getServiceIcon(currentService.services[0].name);
+        console.log('Service icon path:', iconPath); // For debugging
+        return iconPath;
+    };
+
+    // Get the service quantity for the quantity modal
+    const getServiceQuantity = () => {
+        if (!currentService || !currentService.services || currentService.services.length === 0) {
+            return 1;
+        }
+        
+        return currentService.services[0].quantity;
+    };
+
+    // Get the service unit of measurement for the quantity modal
+    const getServiceUnit = () => {
+        if (!currentService || !currentService.services || currentService.services.length === 0) {
+            return 'gallons';
+        }
+        
+        return currentService.services[0].unit;
+    };
+
     return (
-        <Flex flexDirection="column" w="100%" gap="2xl">
-            {serviceCategories.map((category, idx) => {
-                // Filter services that match this category
-                const categoryServices = localReservation.service_requests.filter(category.filter);
+        <>
+            <Flex flexDirection="column" w="100%" gap="2xl">
+                {serviceCategories.map((category, idx) => {
+                    // Filter services that match this category
+                    const categoryServices = localReservation.service_requests.filter(category.filter);
 
-                // Only render this category if it has services
-                if (categoryServices.length === 0) return null;
+                    // Only render this category if it has services
+                    if (categoryServices.length === 0) return null;
 
-                return (
-                    <Flex gap="lg" flexDirection="column" key={idx}>
-                        <Flex justifyContent="space-between" alignItems="center">
-                            <Text
-                                fontSize="16px"
-                                fontWeight="400"
-                                color="gray.700"
-                            >
-                                {category.title}
-                            </Text>
-                            {category.status === 'pending' && (
-                                <Box 
-                                    fontSize="14px" 
-                                    fontWeight="500" 
-                                    color="brand.primaryOrange" 
-                                    onClick={handleAddMoreServices}
-                                    borderRadius="0"
-                                    display="flex"
-                                    alignItems="center"
-                                    gap="4px"
-                                    p="0"
-                                    m="0"
+                    return (
+                        <Flex gap="lg" flexDirection="column" key={idx}>
+                            <Flex justifyContent="space-between" alignItems="center">
+                                <Text
+                                    fontSize="16px"
+                                    fontWeight="400"
+                                    color="gray.700"
                                 >
-                                    <Text borderBottom="1px solid" borderColor="brand.primaryOrange">Add service</Text>
-                                    <Text textAlign="center" fontSize="17px" fontWeight="400" color="brand.primaryOrange">+</Text>
-                                </Box>
-                            )}
+                                    {category.title}
+                                </Text>
+                                {category.status === 'pending' && (
+                                    <Box 
+                                        fontSize="14px" 
+                                        fontWeight="500" 
+                                        color="brand.primaryOrange" 
+                                        onClick={handleAddMoreServices}
+                                        borderRadius="0"
+                                        display="flex"
+                                        alignItems="center"
+                                        gap="4px"
+                                        p="0"
+                                        m="0"
+                                        cursor="pointer"
+                                    >
+                                        <Text borderBottom="1px solid" borderColor="brand.primaryOrange">Add service</Text>
+                                        <Text textAlign="center" fontSize="17px" fontWeight="400" color="brand.primaryOrange">+</Text>
+                                    </Box>
+                                )}
+                            </Flex>
+                            <Flex flexDirection="column" gap="sm">
+                                {categoryServices.map((service, serviceIdx) =>
+                                    category.renderItem(service, serviceIdx)
+                                )}
+                            </Flex>
                         </Flex>
-                        <Flex flexDirection="column" gap="sm">
-                            {categoryServices.map((service, serviceIdx) =>
-                                category.renderItem(service, serviceIdx)
-                            )}
-                        </Flex>
-                    </Flex>
-                );
-            })}
-        </Flex>
+                    );
+                })}
+            </Flex>
+
+            {/* Quantity Input Modal */}
+            <QuantityInputModal
+                isOpen={isQuantityModalOpen}
+                onClose={handleQuantityModalClose}
+                serviceId={currentServiceId}
+                initialQuantity={getServiceQuantity()}
+                serviceName={getServiceName()}
+                serviceIcon={getServiceIconUrl()}
+                unitOfMeasurement={getServiceUnit()}
+                isSubmitting={isSubmittingQuantity}
+                onSubmit={handleQuantitySubmit}
+            />
+        </>
     );
 };
 

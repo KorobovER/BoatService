@@ -17,41 +17,7 @@ import {
 } from '@chakra-ui/react';
 import { MarinaServicePublic, ServiceOnReservationCreate, SubServiceRequest, ReservationPublic, ServiceOnReservationPublic } from '../../../client/models';
 import { ReservationsService } from '../../../client/services';
-
-// Иконки для разных типов услуг
-const SERVICE_ICONS = {
-    TRASH: '/assets/icons/trash_service.svg',
-    LAUNCH: '/assets/images/launch_service.svg',
-    LAUNDRY: '/assets/images/laundry_service.svg',
-    ICE: '/assets/images/ice_service.svg',
-    FUEL: '/assets/images/fuel_service.svg',
-    PUMP_OUT: '/assets/images/pump_out_service.svg',
-    WATER: '/assets/images/water_service.svg',
-    DEFAULT: '/assets/images/all_services.svg'
-};
-
-// Функция для определения иконки по имени услуги
-const getServiceIcon = (name: string): string => {
-    const nameLower = name.toLowerCase();
-
-    if (nameLower.includes('trash') || nameLower.includes('waste') || nameLower.includes('garbage')) {
-        return SERVICE_ICONS.TRASH;
-    } else if (nameLower.includes('launch') || nameLower.includes('boat')) {
-        return SERVICE_ICONS.LAUNCH;
-    } else if (nameLower.includes('laundry') || nameLower.includes('wash') || nameLower.includes('dry')) {
-        return SERVICE_ICONS.LAUNDRY;
-    } else if (nameLower.includes('ice')) {
-        return SERVICE_ICONS.ICE;
-    } else if (nameLower.includes('fuel') || nameLower.includes('gas') || nameLower.includes('diesel') || nameLower.includes('petrol')) {
-        return SERVICE_ICONS.FUEL;
-    } else if (nameLower.includes('pump') || nameLower.includes('sewage')) {
-        return SERVICE_ICONS.PUMP_OUT;
-    } else if (nameLower.includes('water')) {
-        return SERVICE_ICONS.WATER;
-    } else {
-        return SERVICE_ICONS.DEFAULT;
-    }
-};
+import { getServiceIcon } from './Services';
 
 // Функция для определения типа элемента управления (не использует поле type)
 const getItemType = (item: any): 'unit' | 'measured' => {

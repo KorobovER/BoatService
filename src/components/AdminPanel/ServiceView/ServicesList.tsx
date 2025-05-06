@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Text, Image, Flex, Button, Menu, MenuButton, MenuItem, MenuList, useToast } from '@chakra-ui/react';
 import NoService from './NoService';
 import { ReservationExtenstion } from '../TableReservations';
@@ -39,14 +39,10 @@ const ServicesList: React.FC<ServicesListProps> = ({
     const toast = useToast();
     const queryClient = useQueryClient();
 
-    // If no services, render the NoService component
-    if (!localReservation.service_requests || localReservation.service_requests.length === 0) {
-        return (
-            <Flex flexDirection="column" w="100%">
-                <NoService rowId={rowId} reservation={localReservation} userName={userName} />
-            </Flex>
-        );
-    }
+    // Обновляем localReservation при изменении пропса reservation
+    useEffect(() => {
+        setLocalReservation(reservation);
+    }, [reservation]);
 
     // Get background color for service icon based on status
     const getServiceIconBgColor = (status: ServiceRequestStatus) => {
@@ -252,10 +248,10 @@ const ServicesList: React.FC<ServicesListProps> = ({
                     return service;
                 });
                 
-                // Update UI with optimistic change
+                // Update UI
                 setLocalReservation(updatedReservation);
                 
-                // Call API in the background
+                // Make API call
                 await ReservationsService.updateReservationServiceStatus({
                     reservationId: localReservation.reservation_id,
                     serviceId: serviceId,
@@ -265,7 +261,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
                 // Show success message
                 toast({
                     title: "Status updated",
-                    description: `Service has been marked as ${newStatus}`,
+                    description: `Service status has been changed to ${newStatus}`,
                     status: "success",
                     duration: 3000,
                     isClosable: true,
@@ -293,10 +289,14 @@ const ServicesList: React.FC<ServicesListProps> = ({
         }
     };
 
-    // Effect to update local reservation when the prop changes
-    React.useEffect(() => {
-        setLocalReservation(reservation);
-    }, [reservation]);
+    // If no services, render the NoService component
+    if (!localReservation.service_requests || localReservation.service_requests.length === 0) {
+        return (
+            <Flex flexDirection="column" w="100%">
+                <NoService rowId={rowId} reservation={localReservation} userName={userName} />
+            </Flex>
+        );
+    }
 
     // Calculate the total price for a service
     const calculateTotalPrice = (service: ServiceOnReservationPublic) => {

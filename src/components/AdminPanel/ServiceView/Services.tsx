@@ -1,7 +1,12 @@
-import React, { useEffect } from 'react';
-import { Box, Text, Image, Flex, Button } from '@chakra-ui/react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { Box, Text, Image, Flex, Button, useDisclosure } from '@chakra-ui/react';
 import NoService from './NoService';
 import { ReservationExtenstion } from '../TableReservations';
+import ServicePopup from './ServicePopup';
+import { useMarina } from '../../../context/MarinaContext';
+import { useQuery } from '@tanstack/react-query';
+import { MarinasService } from '../../../client/services';
+import { ServiceOnReservationPublic } from '../../../client/models';
 
 interface PopupReservedProps {
     isOpen: boolean;
@@ -18,6 +23,42 @@ interface PopupReservedProps {
         bottom?: number;
     };
 }
+
+// Иконки для разных типов услуг
+const SERVICE_ICONS = {
+    TRASH: '/assets/icons/trash_service.svg',
+    LAUNCH: '/assets/images/launch_service.svg',
+    LAUNDRY: '/assets/images/laundry_service.svg',
+    ICE: '/assets/images/ice_service.svg',
+    FUEL: '/assets/images/fuel_service.svg',
+    PUMP_OUT: '/assets/images/pump_out_service.svg',
+    WATER: '/assets/images/water_service.svg',
+    DEFAULT: '/assets/images/all_services.svg'
+};
+
+// Функция для определения иконки по имени услуги
+const getServiceIcon = (name: string): string => {
+    const nameLower = name.toLowerCase();
+
+    if (nameLower.includes('trash') || nameLower.includes('waste') || nameLower.includes('garbage')) {
+        return SERVICE_ICONS.TRASH;
+    } else if (nameLower.includes('launch') || nameLower.includes('boat')) {
+        return SERVICE_ICONS.LAUNCH;
+    } else if (nameLower.includes('laundry') || nameLower.includes('wash') || nameLower.includes('dry')) {
+        return SERVICE_ICONS.LAUNDRY;
+    } else if (nameLower.includes('ice')) {
+        return SERVICE_ICONS.ICE;
+    } else if (nameLower.includes('fuel') || nameLower.includes('gas') || nameLower.includes('diesel') || nameLower.includes('petrol')) {
+        return SERVICE_ICONS.FUEL;
+    } else if (nameLower.includes('pump') || nameLower.includes('sewage')) {
+        return SERVICE_ICONS.PUMP_OUT;
+    } else if (nameLower.includes('water')) {
+        return SERVICE_ICONS.WATER;
+    } else {
+        return SERVICE_ICONS.DEFAULT;
+    }
+};
+
 
 // Helper function to format date and time
 const formatDateTime = (dateObj: Date) => {
@@ -49,7 +90,30 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     reservation,
     day,
 }) => {
+    // Add these state hooks and service data fetching
+    const { selectedMarina } = useMarina();
+    const { isOpen: isServicePopupOpen, onOpen: onServicePopupOpen, onClose: onServicePopupClose } = useDisclosure();
+    const [currentServiceRequest, setCurrentServiceRequest] = useState<ServiceOnReservationPublic | null>(null);
+    
+    // Fetch marina services
+    const { data: servicesData } = useQuery({
+        queryKey: ['marina-services'],
+        queryFn: () => MarinasService.readServices(),
+        enabled: !!selectedMarina // Only fetch when marina is selected
+    });
 
+    // Get all existing services from all service requests
+    const existingServices = useMemo(() => {
+        if (!reservation?.service_requests) return [];
+        
+        // Flatten all services from all requests
+        return reservation.service_requests.flatMap(request => 
+            request.services.map(service => ({
+                ...service,
+                requestId: request.service_reservation_id
+            }))
+        );
+    }, [reservation]);
 
     useEffect(() => {
         if (isOpen && reservation) {
@@ -154,6 +218,24 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     // Get user name from the boat object if available
     const userName = `${reservation.user.first_name} ${reservation.user.last_name}`
 
+    // Function to handle adding more services to existing reservation
+    const handleAddMoreServices = () => {
+        // Open service popup to add more services
+        onServicePopupOpen();
+    };
+
+    // Function to handle adding more services to a specific service request
+    const handleAddToServiceRequest = (serviceRequest: ServiceOnReservationPublic) => {
+        setCurrentServiceRequest(serviceRequest);
+        onServicePopupOpen();
+    };
+
+    // When closing the popup, reset the current service request
+    const handleCloseServicePopup = () => {
+        setCurrentServiceRequest(null);
+        onServicePopupClose();
+    };
+
     return (
         <>
             {/* Popup content */}
@@ -168,7 +250,6 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 width="auto"
                 overflow="hidden"
                 gap="lg"
-
             >
                 {/* Header - фиксированный */}
                 <Flex
@@ -297,23 +378,217 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                         </Button>
                     </Flex>
                     {/* Content*/}
-                    <Flex>
+                    <Flex flexDirection="column" w="100%" gap="xl">
                         {(!reservation.service_requests || reservation.service_requests.length === 0) ? (
-                            <NoService rowId={rowId} reservation={reservation} userName={userName} />
+                            <Flex flexDirection="column" w="100%">
+                                <NoService rowId={rowId} reservation={reservation} userName={userName} />
+                            </Flex>
                         ) : (
-                            // Отображение списка сервисов, когда они есть
-                            <Flex flexDirection="column" w="100%" py="3xl" px="md">
-                                {reservation.service_requests.map((service, index) => (
-                                    <Flex key={index} w="100%">
-                                        {/* Здесь будет содержимое для отображения каждого сервиса */}
-                                        <Text>Service Request #{index + 1}: {service.is_completed ? 'Completed' : 'Pending'}</Text>
+                            // Группируем сервисы по статусам
+                            <Flex flexDirection="column" w="100%" gap="2xl">
+                                {/* Pending services */}
+                                {reservation.service_requests.some(service => service.status === 'pending') && (
+                                    <Flex flexDirection="column" w="100%">
+                                        <Flex justifyContent="space-between" alignItems="center">
+                                            <Text fontSize="16px" fontWeight="400" color="gray.700" >Pending services</Text>
+                                            <Button variant="unstyled" fontSize="14px" fontWeight="500" color="brand.primaryOrange" onClick={handleAddMoreServices}>Add service +</Button>
+                                        </Flex>
+                                        <Flex flexDirection="column" gap="sm">
+                                            {reservation.service_requests
+                                                .filter(service => service.status === 'pending')
+                                                .map((service, index) => (
+                                                    <Flex 
+                                                        key={index} 
+                                                        w="100%" 
+                                                        flexDirection="column"
+                                                        gap="xs"
+                                                    >
+                                                        {/* Existing service items */}
+                                                        {service.services.map((subService, i) => (
+                                                            <Flex gap="8px" key={i} alignItems="center" >
+                                                                <Flex borderRadius='8px' bg='system.errorRedNew' alignItems="center" justifyContent="center" w="46px" h="46px"><Image w='24px' h='auto' src={getServiceIcon(subService.name)} alt={subService.name} filter="brightness(0) invert(1)" /></Flex>
+                                                                <Flex flex="1" justify="space-between" flexDirection="column">
+                                                                    <Text fontSize="14px" fontWeight="700" color='basic.grey700'>
+                                                                        {subService.quantity}x {subService.name}
+                                                                    </Text>
+                                                                    <Text fontSize="14px" fontWeight="400" color='basic.grey900'>${subService.price} / {subService.unit}</Text>
+                                                                </Flex>
+                                                                <Button px='md' py='10px' variant="unstyled" borderRadius='var(--chakra-space-full)' border="1px solid" borderColor='system.errorRedNew' fontSize="14px" fontWeight="400" color='basic.grey900' display="flex" alignItems="center">Mark in progress</Button>
+                                                                <Button w='32px' h='32px' border='1px solid' borderColor='basic.grey200' borderRadius='100%' variant="unstyled" fontSize="14px" fontWeight="400" color='basic.grey900' p="0" minW="32px" maxW="32px">
+                                                                    <Flex justifyContent="center" alignItems="center" w="100%" h="100%">
+                                                                        <svg width="12" height="4" viewBox="0 0 12 4" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                            <circle cx="1.5" cy="2" r="1.5" fill="#4A5568"/>
+                                                                            <circle cx="6" cy="2" r="1.5" fill="#4A5568"/>
+                                                                            <circle cx="10.5" cy="2" r="1.5" fill="#4A5568"/>
+                                                                        </svg>
+                                                                    </Flex>
+                                                                </Button>
+                                                            </Flex>
+                                                        ))}
+                                                    </Flex>
+                                                ))}
+                                        </Flex>
                                     </Flex>
-                                ))}
+                                )}
+
+                                {/* In progress services */}
+                                {reservation.service_requests.some(service => service.status === 'en-route') && (
+                                    <Box>
+                                        <Flex justifyContent="space-between" alignItems="center" mb="md">
+                                            <Text fontSize="16px" fontWeight="500" color="gray.900">In progress services</Text>
+                                            <Button variant="unstyled" fontSize="14px" fontWeight="500" color="brand.primaryOrange" onClick={handleAddMoreServices}>Add service +</Button>
+                                        </Flex>
+                                        <Flex flexDirection="column" gap="sm">
+                                            {reservation.service_requests
+                                                .filter(service => service.status === 'en-route')
+                                                .map((service, index) => (
+                                                    <Flex
+                                                        key={index}
+                                                        w="100%"
+                                                        p="md"
+                                                        borderWidth="1px"
+                                                        borderColor="gray.200"
+                                                        borderRadius="md"
+                                                        flexDirection="column"
+                                                        gap="xs"
+                                                    >
+                                                        <Flex justifyContent="space-between" alignItems="center">
+                                                            <Text fontWeight="500" color="gray.900">Request #{service.service_reservation_id.slice(-4)}</Text>
+                                                            <Text fontSize="sm" color="blue.500" bg="blue.50" px="sm" py="xs" borderRadius="full">
+                                                                In progress
+                                                            </Text>
+                                                        </Flex>
+                                                        <Text fontSize="sm" color="gray.600">
+                                                            Requested: {new Date(service.requested_date).toLocaleDateString()}
+                                                        </Text>
+                                                        {service.services.map((subService, i) => (
+                                                            <Flex key={i} justify="space-between" alignItems="center" mt="1">
+                                                                <Text fontSize="sm">
+                                                                    {subService.name} ({subService.quantity} {subService.unit})
+                                                                </Text>
+                                                                <Text fontSize="sm">${subService.price * subService.quantity}</Text>
+                                                            </Flex>
+                                                        ))}
+                                                    </Flex>
+                                                ))}
+                                        </Flex>
+                                    </Box>
+                                )}
+
+                                {/* Completed services */}
+                                {reservation.service_requests.some(service => service.status === 'completed') && (
+                                    <Box>
+                                        <Flex justifyContent="space-between" alignItems="center" mb="md">
+                                            <Text fontSize="16px" fontWeight="500" color="gray.900">Completed services</Text>
+                                            <Button variant="unstyled" fontSize="14px" fontWeight="500" color="brand.primaryOrange" onClick={handleAddMoreServices}>Add service +</Button>
+                                        </Flex>
+                                        <Flex flexDirection="column" gap="sm">
+                                            {reservation.service_requests
+                                                .filter(service => service.status === 'completed')
+                                                .map((service, index) => (
+                                                    <Flex
+                                                        key={index}
+                                                        w="100%"
+                                                        p="md"
+                                                        borderWidth="1px"
+                                                        borderColor="gray.200"
+                                                        borderRadius="md"
+                                                        flexDirection="column"
+                                                        gap="xs"
+                                                    >
+                                                        <Flex justifyContent="space-between" alignItems="center">
+                                                            <Text fontWeight="500" color="gray.900">Request #{service.service_reservation_id.slice(-4)}</Text>
+                                                            <Text fontSize="sm" color="green.500" bg="green.50" px="sm" py="xs" borderRadius="full">
+                                                                Completed
+                                                            </Text>
+                                                        </Flex>
+                                                        <Text fontSize="sm" color="gray.600">
+                                                            Requested: {new Date(service.requested_date).toLocaleDateString()}
+                                                        </Text>
+                                                        {service.services.map((subService, i) => (
+                                                            <Flex key={i} justify="space-between" alignItems="center" mt="1">
+                                                                <Text fontSize="sm">
+                                                                    {subService.name} ({subService.quantity} {subService.unit})
+                                                                </Text>
+                                                                <Text fontSize="sm">${subService.price * subService.quantity}</Text>
+                                                            </Flex>
+                                                        ))}
+                                                    </Flex>
+                                                ))}
+                                        </Flex>
+                                    </Box>
+                                )}
+
+                                {/* Other statuses (if any) */}
+                                {reservation.service_requests.some(service =>
+                                    service.status !== 'pending' &&
+                                    service.status !== 'en-route' &&
+                                    service.status !== 'completed'
+                                ) && (
+                                        <Box>
+                                            <Flex justifyContent="space-between" alignItems="center" mb="md">
+                                                <Text fontSize="16px" fontWeight="500" color="gray.900">Other services</Text>
+                                                <Button variant="unstyled" fontSize="14px" fontWeight="500" color="brand.primaryOrange" onClick={handleAddMoreServices}>Add service +</Button>
+                                            </Flex>
+                                            <Flex flexDirection="column" gap="sm">
+                                                {reservation.service_requests
+                                                    .filter(service =>
+                                                        service.status !== 'pending' &&
+                                                        service.status !== 'en-route' &&
+                                                        service.status !== 'completed'
+                                                    )
+                                                    .map((service, index) => (
+                                                        <Flex
+                                                            key={index}
+                                                            w="100%"
+                                                            p="md"
+                                                            borderWidth="1px"
+                                                            borderColor="gray.200"
+                                                            borderRadius="md"
+                                                            flexDirection="column"
+                                                            gap="xs"
+                                                        >
+                                                            <Flex justifyContent="space-between" alignItems="center">
+                                                                <Text fontWeight="500" color="gray.900">Request #{service.service_reservation_id.slice(-4)}</Text>
+                                                                <Text fontSize="sm" color="gray.500" bg="gray.50" px="sm" py="xs" borderRadius="full">
+                                                                    {service.status.charAt(0).toUpperCase() + service.status.slice(1)}
+                                                                </Text>
+                                                            </Flex>
+                                                            <Text fontSize="sm" color="gray.600">
+                                                                Requested: {new Date(service.requested_date).toLocaleDateString()}
+                                                            </Text>
+                                                            {service.services.map((subService, i) => (
+                                                                <Flex key={i} justify="space-between" alignItems="center" mt="1">
+                                                                    <Text fontSize="sm">
+                                                                        {subService.name} ({subService.quantity} {subService.unit})
+                                                                    </Text>
+                                                                    <Text fontSize="sm">${subService.price * subService.quantity}</Text>
+                                                                </Flex>
+                                                            ))}
+                                                        </Flex>
+                                                    ))}
+                                            </Flex>
+                                        </Box>
+                                    )}
                             </Flex>
                         )}
                     </Flex>
                 </Flex>
             </Flex>
+
+            {/* Service Popup */}
+            {reservation && (
+                <ServicePopup 
+                    isOpen={isServicePopupOpen}
+                    onClose={handleCloseServicePopup}
+                    services={servicesData?.data || []}
+                    reservation={reservation}
+                    userName={userName}
+                    rowId={rowId}
+                    existingServices={existingServices}
+                    currentServiceRequest={currentServiceRequest}
+                />
+            )}
         </>
     );
 };

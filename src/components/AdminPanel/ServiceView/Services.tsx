@@ -136,6 +136,13 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
         return currentReservation.service_requests.some(service => service.status === 'completed');
     }, [localReservation, reservation]);
 
+    // Effect to automatically open payment details when completed services appear
+    useEffect(() => {
+        if (hasCompletedServices) {
+            setIsPaymentDetailsOpen(true);
+        }
+    }, [hasCompletedServices]);
+
     // Calculate total price for completed services
     const calculateTotalForCompleted = () => {
         const currentReservation = localReservation || reservation;
@@ -437,6 +444,9 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                             rowId={rowId}
                             userName={userName}
                             handleAddMoreServices={handleAddMoreServices}
+                            onServiceStatusChange={(updatedReservation) => {
+                                setLocalReservation(updatedReservation);
+                            }}
                         />
                     </Flex>
                 </Flex>

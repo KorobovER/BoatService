@@ -20,7 +20,7 @@ import { ReservationsService } from '../../../client/services';
 import { getServiceIcon } from './Services';
 import { useQueryClient } from '@tanstack/react-query';
 
-// Функция для определения типа элемента управления (не использует поле type)
+// Функция для определения типа элемента управления (не использует поле type)(Обсудить с Евгением)
 const getItemType = (item: any): 'unit' | 'measured' => {
     // Определяем по единице измерения (unit)
     if (item.unit && typeof item.unit === 'string') {
@@ -29,12 +29,12 @@ const getItemType = (item: any): 'unit' | 'measured' => {
 
         // Если единица измерения соответствует измеряемым, это measured
         if (measuredUnits.some(u => item.unit.toLowerCase().includes(u))) {
-            return 'measured';
+            return 'unit';
         }
     }
 
     // По умолчанию возвращаем unit
-    return 'unit';
+    return 'measured';
 };
 
 interface ServicePopupProps {

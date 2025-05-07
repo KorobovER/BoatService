@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Text, Image, Flex, Button, Menu, MenuButton, MenuItem, MenuList, useToast, Divider, Icon, Collapse } from '@chakra-ui/react';
+import { Box, Text, Image, Flex, Button, Menu, MenuButton, MenuItem, MenuList, useToast} from '@chakra-ui/react';
 import NoService from './NoService';
 import { ReservationExtenstion } from '../TableReservations';
 import { ServiceOnReservationPublic, ServiceRequestStatus } from '../../../client/models';
@@ -13,13 +13,12 @@ interface ServicesListProps {
     userName: string;
     rowId: string;
     handleAddMoreServices: () => void;
+    onServiceStatusChange?: (updatedReservation: ReservationExtenstion) => void;
 }
-
-type ServiceStatus = 'pending' | 'en-route' | 'completed' | 'other';
 
 interface ServiceCategory {
     title: string;
-    status: ServiceStatus;
+    status: ServiceRequestStatus;
     filter: (service: ServiceOnReservationPublic) => boolean;
     renderItem: (service: ServiceOnReservationPublic, index: number) => React.ReactNode;
 }
@@ -28,7 +27,8 @@ const ServicesList: React.FC<ServicesListProps> = ({
     reservation,
     userName,
     rowId,
-    handleAddMoreServices
+    handleAddMoreServices,
+    onServiceStatusChange
 }) => {
     const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
     const [localReservation, setLocalReservation] = useState<ReservationExtenstion>(reservation);
@@ -170,8 +170,10 @@ const ServicesList: React.FC<ServicesListProps> = ({
                 isClosable: true,
             });
             
-            // Invalidate queries to refresh data
-            queryClient.invalidateQueries();
+            // Notify parent component about the change
+            if (onServiceStatusChange) {
+                onServiceStatusChange(updatedReservation);
+            }
             
             // Close the modal
             handleQuantityModalClose();
@@ -266,9 +268,11 @@ const ServicesList: React.FC<ServicesListProps> = ({
                     duration: 3000,
                     isClosable: true,
                 });
-                
-                // Invalidate queries to refresh data
-                queryClient.invalidateQueries();
+
+                // Notify parent component about the change
+                if (onServiceStatusChange) {
+                    onServiceStatusChange(updatedReservation);
+                }
             }
         } catch (error) {
             console.error('Error updating service status:', error);
@@ -290,7 +294,13 @@ const ServicesList: React.FC<ServicesListProps> = ({
     };
 
     // If no services, render the NoService component
-    if (!localReservation.service_requests || localReservation.service_requests.length === 0) {
+    const hasActiveServices = localReservation.service_requests?.some(service => 
+        service.status === 'pending' || 
+        service.status === 'en-route' || 
+        service.status === 'completed'
+    );
+
+    if (!hasActiveServices) {
         return (
             <Flex flexDirection="column" w="100%">
                 <NoService 
@@ -542,15 +552,6 @@ const ServicesList: React.FC<ServicesListProps> = ({
             title: 'Completed services',
             status: 'completed',
             filter: (service) => service.status === 'completed',
-            renderItem: renderServiceItem
-        },
-        {
-            title: 'Other services',
-            status: 'other',
-            filter: (service) =>
-                service.status !== 'pending' &&
-                service.status !== 'en-route' &&
-                service.status !== 'completed',
             renderItem: renderServiceItem
         }
     ];

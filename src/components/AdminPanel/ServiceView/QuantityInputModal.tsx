@@ -78,7 +78,7 @@ const QuantityInputModal: React.FC<QuantityInputModalProps> = ({
             <ModalOverlay />
             <ModalContent padding='16px' borderRadius="md" maxW="600px">
                 <Flex alignItems='center' justifyContent='end' height='42px'><ModalCloseButton position='static' variant='unstyled' w="42px" h="42px" /></Flex>
-                <ModalBody>
+                <ModalBody p='0'>
                     <Flex direction="column" align="center" gap='3xl'>
                         <Flex direction="column" align="center" gap='xs'>
                             <Box w="62px" h="62px" bg="gradient.orange" borderRadius="md" p={3}>
@@ -112,7 +112,7 @@ const QuantityInputModal: React.FC<QuantityInputModalProps> = ({
                                 isDisabled={isSubmitting}
                             />
                             <Flex flex="1" align="center" justify="center" position="relative">
-                                <Text fontSize="24px" fontWeight="400">{quantity}</Text>
+                                <Text fontSize="48px" fontWeight="400">{quantity}</Text>
                             </Flex>
                             <IconButton
                                 aria-label="Increase"
@@ -129,9 +129,11 @@ const QuantityInputModal: React.FC<QuantityInputModalProps> = ({
                             />
                         </Flex>
 
-                        <Flex gap={4} w="100%" mt={4}>
+                        <Flex gap='md' w="100%">
                             <Button
+                                flex='1'
                                 w="100%"
+                                h="50px"
                                 variant="outline"
                                 borderRadius="var(--chakra-space-full)"
                                 px='md'
@@ -141,11 +143,15 @@ const QuantityInputModal: React.FC<QuantityInputModalProps> = ({
                                 fontWeight="400"
                                 color="basic.grey900"
                                 isDisabled={isSubmitting}
+                                leftIcon={<Image mr='4px' w='17px' h='auto' src='assets/images/goback-icon.svg' />}
+
                             >
                                 Go back
                             </Button>
                             <Button
+                                flex='1'
                                 w="100%"
+                                h="50px"
                                 bg="system.successGreen"
                                 color="white"
                                 borderRadius="var(--chakra-space-full)"
@@ -156,6 +162,7 @@ const QuantityInputModal: React.FC<QuantityInputModalProps> = ({
                                 fontWeight="400"
                                 isLoading={isSubmitting}
                                 loadingText="Updating..."
+                                leftIcon={<Image ml='4px' h='auto' src='assets/images/check-icon.svg' />}
                             >
                                 Mark as done
                             </Button>

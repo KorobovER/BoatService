@@ -128,8 +128,9 @@ const ServiceCancel: React.FC<ServiceCancelProps> = ({
                             />
                         </div>
 
-                        <Flex gap={4} w="100%" mt={4}>
+                        <Flex w="100%" gap='md'>
                             <Button
+                                flex='1'
                                 w="100%"
                                 h="50px"
                                 bg="system.errorRedNew"
@@ -142,11 +143,12 @@ const ServiceCancel: React.FC<ServiceCancelProps> = ({
                                 fontWeight="400"
                                 isLoading={loading}
                                 loadingText="Cancelling..."
+                                leftIcon={<Image mr='4px'  h='auto' src='assets/images/alert-icon.svg' />}
                             >
-                                <Image mr='4px'  h='auto' src='assets/images/alert-icon.svg'></Image>
                                 Yes, cancel service
                             </Button>
                             <Button
+                                flex='1'
                                 w="100%"
                                 h="50px"
                                 variant="outline"
@@ -158,8 +160,8 @@ const ServiceCancel: React.FC<ServiceCancelProps> = ({
                                 fontWeight="400"
                                 color="basic.grey900"
                                 isDisabled={loading}
+                                leftIcon={<Image mr='4px' w='17px' h='auto' src='assets/images/goback-icon.svg' />}
                             >
-                                <Image mr='14px' w='17px' h='auto' src='assets/images/goback-icon.svg'></Image>
                                 Go back
                             </Button>
                         </Flex>

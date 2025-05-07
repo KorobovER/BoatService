@@ -1,11 +1,10 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Box, Text, Image, Flex, Button, useDisclosure, Collapse, Icon } from '@chakra-ui/react';
 import { ReservationExtenstion } from '../TableReservations';
-import ServicePopup from './ServicePopup';
+import ServiceAdd from './ServiceAdd';
 import { useMarina } from '../../../context/MarinaContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { MarinasService, ReservationsService } from '../../../client/services';
-import { ServiceOnReservationPublic } from '../../../client/models';
 import ServicesList from './ServicesList';
 
 // Иконки для разных типов услуг
@@ -91,16 +90,26 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
 }) => {
     // Add these state hooks and service data fetching
     const { selectedMarina } = useMarina();
-    const { isOpen: isServicePopupOpen, onOpen: onServicePopupOpen, onClose: onServicePopupClose } = useDisclosure();
-    const [currentServiceRequest, setCurrentServiceRequest] = useState<ServiceOnReservationPublic | null>(null);
+    const { isOpen: isServiceAddOpen, onOpen: onServiceAddOpen, onClose: onServiceAddClose } = useDisclosure();
     const [isPaymentDetailsOpen, setIsPaymentDetailsOpen] = useState(false);
     const [localReservation, setLocalReservation] = useState(reservation);
     const queryClient = useQueryClient();
 
-    // Обновляем localReservation при изменении пропса reservation
+    // Add query to fetch reservation data
+    const { data: reservationData } = useQuery({
+        queryKey: ['reservation', reservation?.reservation_id],
+        queryFn: () => reservation?.reservation_id ? ReservationsService.readReservation({ id: reservation.reservation_id }) : null,
+        enabled: !!reservation?.reservation_id
+    });
+
+    // Update localReservation when either prop or query data changes
     useEffect(() => {
-        setLocalReservation(reservation);
-    }, [reservation]);
+        if (reservationData) {
+            setLocalReservation(reservationData as ReservationExtenstion);
+        } else if (reservation) {
+            setLocalReservation(reservation);
+        }
+    }, [reservation, reservationData]);
 
     // Fetch marina services
     const { data: servicesData } = useQuery({
@@ -109,22 +118,6 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
         enabled: !!selectedMarina // Only fetch when marina is selected
     });
 
-    // Get all existing services from all service requests
-    const existingServices = useMemo(() => {
-        if (!localReservation?.service_requests && !reservation?.service_requests) return [];
-
-        const currentReservation = localReservation || reservation;
-        // Если currentReservation все еще undefined, возвращаем пустой массив
-        if (!currentReservation?.service_requests) return [];
-        
-        // Flatten all services from all requests
-        return currentReservation.service_requests.flatMap(request =>
-            request.services.map(service => ({
-                ...service,
-                requestId: request.service_reservation_id
-            }))
-        );
-    }, [localReservation, reservation]);
 
     // Check if there are any completed services
     const hasCompletedServices = useMemo(() => {
@@ -284,13 +277,12 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     // Function to handle adding more services to existing reservation
     const handleAddMoreServices = () => {
         // Open service popup to add more services
-        onServicePopupOpen();
+        onServiceAddOpen();
     };
 
     // When closing the popup, reset the current service request and update data
-    const handleCloseServicePopup = () => {
-        setCurrentServiceRequest(null);
-        onServicePopupClose();
+    const handleCloseServiceAdd = () => {
+        onServiceAddClose();
         
         // После закрытия попапа обновляем данные о резервации 
         forceRefresh();
@@ -500,17 +492,15 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 )}
             </Flex>
 
-            {/* Service Popup */}
+            {/* Service Add */}
             {(localReservation || reservation) && (
-                <ServicePopup
-                    isOpen={isServicePopupOpen}
-                    onClose={handleCloseServicePopup}
+                <ServiceAdd
+                    isOpen={isServiceAddOpen}
+                    onClose={handleCloseServiceAdd}
                     services={servicesData?.data || []}
                     reservation={localReservation || reservation}
                     userName={userName}
                     rowId={rowId}
-                    existingServices={existingServices}
-                    currentServiceRequest={currentServiceRequest}
                 />
             )}
         </>

@@ -23,13 +23,13 @@ const colors = {
     errorRedNew: "#A85555",
     warningYellow: "#FEA02F",
     successGreen: "#007A7B",
-    error15: "#FEEEE",
+    error15: "#FEEEEE",
     error: "#A85555"
   },
   bg: {
     success: "#E5F2F2",
     warning: "#FDF6ED",
-    error: "#FEEEE",
+    error: "#FEEEEE",
     info: "#EFF4FB",
     orange: "#FCF0E5",
     mooringField: "#E4E4E4"

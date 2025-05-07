@@ -7,6 +7,7 @@ import { getServiceIcon } from './Services';
 import { ReservationsService } from '../../../client/services';
 import { useQueryClient } from '@tanstack/react-query';
 import QuantityInputModal from './QuantityInputModal';
+import ServiceCancel from './ServiceCancel';
 
 interface ServicesListProps {
     reservation: ReservationExtenstion;
@@ -36,6 +37,9 @@ const ServicesList: React.FC<ServicesListProps> = ({
     const [currentServiceId, setCurrentServiceId] = useState<string | null>(null);
     const [currentService, setCurrentService] = useState<ServiceOnReservationPublic | null>(null);
     const [isSubmittingQuantity, setIsSubmittingQuantity] = useState(false);
+    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+    const [cancelLoading, setCancelLoading] = useState(false);
+    const [cancelService, setCancelService] = useState<ServiceOnReservationPublic | null>(null);
     const toast = useToast();
     const queryClient = useQueryClient();
 
@@ -230,8 +234,12 @@ const ServicesList: React.FC<ServicesListProps> = ({
                     newStatus = 'pending';
                     break;
                 case 'cancel-service':
-                    newStatus = 'cancelled';
-                    break;
+                    const service = localReservation.service_requests.find(s => s.service_reservation_id === serviceId);
+                    if (service) {
+                        setCancelService(service);
+                        setIsCancelModalOpen(true);
+                    }
+                    return;
                 // For other actions like 'edit-service', 
                 // we'd need different API calls or UI components
             }
@@ -290,6 +298,53 @@ const ServicesList: React.FC<ServicesListProps> = ({
         } finally {
             // Clear loading state
             setIsLoading(prev => ({ ...prev, [serviceId]: false }));
+        }
+    };
+
+    const handleConfirmCancel = async () => {
+        if (!cancelService) return;
+        setCancelLoading(true);
+        try {
+            // Update local state immediately for optimistic UI
+            const updatedReservation = { ...localReservation };
+            updatedReservation.service_requests = localReservation.service_requests.map(service => {
+                if (service.service_reservation_id === cancelService.service_reservation_id) {
+                    return {
+                        ...service,
+                        status: 'cancelled'
+                    };
+                }
+                return service;
+            });
+            setLocalReservation(updatedReservation);
+            await ReservationsService.updateReservationServiceStatus({
+                reservationId: localReservation.reservation_id,
+                serviceId: cancelService.service_reservation_id,
+                statusIn: 'cancelled'
+            });
+            toast({
+                title: 'Service cancelled',
+                description: 'Service has been cancelled.',
+                status: 'success',
+                duration: 3000,
+                isClosable: true,
+            });
+            if (onServiceStatusChange) {
+                onServiceStatusChange(updatedReservation);
+            }
+        } catch (error) {
+            setLocalReservation(reservation);
+            toast({
+                title: 'Update failed',
+                description: 'There was an error cancelling the service',
+                status: 'error',
+                duration: 3000,
+                isClosable: true,
+            });
+        } finally {
+            setCancelLoading(false);
+            setIsCancelModalOpen(false);
+            setCancelService(null);
         }
     };
 
@@ -655,6 +710,21 @@ const ServicesList: React.FC<ServicesListProps> = ({
                 isSubmitting={isSubmittingQuantity}
                 onSubmit={handleQuantitySubmit}
             />
+
+            {cancelService && (
+                <ServiceCancel
+                    isOpen={isCancelModalOpen}
+                    onClose={() => { setIsCancelModalOpen(false); setCancelService(null); }}
+                    onConfirm={handleConfirmCancel}
+                    service={{
+                        name: cancelService.services[0]?.name || '',
+                        price: cancelService.services[0]?.price || 0,
+                        unit: cancelService.services[0]?.unit || '',
+                        iconUrl: getServiceIcon(cancelService.services[0]?.name || '')
+                    }}
+                    loading={cancelLoading}
+                />
+            )}
         </>
     );
 };

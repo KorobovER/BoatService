@@ -15,7 +15,7 @@ import {
     Center,
     useToast
 } from '@chakra-ui/react';
-import { MarinaServicePublic, ServiceOnReservationCreate, SubServiceRequest, ReservationPublic, ServiceOnReservationPublic } from '../../../client/models';
+import { MarinaServicePublic, ServiceOnReservationCreate, SubServiceRequest, ReservationPublic} from '../../../client/models';
 import { ReservationsService } from '../../../client/services';
 import { getServiceIcon } from './Services';
 import { useQueryClient } from '@tanstack/react-query';
@@ -37,15 +37,13 @@ const getItemType = (item: any): 'unit' | 'measured' => {
     return 'measured';
 };
 
-interface ServicePopupProps {
+interface ServiceAddProps {
     isOpen: boolean;
     onClose: () => void;
     services: MarinaServicePublic[];
     reservation?: ReservationPublic;
     userName?: string;
     rowId?: string;
-    existingServices?: Array<SubServiceRequest & { requestId: string }>;
-    currentServiceRequest?: ServiceOnReservationPublic | null;
 }
 
 // Функция для извлечения ID резервации из объекта Boat
@@ -55,15 +53,13 @@ const getReservationId = (reservation?: ReservationPublic): string | undefined =
     return reservation ? reservation.reservation_id : undefined;
 };
 
-const ServicePopup: React.FC<ServicePopupProps> = ({ 
+const ServiceAdd: React.FC<ServiceAddProps> = ({ 
     isOpen, 
     onClose, 
     services, 
     reservation, 
     userName = '', 
-    rowId = '',
-    existingServices = [],
-    currentServiceRequest = null
+    rowId = ''
 }) => {
     const toast = useToast();
     const queryClient = useQueryClient();
@@ -84,33 +80,12 @@ const ServicePopup: React.FC<ServicePopupProps> = ({
     // State to track quantity for each item
     const [quantities, setQuantities] = useState<Record<number, number>>({});
 
-    // Pre-fill quantities from existing services when popup opens
+    // Clear quantities when popup opens
     useEffect(() => {
-        if (isOpen && existingServices.length > 0 && allServiceItems.length > 0) {
-            const initialQuantities: Record<number, number> = {};
-            
-            // For each existing service, find matching service item and set its quantity
-            existingServices.forEach(existingService => {
-                // Find the index of the matching service item by name and unit
-                const itemIndex = allServiceItems.findIndex(item => 
-                    item.name === existingService.name && 
-                    item.unit === existingService.unit
-                );
-                
-                if (itemIndex !== -1) {
-                    initialQuantities[itemIndex] = (initialQuantities[itemIndex] || 0) + existingService.quantity;
-                }
-            });
-            
-            // Only set quantities if we found matches
-            if (Object.keys(initialQuantities).length > 0) {
-                setQuantities(prev => ({
-                    ...prev,
-                    ...initialQuantities
-                }));
-            }
+        if (isOpen) {
+            setQuantities({});
         }
-    }, [isOpen, existingServices, allServiceItems]);
+    }, [isOpen]);
 
     // Increment quantity
     const incrementQuantity = (index: number) => {
@@ -122,15 +97,19 @@ const ServicePopup: React.FC<ServicePopupProps> = ({
 
     // Decrement quantity
     const decrementQuantity = (index: number) => {
-        setQuantities(prev => ({
-            ...prev,
-            [index]: Math.max((prev[index] || 0) - 1, 0)
-        }));
+        setQuantities(prev => {
+            const newQuantities = { ...prev };
+            newQuantities[index] = Math.max((prev[index] || 0) - 1, 0);
+            if (newQuantities[index] === 0) {
+                delete newQuantities[index];
+            }
+            return newQuantities;
+        });
     };
 
     // Calculate total selected services
     const totalSelectedServices = useMemo(() => {
-        return Object.values(quantities).filter(qty => qty > 0).length;
+        return Object.keys(quantities).length;
     }, [quantities]);
 
     // Clear all selections
@@ -296,7 +275,7 @@ const ServicePopup: React.FC<ServicePopupProps> = ({
                 
                 // Инвалидируем кэш React Query для обновления списка сервисов
                 if (reservationId) {
-                    console.log('ServicePopup: Services added, invalidating queries');
+                    console.log('ServiceAdd: Services added, invalidating queries');
                     // Инвалидируем ЛЮБЫЕ ключи запросов, связанные с резервациями
                     queryClient.invalidateQueries();
                     
@@ -307,7 +286,7 @@ const ServicePopup: React.FC<ServicePopupProps> = ({
                         
                         // Проверяем failCount внутри таймаута для правильной последовательности
                         if (failCount === 0) {
-                            console.log('ServicePopup: All services added successfully, closing popup');
+                            console.log('ServiceAdd: All services added successfully, closing popup');
                             onClose();
                         }
                     }, 500);
@@ -354,7 +333,7 @@ const ServicePopup: React.FC<ServicePopupProps> = ({
                 <ModalHeader display="flex" alignItems="center" gap="lg">
                     <Flex flex="1" alignItems="center">
                         <Text fontSize="20px" fontWeight="500" color="gray.900" borderRight="1px solid" borderColor="gray.200" pr="lg">
-                            {currentServiceRequest ? 'Add to Existing Service' : 'Add Services'}
+                            Add Services
                         </Text>
                         {reservation && (
                             <>
@@ -404,159 +383,128 @@ const ServicePopup: React.FC<ServicePopupProps> = ({
                     {allServiceItems.length === 0 ? (
                         <Text>No service items available</Text>
                     ) : (
-                        <>
-                            {/* Show summary of existing services if editing an existing request */}
-                            {currentServiceRequest && (
-                                <Box mb="4" p="4" bg="gray.50" borderRadius="md">
-                                    <Flex justifyContent="space-between" alignItems="center" mb="2">
-                                        <Text fontWeight="500">Current Selected Services</Text>
-                                        <Text fontSize="sm" color="gray.600">
-                                            Request #{currentServiceRequest.service_reservation_id.slice(-4)}
-                                        </Text>
-                                    </Flex>
-                                    <Flex flexDirection="column" gap="2">
-                                        {currentServiceRequest.services.map((service, idx) => (
-                                            <Flex key={idx} justifyContent="space-between">
-                                                <Text fontSize="sm">
-                                                    {service.quantity}x {service.name}
-                                                </Text>
-                                                <Text fontSize="sm">
-                                                    ${(service.price * service.quantity).toFixed(2)}
-                                                </Text>
-                                            </Flex>
-                                        ))}
-                                    </Flex>
-                                    <Flex justifyContent="flex-end" mt="2">
-                                        <Text fontWeight="medium">
-                                            Total: ${currentServiceRequest.total_price.toFixed(2)}
-                                        </Text>
-                                    </Flex>
-                                </Box>
-                            )}
-
-                            <SimpleGrid gap="2xl" columns={3} spacing={4}>
-                                {allServiceItems.map((item, idx) => (
-                                    <Flex
-                                        flexDirection="column"
-                                        alignItems="center"
-                                        gap="sm"
-                                        w="246px"
-                                        key={idx}
-                                        p='lg'
-                                        borderWidth={(quantities[idx] || 0) > 0 ? "2px" : "1px"}
-                                        borderColor={(quantities[idx] || 0) > 0 ? "#007A7B" : "gray.200"}
-                                        borderRadius="xl"
-                                        bg={(quantities[idx] || 0) > 0 ? "#E5F2F2" : "white"}
-                                        cursor="pointer"
-                                        display="flex"
-                                        transition="all 0.2s"
-                                        position="relative"
-                                    >
-                                        <Text color="brand.secondaryBlue" fontSize="16px" fontWeight="500">{item.name}</Text>
-                                        {(quantities[idx] || 0) > 0 && (
-                                            <Image
-                                                src="/assets/images/AddButton.svg"
-                                                alt="Selected"
-                                                position="absolute"
-                                                top="8px"
-                                                right="4px"
-                                                width="24px"
-                                                height="24px"
-                                            />
-                                        )}
-
+                        <SimpleGrid gap="2xl" columns={3} spacing={4}>
+                            {allServiceItems.map((item, idx) => (
+                                <Flex
+                                    flexDirection="column"
+                                    alignItems="center"
+                                    gap="sm"
+                                    w="246px"
+                                    key={idx}
+                                    p='lg'
+                                    borderWidth={(quantities[idx] || 0) > 0 ? "2px" : "1px"}
+                                    borderColor={(quantities[idx] || 0) > 0 ? "#007A7B" : "gray.200"}
+                                    borderRadius="xl"
+                                    bg={(quantities[idx] || 0) > 0 ? "#E5F2F2" : "white"}
+                                    cursor="pointer"
+                                    display="flex"
+                                    transition="all 0.2s"
+                                    position="relative"
+                                >
+                                    <Text color="brand.secondaryBlue" fontSize="16px" fontWeight="500">{item.name}</Text>
+                                    {(quantities[idx] || 0) > 0 && (
                                         <Image
-                                            src={getServiceIcon(item.name)}
-                                            alt={item.name}
-                                            width="40px"
-                                            height="40px"
+                                            src="/assets/images/AddButton.svg"
+                                            alt="Selected"
+                                            position="absolute"
+                                            top="8px"
+                                            right="4px"
+                                            width="24px"
+                                            height="24px"
                                         />
-                                        <Flex gap="xs" alignItems="center">
-                                            <Text color="gray.900" fontSize="16px" fontWeight="400">
-                                                ${typeof item.price === 'number' ? item.price.toFixed(2) : item.price}
-                                            </Text>
-                                            <Text color="gray.900" fontSize="12px" fontWeight="300">
-                                                / {item.unit}
-                                            </Text>
-                                        </Flex>
+                                    )}
 
-                                        {getItemType(item) === 'unit' ? (
-                                            <Flex
-                                                borderWidth="1px"
-                                                borderRadius="md"
-                                                borderColor="gray.200"
-                                                overflow="hidden"
-                                                alignItems="center"
-                                            >
-                                                <Button
-                                                    onClick={() => decrementQuantity(idx)}
-                                                    variant="unstyled"
-                                                    minW="42px"
-                                                    h="42px"
-                                                    borderRadius="0"
-                                                    borderRight="1px solid"
-                                                    borderColor="gray.100"
-                                                    fontSize="17px"
-                                                >
-                                                    −
-                                                </Button>
-                                                <Center width="46px" flex={1}>
-                                                    <Text>{quantities[idx] || 0}</Text>
-                                                </Center>
-                                                <Button
-                                                    onClick={() => incrementQuantity(idx)}
-                                                    variant="unstyled"
-                                                    minW="42px"
-                                                    h="42px"
-                                                    borderRadius="0"
-                                                    borderLeft="1px solid"
-                                                    borderColor="gray.100"
-                                                    fontSize="17px"
-                                                >
-                                                    +
-                                                </Button>
-                                            </Flex>
-                                        ) : (
-                                            <Button
-                                                onClick={() => {
-                                                    if (quantities[idx] && quantities[idx] > 0) {
-                                                        // Если услуга уже выбрана, удаляем ее
-                                                        setQuantities(prev => ({ ...prev, [idx]: 0 }));
-                                                    } else {
-                                                        // Иначе добавляем
-                                                        incrementQuantity(idx);
-                                                    }
-                                                }}
-                                                variant="outline"
-                                                borderWidth="1px"
-                                                borderColor={quantities[idx] && quantities[idx] > 0 ? "#007A7B" : "gray.200"}
-                                                borderRadius="md"
-                                                width="100%"
-                                                height="42px"
-                                                display="flex"
-                                                justifyContent="center"
-                                                alignItems="center"
-                                                gap="4px"
-                                                px="md"
-                                                py="10px"
-                                                bg={quantities[idx] && quantities[idx] > 0 ? "#E5F2F2" : "white"}
-                                            >
-                                                <Text fontSize="14px" fontWeight="400">
-                                                    {quantities[idx] && quantities[idx] > 0 ? "Remove service" : "Add service"}
-                                                </Text>
-                                                <Box display="flex" justifyContent="center" alignItems="center" textAlign="center" p='10px' as="span" fontSize="17px" fontWeight="400">
-                                                    {quantities[idx] && quantities[idx] > 0 ? "−" : "+"}
-                                                </Box>
-                                            </Button>
-                                        )}
+                                    <Image
+                                        src={getServiceIcon(item.name)}
+                                        alt={item.name}
+                                        width="40px"
+                                        height="40px"
+                                    />
+                                    <Flex gap="xs" alignItems="center">
+                                        <Text color="gray.900" fontSize="16px" fontWeight="400">
+                                            ${typeof item.price === 'number' ? item.price.toFixed(2) : item.price}
+                                        </Text>
+                                        <Text color="gray.900" fontSize="12px" fontWeight="300">
+                                            / {item.unit}
+                                        </Text>
                                     </Flex>
-                                ))}
-                            </SimpleGrid>
-                        </>
+
+                                    {getItemType(item) === 'unit' ? (
+                                        <Flex
+                                            borderWidth="1px"
+                                            borderRadius="md"
+                                            borderColor="gray.200"
+                                            overflow="hidden"
+                                            alignItems="center"
+                                        >
+                                            <Button
+                                                onClick={() => decrementQuantity(idx)}
+                                                variant="unstyled"
+                                                minW="42px"
+                                                h="42px"
+                                                borderRadius="0"
+                                                borderRight="1px solid"
+                                                borderColor="gray.100"
+                                                fontSize="17px"
+                                            >
+                                                −
+                                            </Button>
+                                            <Center width="46px" flex={1}>
+                                                <Text>{quantities[idx] || 0}</Text>
+                                            </Center>
+                                            <Button
+                                                onClick={() => incrementQuantity(idx)}
+                                                variant="unstyled"
+                                                minW="42px"
+                                                h="42px"
+                                                borderRadius="0"
+                                                borderLeft="1px solid"
+                                                borderColor="gray.100"
+                                                fontSize="17px"
+                                            >
+                                                +
+                                            </Button>
+                                        </Flex>
+                                    ) : (
+                                        <Button
+                                            onClick={() => {
+                                                if (quantities[idx] && quantities[idx] > 0) {
+                                                    // Если услуга уже выбрана, удаляем ее
+                                                    setQuantities(prev => ({ ...prev, [idx]: 0 }));
+                                                } else {
+                                                    // Иначе добавляем
+                                                    incrementQuantity(idx);
+                                                }
+                                            }}
+                                            variant="outline"
+                                            borderWidth="1px"
+                                            borderColor={quantities[idx] && quantities[idx] > 0 ? "#007A7B" : "gray.200"}
+                                            borderRadius="md"
+                                            width="100%"
+                                            height="42px"
+                                            display="flex"
+                                            justifyContent="center"
+                                            alignItems="center"
+                                            gap="4px"
+                                            px="md"
+                                            py="10px"
+                                            bg={quantities[idx] && quantities[idx] > 0 ? "#E5F2F2" : "white"}
+                                        >
+                                            <Text fontSize="14px" fontWeight="400">
+                                                {quantities[idx] && quantities[idx] > 0 ? "Remove service" : "Add service"}
+                                            </Text>
+                                            <Box display="flex" justifyContent="center" alignItems="center" textAlign="center" p='10px' as="span" fontSize="17px" fontWeight="400">
+                                                {quantities[idx] && quantities[idx] > 0 ? "−" : "+"}
+                                            </Box>
+                                        </Button>
+                                    )}
+                                </Flex>
+                            ))}
+                        </SimpleGrid>
                     )}
                 </ModalBody>
 
-                {totalSelectedServices > 0 && (
+                {Object.keys(quantities).length > 0 && (
                     <ModalFooter
                         position="relative"
                         width="100%"
@@ -608,4 +556,4 @@ const ServicePopup: React.FC<ServicePopupProps> = ({
     );
 };
 
-export default ServicePopup;
+export default ServiceAdd;

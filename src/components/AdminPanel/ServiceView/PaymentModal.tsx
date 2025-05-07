@@ -78,7 +78,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           <Text fontSize='16px' fontWeight='500' color='basic.grey900'>${total.toFixed(2)}</Text>
         </Flex>
       </ModalBody>
-      <ModalFooter display='flex' justifyContent='space-between' gap='md'>
+      <ModalFooter p='0' display='flex' justifyContent='space-between' gap='md'>
         <Button
           flex='1'
           h="50px"

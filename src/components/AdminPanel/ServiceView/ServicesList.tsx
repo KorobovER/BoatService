@@ -475,7 +475,10 @@ const ServicesList: React.FC<ServicesListProps> = ({
                         border: '1px solid',
                         borderColor: 'system.errorRedNew',
                         bg: 'transparent',
-                        color: 'basic.grey900'
+                        color: 'basic.grey900',
+                        borderRadius: 'full',
+                        w: '149px',
+                        h: '32px',
                     }
                 };
             case 'en-route':
@@ -486,18 +489,26 @@ const ServicesList: React.FC<ServicesListProps> = ({
                         border: '1px solid',
                         borderColor: 'brand.primaryOrange',
                         bg: 'transparent',
-                        color: 'basic.grey900'
+                        color: 'basic.grey900',
+                        borderRadius: 'full',
+                        w: '149px',
+                        h: '32px',
                     }
                 };
             case 'completed':
                 return {
-                    text: `$${totalPrice.toFixed(2)}`,
+                    text: `$${totalPrice.toFixed(2)} Total`,
                     action: '',
                     styles: {
                         border: 'none',
                         borderColor: 'transparent',
-                        bg: 'system.successGreen',
-                        color: 'white'
+                        bg: 'bg.success',
+                        color: 'system.successGreen',
+                        h: '46px',
+                        px: 'sm',
+                        py: 'xs',
+                        borderRadius: '8px',
+                        w: 'fit-content',
                     }
                 };
             default:
@@ -600,12 +611,12 @@ const ServicesList: React.FC<ServicesListProps> = ({
                             <Text fontSize="14px" fontWeight="400" color='basic.grey900'>${subService.price} / {subService.unit}</Text>
                         </Flex>
                         <Button
-                            w='149px'
-                            h='32px'
+                            w={buttonConfig.styles.w}
+                            h={buttonConfig.styles.h}
                             px='md'
                             py='10px'
                             variant="unstyled"
-                            borderRadius='var(--chakra-space-full)'
+                            borderRadius={buttonConfig.styles.borderRadius}
                             border={buttonConfig.styles.border}
                             borderColor={buttonConfig.styles.borderColor}
                             bg={buttonConfig.styles.bg}

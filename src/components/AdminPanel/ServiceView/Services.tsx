@@ -6,6 +6,7 @@ import { useMarina } from '../../../context/MarinaContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { MarinasService, ReservationsService } from '../../../client/services';
 import ServicesList from './ServicesList';
+import PaymentModal from './PaymentModal';
 
 // Иконки для разных типов услуг
 export const SERVICE_ICONS = {
@@ -94,6 +95,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     const [isPaymentDetailsOpen, setIsPaymentDetailsOpen] = useState(false);
     const [localReservation, setLocalReservation] = useState(reservation);
     const queryClient = useQueryClient();
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
     // Add query to fetch reservation data
     const { data: reservationData } = useQuery({
@@ -118,6 +120,37 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
         enabled: !!selectedMarina // Only fetch when marina is selected
     });
 
+    // Получить выполненные сервисы
+    const completedServices = useMemo(() => {
+        const currentReservation = localReservation || reservation;
+        if (!currentReservation?.service_requests) return [];
+        return currentReservation.service_requests
+            .filter(service => service.status === 'completed')
+            .flatMap(service => service.services.map(item => ({
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity
+            })));
+    }, [localReservation, reservation]);
+
+    // Сумма выполненных сервисов
+    const completedServicesTotal = useMemo(() => {
+        return completedServices.reduce((sum, s) => sum + s.price * s.quantity, 0);
+    }, [completedServices]);
+
+    // Комиссия 7.5%
+    const serviceFee = useMemo(() => Number((completedServicesTotal * 0.075).toFixed(2)), [completedServicesTotal]);
+    // Налоги (пока 0)
+    const taxes = 0;
+    // Итоговая сумма
+    const total = useMemo(() => Number((completedServicesTotal + serviceFee + taxes).toFixed(2)), [completedServicesTotal, serviceFee, taxes]);
+
+    // Обработчик оплаты
+    const handleCharge = () => {
+        // Здесь будет логика оплаты
+        setIsPaymentModalOpen(false);
+        // Можно добавить уведомление или обновление данных
+    };
 
     // Check if there are any completed services
     const hasCompletedServices = useMemo(() => {
@@ -483,6 +516,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                                     py={6}
                                     fontWeight="500"
                                     _hover={{ bg: "teal.400" }}
+                                    onClick={() => setIsPaymentModalOpen(true)}
                                 >
                                     <Flex gap="4px" fontSize="16px" fontWeight="400" color="white">CHARGE<Text fontWeight="700">${calculateTotalForCompleted()}</Text> NOW <Flex align="end" fontSize="12px">(Completed services ONLY)</Flex></Flex>
                                 </Button>
@@ -503,6 +537,17 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                     rowId={rowId}
                 />
             )}
+
+            {/* Payment Modal */}
+            <PaymentModal
+                isOpen={isPaymentModalOpen}
+                onClose={() => setIsPaymentModalOpen(false)}
+                services={completedServices}
+                serviceFee={serviceFee}
+                taxes={taxes}
+                total={total}
+                onCharge={handleCharge}
+            />
         </>
     );
 };

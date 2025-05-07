@@ -56,7 +56,7 @@ const ServiceCancel: React.FC<ServiceCancelProps> = ({
                     <Flex direction="column" align="center" gap='2xl'>
                         <Flex direction="column" align="center" gap='sm' w="100%">
                             <Box bg='system.errorRedNew' w='90px' h='90px' borderRadius='full' display='flex' alignItems='center' justifyContent='center'>
-                                <Image w='90px' h='90px' src='assets/images/alert-icon-big.svg'></Image>
+                                <Image w='90px' h='90px' src='assets/images/alert-icon-red.svg'></Image>
                             </Box>
                             <Flex border="1px solid" borderColor="system.errorRedNew" bg="bg.error" borderRadius="20px" w="100%" p='10px 20px' direction="column" justifyContent="center" gap='xs'>
                                 <Text fontSize="16px" color="system.errorRedNew" fontWeight="400" textAlign="start">

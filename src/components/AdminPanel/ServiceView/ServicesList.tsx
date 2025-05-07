@@ -8,6 +8,7 @@ import { ReservationsService } from '../../../client/services';
 import { useQueryClient } from '@tanstack/react-query';
 import QuantityInputModal from './QuantityInputModal';
 import ServiceCancel from './ServiceCancel';
+import ServiceEdit from './ServiceEdit';
 
 interface ServicesListProps {
     reservation: ReservationExtenstion;
@@ -40,6 +41,9 @@ const ServicesList: React.FC<ServicesListProps> = ({
     const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
     const [cancelLoading, setCancelLoading] = useState(false);
     const [cancelService, setCancelService] = useState<ServiceOnReservationPublic | null>(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editService, setEditService] = useState<ServiceOnReservationPublic | null>(null);
+    const [editLoading, setEditLoading] = useState(false);
     const toast = useToast();
     const queryClient = useQueryClient();
 
@@ -240,6 +244,13 @@ const ServicesList: React.FC<ServicesListProps> = ({
                         setIsCancelModalOpen(true);
                     }
                     return;
+                case 'edit-service':
+                    const serviceEdit = localReservation.service_requests.find(s => s.service_reservation_id === serviceId);
+                    if (serviceEdit) {
+                        setEditService(serviceEdit);
+                        setIsEditModalOpen(true);
+                    }
+                    return;
                 // For other actions like 'edit-service', 
                 // we'd need different API calls or UI components
             }
@@ -345,6 +356,62 @@ const ServicesList: React.FC<ServicesListProps> = ({
             setCancelLoading(false);
             setIsCancelModalOpen(false);
             setCancelService(null);
+        }
+    };
+
+    const handleEditUpdate = async (quantity: number) => {
+        if (!editService) return;
+        setEditLoading(true);
+        try {
+            // Обновляем локальный стейт для UI
+            const updatedReservation = { ...localReservation };
+            updatedReservation.service_requests = localReservation.service_requests.map(service => {
+                if (service.service_reservation_id === editService.service_reservation_id) {
+                    return {
+                        ...service,
+                        services: service.services.map((subService, idx) =>
+                            idx === 0 ? { ...subService, quantity } : subService
+                        )
+                    };
+                }
+                return service;
+            });
+            setLocalReservation(updatedReservation);
+            // Обновляем на сервере
+            await ReservationsService.updateReservationService({
+                reservationId: localReservation.reservation_id,
+                serviceId: editService.service_reservation_id,
+                requestBody: {
+                    requested_date: editService.requested_date,
+                    special_instructions: editService.special_instructions,
+                    services: editService.services.map((subService, idx) =>
+                        idx === 0 ? { ...subService, quantity } : subService
+                    )
+                }
+            });
+            toast({
+                title: 'Service updated',
+                description: 'Service quantity has been updated.',
+                status: 'success',
+                duration: 3000,
+                isClosable: true,
+            });
+            if (onServiceStatusChange) {
+                onServiceStatusChange(updatedReservation);
+            }
+        } catch (error) {
+            setLocalReservation(reservation);
+            toast({
+                title: 'Update failed',
+                description: 'There was an error updating the service quantity',
+                status: 'error',
+                duration: 3000,
+                isClosable: true,
+            });
+        } finally {
+            setEditLoading(false);
+            setIsEditModalOpen(false);
+            setEditService(null);
         }
     };
 
@@ -723,6 +790,22 @@ const ServicesList: React.FC<ServicesListProps> = ({
                         iconUrl: getServiceIcon(cancelService.services[0]?.name || '')
                     }}
                     loading={cancelLoading}
+                />
+            )}
+
+            {editService && (
+                <ServiceEdit
+                    isOpen={isEditModalOpen}
+                    onClose={() => { setIsEditModalOpen(false); setEditService(null); }}
+                    onUpdate={handleEditUpdate}
+                    service={{
+                        name: editService.services[0]?.name || '',
+                        price: editService.services[0]?.price || 0,
+                        unit: editService.services[0]?.unit || '',
+                        iconUrl: getServiceIcon(editService.services[0]?.name || ''),
+                        quantity: editService.services[0]?.quantity || 1
+                    }}
+                    loading={editLoading}
                 />
             )}
         </>

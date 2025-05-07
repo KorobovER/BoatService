@@ -48,7 +48,7 @@ const ServiceCancel: React.FC<ServiceCancelProps> = ({
     return (
         <Modal isOpen={isOpen} onClose={handleClose} isCentered>
             <ModalOverlay />
-            <ModalContent padding='16px' borderRadius="md" maxW="600px">
+            <ModalContent padding='16px' borderRadius="12px" maxW="600px">
                 <Flex alignItems='center' justifyContent='end' height='28px'>
                     <ModalCloseButton position='static' variant='unstyled' w="42px" h="42px" />
                 </Flex>
@@ -89,35 +89,44 @@ const ServiceCancel: React.FC<ServiceCancelProps> = ({
                             </Box>
                         </Flex>
 
-                        <Box
-                            w="100%"
-                            border="1px solid"
-                            borderColor="gray.200"
-                            borderRadius="20px"
-                            bg="white"
-                            mb="0"
-                            p='4px 10px 4px 24px'
-                        >
-                            <Text fontWeight="300" fontSize="12px" color="gray.900">
+                        <div style={{ position: 'relative', width: '100%', marginBottom: '0' }}>
+                            <Text
+                                as="label"
+                                htmlFor="cancel-reason-textarea"
+                                position="absolute"
+                                left="24px"
+                                top="6px"
+                                fontSize="12px"
+                                color="gray.500"
+                                fontWeight={400}
+                                pointerEvents="none"
+                                bg="white"
+                                px="2px"
+                                zIndex={2}
+                            >
                                 Reason for Cancellation
                             </Text>
                             <Textarea
-                                placeholder={
-                                    "Please provide a short explanation for why this service is being canceled.\nThis message will be sent to the boater to help avoid confusion"
-                                }
+                                id="cancel-reason-textarea"
                                 value={reason}
                                 onChange={e => setReason(e.target.value)}
-                                border="none"
-                                resize="none"
-                                fontSize="16px"
-                                color="gray.600"
-                                _placeholder={{ fontSize: '16px', color: 'gray.600', fontWeight: 300 }}
-                                minH="60px"
-                                p="0"
+                                border="1px solid"
+                                borderColor="gray.200"
+                                borderRadius="20px"
                                 bg="white"
+                                color="gray.600"
+                                fontSize="16px"
+                                fontWeight={300}
+                                minH="90px"
+                                p="20px 24px 20px 24px"
+                                w="100%"
+                                resize="none"
                                 boxShadow="none"
+                                mb="0"
+                                placeholder="Please provide a short explanation for why this service is being canceled. This message will be sent to the boater to help avoid confusion"
+                                _placeholder={{ fontSize: '16px', color: 'gray.600', fontWeight: 300 }}
                             />
-                        </Box>
+                        </div>
 
                         <Flex gap={4} w="100%" mt={4}>
                             <Button

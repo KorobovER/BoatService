@@ -124,6 +124,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     renderBoatCell,
     currentDate,
     onReservationClick,
+    isMonthView,
 }) => {
     const { selectedMarina } = useMarina();
     const [reservations, setReservations] = useState<ReservationExtenstion[]>([]);
@@ -640,6 +641,84 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 const lastHalfDay = (halfDayIndex + halfDayColspan - 1) % 2 === 0; // Последняя часть - AM
                                 needsRightRadius = (isLastDayOfWeek && !endsAfterVisiblePeriod) ||
                                                  (isEndDay && ((!lastHalfDay) || boatMatch.endsInFirstHalf));
+
+                                // Для месячного просмотра – прямые края на границах месяца
+                                if (isMonthView) {
+                                    // Если это первый день месяца и резервация начинается в предыдущем месяце - прямой левый край
+                                    if (isFirstDayOfWeek) {
+                                        // Получаем день месяца для первого дня в видимом периоде
+                                        const [, , firstDayOfMonth] = days[0].split('-').map(Number);
+                                        
+                                        // Если это первый день месяца (1-е число) и резервация началась раньше
+                                        if (firstDayOfMonth === 1 && startsBeforeVisiblePeriod) {
+                                            needsLeftRadius = false;
+                                            console.log('Обнаружена резервация, начавшаяся в предыдущем месяце:', boatMatch);
+                                        }
+                                    }
+                                    
+                                    // Если это последний день месяца и резервация продолжается в следующем месяце - прямой правый край
+                                    if (isLastDayOfWeek) {
+                                        const [year, month, lastDayOfMonth] = days[days.length - 1].split('-').map(Number);
+                                        
+                                        // Корректное определение последнего дня текущего месяца
+                                        // Месяцы в JavaScript индексируются с 0, поэтому для апреля используем month=4
+                                        const lastDayInMonth = new Date(year, month, 0).getDate();
+                                        
+                                        console.log('Проверка последнего дня месяца:', {
+                                            год: year,
+                                            месяц: month,
+                                            текущийДень: lastDayOfMonth,
+                                            последнийДеньМесяца: lastDayInMonth,
+                                            продолжаетсяДальше: endsAfterVisiblePeriod,
+                                            лодка: boatMatch.name,
+                                            начало: boatMatch.startDay,
+                                            конец: boatMatch.endDay
+                                        });
+                                        
+                                        // Для апреля (месяц 4 в нашем случае) последний день 30
+                                        if (lastDayOfMonth === lastDayInMonth && endsAfterVisiblePeriod) {
+                                            needsRightRadius = false;
+                                            console.log('Обнаружена резервация, продолжающаяся в следующем месяце:', boatMatch);
+                                        }
+                                    }
+                                }
+
+                                // Отладка для конкретного случая апрель-май
+                                const [startYear, startMonth, startDay] = boatMatch.startDay.split('-').map(Number);
+                                const [endYear, endMonth, endDay] = boatMatch.endDay.split('-').map(Number);
+
+                                // Специальная проверка для переходов между месяцами
+                                const isAprilToMayTransition = (startMonth === 4 && startYear === endYear && endMonth === 5);
+                                if (isAprilToMayTransition) {
+                                    console.log('Найден переход апрель-май:', {
+                                        лодка: boatMatch.name,
+                                        начало: boatMatch.startDay,
+                                        конец: boatMatch.endDay,
+                                        текущийДень: day,
+                                        текущийИндекс: dayIndex,
+                                        первыйДеньНедели: isFirstDayOfWeek,
+                                        последнийДеньНедели: isLastDayOfWeek,
+                                        начинаетсяРаньше: startsBeforeVisiblePeriod,
+                                        заканчиваетсяПозже: endsAfterVisiblePeriod,
+                                        левыйРадиус: needsLeftRadius,
+                                        правыйРадиус: needsRightRadius
+                                    });
+                                }
+
+                                // Исправление для случая апрель-май (последний день апреля и первый день мая)
+                                if (isMonthView) {
+                                    // Если текущий день - 30 апреля и резервация продолжается в мае
+                                    if (day.endsWith('-04-30') && endMonth === 5) {
+                                        needsRightRadius = false;
+                                        console.log('Применено специальное правило для 30 апреля:', boatMatch);
+                                    }
+                                    
+                                    // Если текущий день - 1 мая и резервация началась в апреле
+                                    if (day.endsWith('-05-01') && startMonth === 4) {
+                                        needsLeftRadius = false;
+                                        console.log('Применено специальное правило для 1 мая:', boatMatch);
+                                    }
+                                }
 
                                 // Определяем итоговый borderRadius
                                 let borderRadius = "0";

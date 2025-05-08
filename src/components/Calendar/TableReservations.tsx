@@ -20,8 +20,8 @@ import BolaCell from "/assets/images/bola-cell.svg";
 import { ReservationsService, MarinasService } from '../../client';
 import { useMarina } from '../../context/MarinaContext';
 import PopupFreeCell from './PopupFreeCell';
-import PopupReserved from '../AdminPanel/ServiceView/Services';
 import { ReservationExtenstion } from '../ReservationExtenstion';
+import PopupReserved from '../ServicesPanel/Services';
 
 interface Row {
     id: string;

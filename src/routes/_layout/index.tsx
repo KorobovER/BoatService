@@ -5,8 +5,8 @@ import TableSwitch from '../../components/Calendar/TableSwitch';
 import { useEffect, useState, useRef } from 'react';
 import TableDay from '../../components/Calendar/TableDay';
 import TableMonth from '../../components/Calendar/TableMonth';
-import PopupReserved from '../../components/AdminPanel/ServiceView/Services';
 import { ReservationExtenstion } from "../../components/ReservationExtenstion";
+import PopupReserved from "../../components/ServicesPanel/Services";
 
 type TableView = 'month' | 'week' | 'day';
 

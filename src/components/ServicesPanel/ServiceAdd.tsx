@@ -15,8 +15,8 @@ import {
     Center,
     useToast
 } from '@chakra-ui/react';
-import { MarinaServicePublic, ServiceOnReservationCreate, SubServiceRequest, ReservationPublic} from '../../../client/models';
-import { ReservationsService } from '../../../client/services';
+import { MarinaServicePublic, ServiceOnReservationCreate, SubServiceRequest, ReservationPublic} from '../../client/models';
+import { ReservationsService } from '../../client/services';
 import { getServiceIcon } from './Services';
 import { useQueryClient } from '@tanstack/react-query';
 

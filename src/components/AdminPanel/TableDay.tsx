@@ -341,7 +341,7 @@ const TableDay: React.FC<TableDayProps> = ({
                                 bg="white"
                                 zIndex={2}
                             />
-                            {hours.map((hour) => (
+                            {hours.map((hour, hourIndex) => (
                                 <Th
                                     key={`hour-${hour}`}
                                     p={1}
@@ -350,6 +350,7 @@ const TableDay: React.FC<TableDayProps> = ({
                                     fontWeight="normal"
                                     position="relative"
                                     colSpan={2} // Each hour spans 2 columns (30-min intervals)
+                                    borderLeft={hourIndex > 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
                                 >
                                     <Text color="basic.grey600" fontSize="14px" fontWeight="500">{hour}</Text>
                                 </Th>
@@ -502,8 +503,10 @@ const TableDay: React.FC<TableDayProps> = ({
                                             }}
                                             cursor="pointer"
                                             onClick={() => handleCellClick(row.id, hour, halfHour)}
-                                            borderRight={!isFirstHalf || hourIndex < hours.length - 1 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
+                                            borderRight={hourIndex < hours.length - 1 && !isFirstHalf && (hourIndex + 1) % 1 === 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
+                                            borderLeft={isFirstHalf && hourIndex > 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
                                             borderTop="1px solid var(--chakra-colors-basic-grey100)"
+                                            bg={hourIndex % 2 === 0 ? "white" : "basic.grey50"}
                                         >
                                             <Box height="100%" width="100%" display="flex" alignItems="center" justifyContent="center" />
                                         </Td>
@@ -644,13 +647,15 @@ const TableDay: React.FC<TableDayProps> = ({
                                             onClick={() => handleCellClick(row.id, hour, halfHour, boatForHalfHour)}
                                             cursor="pointer"
                                             className={selectedCell?.reservation?.reservation_id === boatForHalfHour.id ? 'selected-cell' : ''}
-                                            borderRight={hourIndex < hours.length - 1 && (halfHourIndex + halfHourColspan) % 2 === 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
+                                            borderRight={hourIndex < hours.length - 1 && (hourIndex + 1) % 1 === 0 && (halfHourIndex + halfHourColspan) % 2 === 0 ? "2px solid var(--chakra-colors-basic-grey200)" : "none"}
+                                            borderLeft={isFirstHalf && hourIndex > 0 ? "2px solid var(--chakra-colors-basic-grey200)" : "none"}
                                             borderTop="1px solid var(--chakra-colors-basic-grey100)"
                                             data-boat-id={boatForHalfHour.id}
                                             data-boat-name={boatForHalfHour.name}
                                             data-boat-code={boatForHalfHour.code}
                                             data-day={currentDate}
                                             data-hour={hour}
+                                            bg={hourIndex % 2 === 0 ? "white" : "basic.grey50"}
                                             sx={{
                                                 overflow: "hidden",
                                             }}

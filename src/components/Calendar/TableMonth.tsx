@@ -1,8 +1,9 @@
 // TableMonth.tsx
 import React from 'react';
 import { Box, Text, Flex} from '@chakra-ui/react';
-import TableReservations, { ReservationExtenstion } from './TableReservations';
+import TableReservations from '../Calendar/TableReservations';
 import BoatCell from './BoatCell';
+import { ReservationExtenstion } from '../ReservationExtenstion';
 
 interface TableMonthProps {
     currentMonthDate: string;

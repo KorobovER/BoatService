@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, Image, Flex, Button, Link } from '@chakra-ui/react';
-import { ReservationExtenstion } from './TableReservations';
+import { ReservationExtenstion } from '../ReservationExtenstion';
 
 interface HoverReservationProps {
     reservation: ReservationExtenstion;

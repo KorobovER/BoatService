@@ -1,8 +1,9 @@
 // TableWeek.tsx
 import React, { useMemo } from 'react';
 import { Box, Text, Spinner, Center } from '@chakra-ui/react';
-import TableReservations, { ReservationExtenstion } from './TableReservations';
+import TableReservations from './TableReservations';
 import BoatCell from './BoatCell';
+import { ReservationExtenstion } from '../ReservationExtenstion';
 
 interface TableWeekProps {
     currentWeekStart: string;

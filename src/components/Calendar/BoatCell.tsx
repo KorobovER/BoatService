@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Text, Image, Flex, Popover, PopoverTrigger, PopoverContent, PopoverBody } from '@chakra-ui/react';
 import HoverReservation from './HoverReservation';
-import { ReservationExtenstion } from './TableReservations';
+import { ReservationExtenstion } from '../ReservationExtenstion';
 
 interface BoatCellProps {
     reservation: ReservationExtenstion;

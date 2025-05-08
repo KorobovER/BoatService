@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Box, Text, Image, Flex, Button, useDisclosure, Collapse, Icon } from '@chakra-ui/react';
-import { ReservationExtenstion } from '../TableReservations';
 import ServiceAdd from './ServiceAdd';
 import { useMarina } from '../../../context/MarinaContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { MarinasService, ReservationsService } from '../../../client/services';
 import ServicesList from './ServicesList';
 import PaymentModal from './PaymentModal';
+import { ReservationExtenstion } from '../../ReservationExtenstion';
 
 // Иконки для разных типов услуг
 export const SERVICE_ICONS = {

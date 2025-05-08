@@ -17,36 +17,17 @@ import {
     Button
 } from '@chakra-ui/react';
 import BolaCell from "/assets/images/bola-cell.svg";
-import { ReservationsService, MarinasService, ReservationPublic } from '../../client';
+import { ReservationsService, MarinasService } from '../../client';
 import { useMarina } from '../../context/MarinaContext';
 import PopupFreeCell from './PopupFreeCell';
-import PopupReserved from './ServiceView/Services';
+import PopupReserved from '../AdminPanel/ServiceView/Services';
+import { ReservationExtenstion } from '../ReservationExtenstion';
 
 interface Row {
     id: string;
     label: string;
 }
 
-export type ReservationExtenstion = ReservationPublic & {
-    startDay: string;
-    endDay: string;
-    startTime?: string;
-    endTime?: string;
-    rawStartTime: string;
-    rawEndTime: string;
-    startsInSecondHalf: boolean;
-    endsInFirstHalf: boolean;
-    selectedTimeOfDay?: 'AM' | 'PM';
-    displayTime?: string;
-    startDateObj: Date;
-    endDateObj: Date;
-    startsInSecondHalfLocal: boolean;
-    endsInFirstHalfLocal: boolean;
-    startsBefore?: boolean;
-    endsAfter?: boolean;
-    effectiveStartDate?: Date;
-    effectiveEndDate?: Date;
-  }
 
 
 interface TableReservationsProps {

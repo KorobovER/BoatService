@@ -1,7 +1,7 @@
 import { Flex, Text, Button, Image, useDisclosure } from '@chakra-ui/react';
 import { useMarina } from '../../../context/MarinaContext';
 import ServiceAdd from './ServiceAdd';
-import { ReservationExtenstion } from '../TableReservations';
+import { ReservationExtenstion } from '../../ReservationExtenstion';
 
 
 interface NoServiceProps {

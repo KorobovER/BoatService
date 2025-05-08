@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { Box, Flex} from '@chakra-ui/react';
-import TableWeek from '../../components/AdminPanel/TableWeek';
-import TableSwitch from '../../components/AdminPanel/TableSwitch';
+import TableWeek from '../../components/Calendar/TableWeek';
+import TableSwitch from '../../components/Calendar/TableSwitch';
 import { useEffect, useState, useRef } from 'react';
-import TableDay from '../../components/AdminPanel/TableDay';
-import TableMonth from '../../components/AdminPanel/TableMonth';
+import TableDay from '../../components/Calendar/TableDay';
+import TableMonth from '../../components/Calendar/TableMonth';
 import PopupReserved from '../../components/AdminPanel/ServiceView/Services';
-import { ReservationExtenstion } from "../../components/AdminPanel/TableReservations";
+import { ReservationExtenstion } from "../../components/ReservationExtenstion";
 
 type TableView = 'month' | 'week' | 'day';
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Text, Image, Flex, Button, Menu, MenuButton, MenuItem, MenuList, useToast} from '@chakra-ui/react';
 import NoService from './NoService';
-import { ReservationExtenstion } from '../TableReservations';
+import { ReservationExtenstion } from '../../ReservationExtenstion';
 import { ServiceOnReservationPublic, ServiceRequestStatus } from '../../../client/models';
 import { getServiceIcon } from './Services';
 import { ReservationsService } from '../../../client/services';

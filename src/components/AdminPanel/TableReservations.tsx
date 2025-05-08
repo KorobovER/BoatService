@@ -684,8 +684,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 }
 
                                 // Debug for the specific case of April-May
-                                const [startYear, startMonth, startDay] = boatMatch.startDay.split('-').map(Number);
-                                const [endYear, endMonth, endDay] = boatMatch.endDay.split('-').map(Number);
+                                const [startYear, startMonth] = boatMatch.startDay.split('-').map(Number);
+                                const [endYear, endMonth] = boatMatch.endDay.split('-').map(Number);
 
                                 // Special check for transitions between months
                                 const isAprilToMayTransition = (startMonth === 4 && startYear === endYear && endMonth === 5);

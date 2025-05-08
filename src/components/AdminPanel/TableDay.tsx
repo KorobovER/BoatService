@@ -150,14 +150,18 @@ const TableDay: React.FC<TableDayProps> = ({
     useEffect(() => {
         if (reservationsData?.data && currentDate) {
             try {
+                console.log('Raw reservations data:', reservationsData.data);
 
                 // Parse current date for day boundaries
                 const [year, month, day] = currentDate.split('-').map(Number);
-
-                // Create Date objects for current day boundaries using local time (not UTC)
                 const currentDayStart = new Date(year, month - 1, day, 0, 0, 0);
                 const currentDayEnd = new Date(year, month - 1, day, 23, 59, 59, 999);
 
+                console.log('Current day boundaries:', {
+                    currentDate,
+                    currentDayStart,
+                    currentDayEnd
+                });
 
                 // Filter reservations that overlap with the current day
                 const apiBoats = reservationsData.data
@@ -167,14 +171,28 @@ const TableDay: React.FC<TableDayProps> = ({
                             const startDate = new Date(reservation.start_date.endsWith('Z') ? reservation.start_date : reservation.start_date + 'Z');
                             const endDate = new Date(reservation.end_date.endsWith('Z') ? reservation.end_date : reservation.end_date + 'Z');
 
+                            console.log('Processing reservation:', {
+                                id: reservation.reservation_id,
+                                startDate,
+                                endDate,
+                                mooringBallId: reservation.mooring_ball_id
+                            });
+
                             // Check if reservation overlaps with current day
-                            // A reservation overlaps with the day if:
-                            // 1. It starts before the end of the day AND
-                            // 2. It ends after the start of the day
                             const overlapsWithDay = (
                                 startDate <= currentDayEnd &&
                                 endDate >= currentDayStart
                             );
+
+                            console.log('Reservation overlap check:', {
+                                id: reservation.reservation_id,
+                                overlapsWithDay,
+                                startDate,
+                                endDate,
+                                currentDayStart,
+                                currentDayEnd
+                            });
+
                             return overlapsWithDay;
                         } catch (error) {
                             console.error('Error checking reservation date:', error);
@@ -188,10 +206,16 @@ const TableDay: React.FC<TableDayProps> = ({
                             const endDate = new Date(reservation.end_date.endsWith('Z') ? reservation.end_date : reservation.end_date + 'Z');
 
                             // For the current day view, determine effective start and end times
-                            // If the reservation starts before this day, use the start of the day
-                            // If the reservation ends after this day, use the end of the day
                             const effectiveStartTime = startDate < currentDayStart ? currentDayStart : startDate;
                             const effectiveEndTime = endDate > currentDayEnd ? currentDayEnd : endDate;
+
+                            console.log('Processing effective times:', {
+                                id: reservation.reservation_id,
+                                startDate,
+                                endDate,
+                                effectiveStartTime,
+                                effectiveEndTime
+                            });
 
                             // Check if this reservation crosses day boundaries
                             const startsBefore = startDate < currentDayStart;
@@ -202,16 +226,14 @@ const TableDay: React.FC<TableDayProps> = ({
                                 return num < 10 ? `0${num}` : `${num}`;
                             };
 
-                            // Then update the rawStartTime and rawEndTime generation:
-                            // Format times for raw calculations (ensuring they're in 24h format with leading zeros)
+                            // Format times for raw calculations
                             const rawStartTime = `${paddingZero(effectiveStartTime.getHours())}:${paddingZero(effectiveStartTime.getMinutes())}`;
                             const rawEndTime = `${paddingZero(effectiveEndTime.getHours())}:${paddingZero(effectiveEndTime.getMinutes())}`;
 
-                            return {
+                            const processedReservation = {
                                 ...reservation,
                                 startDay: currentDate,
                                 endDay: currentDate,
-                                // Format times for display
                                 startTime: effectiveStartTime.toLocaleTimeString('en-US', {
                                     hour: '2-digit',
                                     minute: '2-digit',
@@ -222,30 +244,31 @@ const TableDay: React.FC<TableDayProps> = ({
                                     minute: '2-digit',
                                     hour12: true
                                 }),
-                                // Raw times for cell calculations
                                 rawStartTime,
                                 rawEndTime,
-                                // Store original dates (unclamped) for hover display
                                 startDateObj: startDate,
                                 endDateObj: endDate,
-                                // Store effective dates (clamped to day) for cell display
                                 effectiveStartDate: effectiveStartTime,
                                 effectiveEndDate: effectiveEndTime,
-                                // Calculate half-hour flags based on effective times
                                 startsInSecondHalf: effectiveStartTime.getMinutes() >= 30,
                                 endsInFirstHalf: effectiveEndTime.getMinutes() < 30,
                                 startsInSecondHalfLocal: effectiveStartTime.getMinutes() >= 30,
                                 endsInFirstHalfLocal: effectiveEndTime.getMinutes() < 30,
-                                // Flags for multi-day handling
                                 startsBefore,
-                                endsAfter,
+                                endsAfter
                             };
+
+                            console.log('Processed reservation:', processedReservation);
+
+                            return processedReservation;
                         } catch (error) {
                             console.error('Error processing reservation:', error);
                             return null;
                         }
                     })
                     .filter(Boolean) as ReservationExtenstion[];
+
+                console.log('Final processed reservations:', apiBoats);
 
                 if (apiBoats.length === 0) {
                     console.log("No boats found for the selected date. Check API response and filtering logic.");
@@ -358,11 +381,23 @@ const TableDay: React.FC<TableDayProps> = ({
                                 console.log(`reservations ${reservations}`);
                                 // Find boats for this hour and row
                                 const boatsForHour = reservations.filter(boat => {
-                                    console.log(`filter ${boat.mooring_ball_id} ${row.id} `)
-                                    if (boat.mooring_ball_id !== row.id) return false;
+                                    console.log(`Comparing mooring ball IDs:`, {
+                                        boatMooringBallId: boat.mooring_ball_id,
+                                        rowId: row.id,
+                                        mooring_ball: boat.mooring_ball
+                                    });
+                                    
+                                    // First check if the mooring ball IDs match
+                                    let mooringBallMatches = false;
+                                    if (boat.mooring_ball && boat.mooring_ball.ball_number) {
+                                        mooringBallMatches = boat.mooring_ball.ball_number.toString() === row.id;
+                                    } else {
+                                        mooringBallMatches = boat.mooring_ball_id === row.id;
+                                    }
+
+                                    if (!mooringBallMatches) return false;
 
                                     // Parse the hour and minute from the raw times
-                                    // Using padded format HH:MM for consistency
                                     const [boatStartHour, boatStartMinute] = boat.rawStartTime.split(':').map(Number);
                                     const [boatEndHour, boatEndMinute] = boat.rawEndTime.split(':').map(Number);
 

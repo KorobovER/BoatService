@@ -7603,6 +7603,13 @@
               }
             ]
           },
+          "visible_service_requests": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceOnReservationPublic"
+            },
+            "type": "array",
+            "title": "Visible Service Requests"
+          },
           "service_requests": {
             "items": {
               "$ref": "#/components/schemas/ServiceOnReservationPublic"
@@ -7650,6 +7657,7 @@
           "user",
           "boat",
           "payment_details_simple",
+          "visible_service_requests",
           "service_requests",
           "payment_receipts",
           "stripe_client_secret"
@@ -7755,6 +7763,13 @@
               }
             ]
           },
+          "visible_service_requests": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceOnReservationPublic"
+            },
+            "type": "array",
+            "title": "Visible Service Requests"
+          },
           "service_requests": {
             "items": {
               "$ref": "#/components/schemas/ServiceOnReservationPublic"
@@ -7791,6 +7806,7 @@
           "user",
           "boat",
           "payment_details_simple",
+          "visible_service_requests",
           "service_requests",
           "payment_receipts"
         ],

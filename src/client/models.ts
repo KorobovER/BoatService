@@ -534,6 +534,7 @@ export type ReservationCreatedPublic = {
   user: UserBase
   boat: BoatBase
   payment_details_simple: PaymentDetailsSimple | null
+  visible_service_requests: Array<ServiceOnReservationPublic>
   service_requests: Array<ServiceOnReservationPublic>
   payment_receipts: Array<PaymentReceiptPublic>
   stripe_client_secret: string | null
@@ -559,6 +560,7 @@ export type ReservationPublic = {
   user: UserBase
   boat: BoatBase
   payment_details_simple: PaymentDetailsSimple | null
+  visible_service_requests: Array<ServiceOnReservationPublic>
   service_requests: Array<ServiceOnReservationPublic>
   payment_receipts: Array<PaymentReceiptPublic>
 }

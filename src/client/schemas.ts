@@ -2843,6 +2843,13 @@ export const $ReservationCreatedPublic = {
       ],
       isRequired: true,
     },
+    visible_service_requests: {
+      type: "array",
+      contains: {
+        type: "ServiceOnReservationPublic",
+      },
+      isRequired: true,
+    },
     service_requests: {
       type: "array",
       contains: {
@@ -2979,6 +2986,13 @@ export const $ReservationPublic = {
           type: "null",
         },
       ],
+      isRequired: true,
+    },
+    visible_service_requests: {
+      type: "array",
+      contains: {
+        type: "ServiceOnReservationPublic",
+      },
       isRequired: true,
     },
     service_requests: {

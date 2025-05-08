@@ -69,6 +69,11 @@ const TableDay: React.FC<TableDayProps> = ({
         return i < 12 ? `${i}am` : `${i - 12}pm`;
     });
 
+    // Функция для отображения часа (скрывает 12am)
+    const getDisplayHour = (hour: string) => {
+        return hour === '12am' ? '' : hour;
+    };
+
     useEffect(() => {
         if (typeof window !== 'undefined' && 'Intl' in window) {
             updateTimeZone();
@@ -298,6 +303,39 @@ const TableDay: React.FC<TableDayProps> = ({
 
     const isLoading = isLoadingMooringBalls || isLoadingReservations;
 
+    // Компонент разметки временной шкалы с метками часов
+    const TimeScaleHeader = () => {
+        return (
+            <Box position="relative" width="100%" height="52px">
+                {hours.map((hour, hourIndex) => {
+                    // Положение метки в процентах (от 0 до 100)
+                    // Деление на hours.length дает шаг сетки
+                    const position = (hourIndex * 100) / hours.length;
+                    
+                    return (
+                        <Box 
+                            key={`timescale-${hour}`} 
+                            position="absolute" 
+                            left={`${position}%`}
+                            top="50%"
+                            transform="translate(-50%, -50%)" 
+                            zIndex={3}
+                        >
+                            <Text 
+                                color="basic.grey600" 
+                                fontSize="14px" 
+                                fontWeight="500"
+                                whiteSpace="nowrap"
+                            >
+                                {getDisplayHour(hour)}
+                            </Text>
+                        </Box>
+                    );
+                })}
+            </Box>
+        );
+    };
+
     if (isLoading) return (
         <Flex width="98%" m="auto" height="100vh" alignItems="center" justifyContent="center" bg="white" rounded='25px'>
             <Spinner size="xl" color="ui.main" />
@@ -341,20 +379,14 @@ const TableDay: React.FC<TableDayProps> = ({
                                 bg="white"
                                 zIndex={2}
                             />
-                            {hours.map((hour, hourIndex) => (
-                                <Th
-                                    key={`hour-${hour}`}
-                                    p={1}
-                                    height="52px"
-                                    textAlign="center"
-                                    fontWeight="normal"
-                                    position="relative"
-                                    colSpan={2} // Each hour spans 2 columns (30-min intervals)
-                                    borderLeft={hourIndex > 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
-                                >
-                                    <Text color="basic.grey600" fontSize="14px" fontWeight="500">{hour}</Text>
-                                </Th>
-                            ))}
+                            <Th
+                                p={0}
+                                height="52px"
+                                colSpan={hours.length * 2}
+                                position="relative"
+                            >
+                                <TimeScaleHeader />
+                            </Th>
                         </Tr>
                     </Thead>
                     <Tbody>
@@ -647,8 +679,8 @@ const TableDay: React.FC<TableDayProps> = ({
                                             onClick={() => handleCellClick(row.id, hour, halfHour, boatForHalfHour)}
                                             cursor="pointer"
                                             className={selectedCell?.reservation?.reservation_id === boatForHalfHour.id ? 'selected-cell' : ''}
-                                            borderRight={hourIndex < hours.length - 1 && (hourIndex + 1) % 1 === 0 && (halfHourIndex + halfHourColspan) % 2 === 0 ? "2px solid var(--chakra-colors-basic-grey200)" : "none"}
-                                            borderLeft={isFirstHalf && hourIndex > 0 ? "2px solid var(--chakra-colors-basic-grey200)" : "none"}
+                                            borderRight={hourIndex < hours.length - 1 && (hourIndex + 1) % 1 === 0 && (halfHourIndex + halfHourColspan) % 2 === 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
+                                            borderLeft={isFirstHalf && hourIndex > 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
                                             borderTop="1px solid var(--chakra-colors-basic-grey100)"
                                             data-boat-id={boatForHalfHour.id}
                                             data-boat-name={boatForHalfHour.name}

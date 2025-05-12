@@ -328,7 +328,6 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 flexDirection="column"
                 bg="white"
                 rounded="var(--chakra-space-lg)"
-                zIndex="100"
                 position="relative"
                 height='100%'
                 minHeight="400px"

@@ -50,7 +50,7 @@ const MarinasMenu = () => {
 
     if (isLoading) {
         return (
-            <Flex align="center" justify="center" w="300px">
+            <Flex align="center" justify="center" w="236px" p='xs' bg='white' rounded='full'>
                 <Spinner size="sm" color="ui.main" />
             </Flex>
         );
@@ -58,7 +58,7 @@ const MarinasMenu = () => {
 
     if (currentUser?.marinas.length === 0) {
         return (
-            <Flex align="center" justify="center" w="300px" color="basic.grey600">
+            <Flex align="center" justify="center" w="236px" p='xs' bg='white' rounded='full' color="basic.grey600">
                 No marinas available
             </Flex>
         );

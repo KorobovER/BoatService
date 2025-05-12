@@ -665,28 +665,9 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 }
 
                                 // Debug for the specific case of April-May
-                                const [startYear, startMonth] = boatMatch.startDay.split('-').map(Number);
-                                const [endYear, endMonth] = boatMatch.endDay.split('-').map(Number);
+                                const startMonth = parseInt(boatMatch.startDay.split('-')[1]);
+                                const endMonth = parseInt(boatMatch.endDay.split('-')[1]);
 
-                                // Special check for transitions between months
-                                const isAprilToMayTransition = (startMonth === 4 && startYear === endYear && endMonth === 5);
-                                if (isAprilToMayTransition) {
-                                    console.log('Found April-May transition:', {
-                                        boat: boatMatch.name,
-                                        start: boatMatch.startDay,
-                                        end: boatMatch.endDay,
-                                        currentDay: day,
-                                        dayIndex,
-                                        isFirstDayOfWeek,
-                                        isLastDayOfWeek,
-                                        startsBeforeVisiblePeriod,
-                                        endsAfterVisiblePeriod,
-                                        needsLeftRadius,
-                                        needsRightRadius
-                                    });
-                                }
-
-                                // Fix for the April-May case (last day of April and first day of May)
                                 if (isMonthView) {
                                     // If current day is April 30 and the reservation continues into May
                                     if (day.endsWith('-04-30') && endMonth === 5) {

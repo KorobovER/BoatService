@@ -35,7 +35,7 @@ const UserMenu = () => {
   return (
     <>
       {/* Desktop */}
-      <Box>
+      <Box style={{ zIndex: 1000 }}>
         <Menu isOpen={isOpen} onClose={onClose} onOpen={onOpen}>
           <MenuButton
             as={IconButton}

@@ -2,7 +2,8 @@ import { Flex, Text, Button, Image, useDisclosure } from '@chakra-ui/react';
 import { useMarina } from '../../context/MarinaContext';
 import ServiceAdd from './ServiceAdd';
 import { ReservationExtenstion } from '../ReservationExtenstion';
-
+import { useQuery } from '@tanstack/react-query';
+import { MarinasService } from '../../client/services';
 
 interface NoServiceProps {
     reservation?: ReservationExtenstion;
@@ -14,6 +15,13 @@ interface NoServiceProps {
 const NoService: React.FC<NoServiceProps> = ({ reservation, userName, rowId}) => {
     const { isOpen: isServiceAddOpen, onOpen: onServiceAddOpen, onClose: onServiceAddClose } = useDisclosure();
     const { selectedMarina } = useMarina();
+    
+    // Fetch services data using the same query as in Services.tsx
+    const { data: servicesData } = useQuery({
+        queryKey: ['marina-services'],
+        queryFn: () => MarinasService.readServices(),
+        enabled: !!selectedMarina // Only fetch when marina is selected
+    });
 
     const openServiceAdd = () => {
         onServiceAddOpen();
@@ -41,7 +49,7 @@ const NoService: React.FC<NoServiceProps> = ({ reservation, userName, rowId}) =>
                 <ServiceAdd
                     isOpen={isServiceAddOpen}
                     onClose={closeServiceAdd}
-                    services={selectedMarina.active_services || []}
+                    services={servicesData?.data || []}
                     reservation={reservation}
                     userName={userName}
                     rowId={rowId}

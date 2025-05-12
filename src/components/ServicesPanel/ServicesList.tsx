@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Text, Image, Flex, Button, Menu, MenuButton, MenuItem, MenuList, useToast} from '@chakra-ui/react';
 import NoService from './NoService';
 import { ReservationExtenstion } from '../ReservationExtenstion';
-import { ServiceOnReservationPublic, ServiceRequestStatus } from '../../client/models';
+import { ServiceOnReservationPublic, ServiceRequestStatus} from '../../client/models';
 import { getServiceIcon } from './Services';
 import { ReservationsService } from '../../client/services';
 import { useQueryClient } from '@tanstack/react-query';
@@ -689,42 +689,36 @@ const ServicesList: React.FC<ServicesListProps> = ({
         }
     ];
 
-    // Get the service name for the quantity modal
-    const getServiceName = () => {
-        if (!currentService || !currentService.services || currentService.services.length === 0) {
-            return 'Service';
-        }
-        
-        return currentService.services[0].name;
-    };
+    // Вспомогательная функция для создания сервисного объекта
+    const createServiceProps = (serviceData: ServiceOnReservationPublic) => ({
+        title: serviceData.services[0]?.title || '',
+        name: serviceData.services[0]?.name || '',
+        price: serviceData.services[0]?.price || 0,
+        unit: serviceData.services[0]?.unit || '',
+        iconUrl: getServiceIcon(serviceData.services[0]?.name || ''),
+        quantity: serviceData.services[0]?.quantity || 1
+    });
 
-    // Get the service icon for the quantity modal
-    const getServiceIconUrl = () => {
+    // Функция для получения данных для QuantityInputModal
+    const getQuantityModalProps = () => {
         if (!currentService || !currentService.services || currentService.services.length === 0) {
-            return '/assets/icons/fuel_service.svg';
+            return {
+                serviceName: 'Service',
+                serviceIcon: '/assets/icons/fuel_service.svg',
+                initialQuantity: 1,
+                unitOfMeasurement: 'gallons'
+            };
         }
-        
-        const iconPath = getServiceIcon(currentService.services[0].name);
-        console.log('Service icon path:', iconPath); // For debugging
-        return iconPath;
-    };
 
-    // Get the service quantity for the quantity modal
-    const getServiceQuantity = () => {
-        if (!currentService || !currentService.services || currentService.services.length === 0) {
-            return 1;
-        }
+        const service = currentService.services[0];
+        const iconPath = getServiceIcon(service.name);
         
-        return currentService.services[0].quantity;
-    };
-
-    // Get the service unit of measurement for the quantity modal
-    const getServiceUnit = () => {
-        if (!currentService || !currentService.services || currentService.services.length === 0) {
-            return 'gallons';
-        }
-        
-        return currentService.services[0].unit;
+        return {
+            serviceName: service.name,
+            serviceIcon: iconPath,
+            initialQuantity: service.quantity,
+            unitOfMeasurement: service.unit
+        };
     };
 
     return (
@@ -781,10 +775,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
                 isOpen={isQuantityModalOpen}
                 onClose={handleQuantityModalClose}
                 serviceId={currentServiceId}
-                initialQuantity={getServiceQuantity()}
-                serviceName={getServiceName()}
-                serviceIcon={getServiceIconUrl()}
-                unitOfMeasurement={getServiceUnit()}
+                {...getQuantityModalProps()}
                 isSubmitting={isSubmittingQuantity}
                 onSubmit={handleQuantitySubmit}
             />
@@ -794,12 +785,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
                     isOpen={isCancelModalOpen}
                     onClose={() => { setIsCancelModalOpen(false); setCancelService(null); }}
                     onConfirm={handleConfirmCancel}
-                    service={{
-                        name: cancelService.services[0]?.name || '',
-                        price: cancelService.services[0]?.price || 0,
-                        unit: cancelService.services[0]?.unit || '',
-                        iconUrl: getServiceIcon(cancelService.services[0]?.name || '')
-                    }}
+                    service={createServiceProps(cancelService)}
                     loading={cancelLoading}
                 />
             )}
@@ -809,13 +795,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
                     isOpen={isEditModalOpen}
                     onClose={() => { setIsEditModalOpen(false); setEditService(null); }}
                     onUpdate={handleEditUpdate}
-                    service={{
-                        name: editService.services[0]?.name || '',
-                        price: editService.services[0]?.price || 0,
-                        unit: editService.services[0]?.unit || '',
-                        iconUrl: getServiceIcon(editService.services[0]?.name || ''),
-                        quantity: editService.services[0]?.quantity || 1
-                    }}
+                    service={createServiceProps(editService)}
                     loading={editLoading}
                 />
             )}

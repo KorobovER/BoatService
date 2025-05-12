@@ -12,15 +12,13 @@ import {
     Button,
     Textarea,
 } from '@chakra-ui/react';
+import { SubServiceRequest} from '../../client/models';
 
 interface ServiceCancelProps {
     isOpen: boolean;
     onClose: () => void;
     onConfirm: (reason: string) => void;
-    service: {
-        name: string;
-        price: number;
-        unit: string;
+    service: SubServiceRequest & {
         iconUrl?: string;
     };
     loading?: boolean;
@@ -143,7 +141,7 @@ const ServiceCancel: React.FC<ServiceCancelProps> = ({
                                 fontWeight="400"
                                 isLoading={loading}
                                 loadingText="Cancelling..."
-                                leftIcon={<Image mr='4px'  h='auto' src='assets/images/alert-icon.svg' />}
+                                leftIcon={<Image mr='4px' h='auto' src='assets/images/alert-icon.svg' />}
                             >
                                 Yes, cancel service
                             </Button>

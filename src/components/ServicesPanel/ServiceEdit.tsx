@@ -12,17 +12,14 @@ import {
     Button,
     IconButton
 } from '@chakra-ui/react';
+import { SubServiceRequest} from '../../client/models';
 
 interface ServiceEditProps {
     isOpen: boolean;
     onClose: () => void;
     onUpdate: (quantity: number) => void;
-    service: {
-        name: string;
-        price: number;
-        unit: string;
+    service: SubServiceRequest & {
         iconUrl?: string;
-        quantity: number;
     };
     loading?: boolean;
 }

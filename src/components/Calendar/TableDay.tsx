@@ -362,23 +362,27 @@ const TableDay: React.FC<TableDayProps> = ({
         
         const currentHour = currentTime.getHours();
         const currentMinute = currentTime.getMinutes();
+        const currentSeconds = currentTime.getSeconds();
         
-        const hourWidth = 100 / 24; // 24 hours
+        const hourWidth = 100 / hours.length; 
         
-        const adjustedHour = (currentHour + 0.37) % 24; 
+        const hourPosition = currentHour * hourWidth;
         
-        const positionPercentage = (adjustedHour + (currentMinute / 60)) * hourWidth;
+        // Точный расчет минут как доли часа
+        let minuteFraction = currentMinute / 60;
+        const secondFraction = currentSeconds / 3600;
         
-        const formattedTime = currentTime.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-        }).toLowerCase();
+        const correction = 0.15;
+        minuteFraction += correction;
+
+        const exactPosition = hourPosition + ((minuteFraction + secondFraction) * hourWidth);
+        
+        
         
         return (
             <Box
                 position="absolute"
-                left={`${positionPercentage}%`}
+                left={`${exactPosition}%`}
                 bottom="0"
                 height="80%"
                 width="2px"
@@ -389,21 +393,14 @@ const TableDay: React.FC<TableDayProps> = ({
                 {/* Time indicator label */}
                 <Flex
                     position="absolute"
-                    top="-25px"
-                    left="-29px"
+                    top="-10px"
+                    left="50%"
+                    transform="translateX(-50%)"
                     width="60px"
                     alignItems="center"
                     justifyContent="center"
                     flexDirection="column"
                 >
-                    <Text
-                        fontSize="10px"
-                        fontWeight="bold"
-                        color="brand.primaryOrange"
-                        mb="2px"
-                    >
-                        {formattedTime}
-                    </Text>
                     <Box
                         width="10px"
                         height="10px"

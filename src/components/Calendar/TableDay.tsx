@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
     Box,
@@ -52,9 +52,10 @@ const TableDay: React.FC<TableDayProps> = ({
     const [currentTimeZone, setCurrentTimeZone] = useState<string>(
         Intl.DateTimeFormat().resolvedOptions().timeZone
     );
+    const [currentTime, setCurrentTime] = useState<Date>(new Date());
+    const tableRef = useRef<HTMLDivElement>(null);
 
     const queryClient = useQueryClient();
-
 
     const updateTimeZone = () => {
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -63,7 +64,7 @@ const TableDay: React.FC<TableDayProps> = ({
 
     // Update hour handling logic
     // Generate hours array from 12 AM to 11 PM (24 hours)
-    const hours = Array.from({ length: 24 }, (_, i) => {
+    const hours: string[] = Array.from({ length: 24 }, (_, i) => {
         if (i === 0) return '12am'; // Midnight (12 AM)
         if (i === 12) return '12pm'; // Noon (12 PM)
         return i < 12 ? `${i}am` : `${i - 12}pm`;
@@ -336,6 +337,84 @@ const TableDay: React.FC<TableDayProps> = ({
         );
     };
 
+    // Update current time every minute
+    useEffect(() => {
+        const updateCurrentTime = () => {
+            setCurrentTime(new Date());
+        };
+        
+        updateCurrentTime();
+        
+        // Then update every minute
+        const timer = setInterval(updateCurrentTime, 60000);
+        
+        return () => clearInterval(timer);
+    }, []);
+
+    // Current time indicator component
+    const CurrentTimeIndicator = () => {
+        // Check if current date matches the displayed date
+        const today = new Date();
+        const todayFormatted = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        const isToday = currentDate === todayFormatted;
+        
+        if (!isToday) return null;
+        
+        const currentHour = currentTime.getHours();
+        const currentMinute = currentTime.getMinutes();
+        
+        const hourWidth = 100 / 24; // 24 hours
+        
+        const adjustedHour = (currentHour + 0.5) % 24; 
+        
+        const positionPercentage = (adjustedHour + (currentMinute / 60)) * hourWidth;
+        
+        const formattedTime = currentTime.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        }).toLowerCase();
+        
+        return (
+            <Box
+                position="absolute"
+                left={`${positionPercentage}%`}
+                bottom="0"
+                height="80%"
+                width="2px"
+                backgroundColor="brand.primaryOrange"
+                zIndex={10}
+                pointerEvents="none"
+            >
+                {/* Time indicator label */}
+                <Flex
+                    position="absolute"
+                    top="-25px"
+                    left="-29px"
+                    width="60px"
+                    alignItems="center"
+                    justifyContent="center"
+                    flexDirection="column"
+                >
+                    <Text
+                        fontSize="10px"
+                        fontWeight="bold"
+                        color="brand.primaryOrange"
+                        mb="2px"
+                    >
+                        {formattedTime}
+                    </Text>
+                    <Box
+                        width="10px"
+                        height="10px"
+                        borderRadius="50%"
+                        backgroundColor="brand.primaryOrange"
+                    />
+                </Flex>
+            </Box>
+        );
+    };
+
     if (isLoading) return (
         <Flex width="98%" m="auto" height="100vh" alignItems="center" justifyContent="center" bg="white" rounded='25px'>
             <Spinner size="xl" color="ui.main" />
@@ -364,7 +443,10 @@ const TableDay: React.FC<TableDayProps> = ({
                     tableLayout: 'fixed',
                     width: '100%',
                 }
-            }}>
+            }} position="relative" ref={tableRef}>
+                {/* Current time indicator */}
+                <CurrentTimeIndicator />
+                
                 <Table variant="unstyled" width="100%">
                     <Thead>
                         <Tr>

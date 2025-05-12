@@ -372,8 +372,8 @@ const TableDay: React.FC<TableDayProps> = ({
         let minuteFraction = currentMinute / 60;
         const secondFraction = currentSeconds / 3600;
         
-        const correction = 0.15;
-        minuteFraction += correction;
+        // const correction = 0.05;
+        // minuteFraction += correction;
 
         const exactPosition = hourPosition + ((minuteFraction + secondFraction) * hourWidth);
         
@@ -389,6 +389,7 @@ const TableDay: React.FC<TableDayProps> = ({
                 backgroundColor="brand.primaryOrange"
                 zIndex={10}
                 pointerEvents="none"
+                ml="105px" // Add left margin to account for the mooring ball column width
             >
                 {/* Time indicator label */}
                 <Flex

@@ -365,7 +365,7 @@ const TableDay: React.FC<TableDayProps> = ({
         
         const hourWidth = 100 / 24; // 24 hours
         
-        const adjustedHour = (currentHour + 0.5) % 24; 
+        const adjustedHour = (currentHour + 0.37) % 24; 
         
         const positionPercentage = (adjustedHour + (currentMinute / 60)) * hourWidth;
         

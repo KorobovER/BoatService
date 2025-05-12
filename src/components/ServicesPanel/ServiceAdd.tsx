@@ -109,8 +109,20 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
 
         for (const [idx, qty] of Object.entries(quantities)) {
             const index = parseInt(idx, 10);
-            if (qty > 0 && index < allServiceItems.length) {
-                const item = allServiceItems[index];
+            if (qty > 0) {
+                let item;
+
+                // Определяем, откуда брать элемент - из основных или пользовательских сервисов
+                if (index < allServiceItems.length) {
+                    item = allServiceItems[index];
+                } else if (index < allServiceItems.length + customServices.length) {
+                    // Это пользовательский сервис
+                    const customIndex = index - allServiceItems.length;
+                    item = customServices[customIndex];
+                } else {
+                    console.warn('Invalid service index:', index);
+                    continue;
+                }
 
                 try {
                     // Validate title
@@ -177,141 +189,6 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
         return selectedServices;
     };
 
-    // Функция для добавления сервисов к резервации
-    const submitServices = async () => {
-        try {
-            const selectedServices = getSelectedServices();
-
-            if (selectedServices.length === 0) {
-                toast({
-                    title: "No services selected",
-                    description: "Please select at least one service to add",
-                    status: "warning",
-                    duration: 3000,
-                    isClosable: true,
-                });
-                return;
-            }
-
-            // Используем функцию для извлечения ID резервации
-            const reservationId = getReservationId(reservation);
-
-            if (!reservationId) {
-                console.error('Missing reservation ID', { reservation });
-                toast({
-                    title: "Error",
-                    description: "No reservation ID found. Please make sure a valid reservation is selected.",
-                    status: "error",
-                    duration: 3000,
-                    isClosable: true,
-                });
-                return;
-            }
-
-            // Отправляем каждую услугу отдельно
-            const results = await Promise.all(
-                selectedServices.map(async (service) => {
-                    try {
-                        // Создаем объект ServiceOnReservationCreate для каждой услуги отдельно
-                        const serviceRequest: ServiceOnReservationCreate = {
-                            requested_date: new Date().toISOString(),
-                            services: [service], // Только одна услуга в массиве
-                            special_instructions: null
-                        };
-
-                        console.log('Creating individual service request:', JSON.stringify(serviceRequest, null, 2));
-                        console.log('For reservation ID:', reservationId);
-
-                        // Используем ReservationsService для добавления сервиса
-                        const response = await ReservationsService.requestReservationService({
-                            reservationId,
-                            requestBody: serviceRequest
-                        });
-
-                        console.log('Service creation response:', response);
-                        return { success: true, service };
-                    } catch (error: any) {
-                        console.error('API error for service:', service.name, error);
-                        return {
-                            success: false,
-                            service,
-                            error: {
-                                status: error.status,
-                                message: error.message,
-                                body: error.body
-                            }
-                        };
-                    }
-                })
-            );
-
-            // Подсчитываем количество успешных и неуспешных запросов
-            const successCount = results.filter(r => r.success).length;
-            const failCount = results.length - successCount;
-
-            if (successCount > 0) {
-                // Показываем уведомление об успешном добавлении
-                toast({
-                    title: "Services added",
-                    description: `Successfully added ${successCount} ${successCount === 1 ? 'service' : 'services'} to reservation`,
-                    status: "success",
-                    duration: 3000,
-                    isClosable: true,
-                });
-
-                // Инвалидируем кэш React Query для обновления списка сервисов
-                if (reservationId) {
-                    console.log('ServiceAdd: Services added, invalidating queries');
-                    // Инвалидируем ЛЮБЫЕ ключи запросов, связанные с резервациями
-                    queryClient.invalidateQueries();
-
-                    // Даем время на обновление данных перед закрытием
-                    setTimeout(() => {
-                        // Перед закрытием еще раз инвалидируем кэш для гарантии обновления
-                        queryClient.invalidateQueries();
-
-                        // Проверяем failCount внутри таймаута для правильной последовательности
-                        if (failCount === 0) {
-                            console.log('ServiceAdd: All services added successfully, closing popup');
-                            onClose();
-                        }
-                    }, 500);
-
-                    // Сразу возвращаемся из метода, чтобы не выполнять onClose() ниже
-                    return;
-                }
-            }
-
-            if (failCount > 0) {
-                // Показываем уведомление о неуспешных запросах
-                toast({
-                    title: "Some services failed",
-                    description: `Failed to add ${failCount} ${failCount === 1 ? 'service' : 'services'} to reservation`,
-                    status: "warning",
-                    duration: 5000,
-                    isClosable: true,
-                });
-            }
-
-            // Закрытие модального окна теперь обрабатывается в таймауте выше
-            // если все сервисы добавлены успешно
-        } catch (error: any) {
-            console.error('Error in service request preparation:', error);
-            toast({
-                title: "Error adding services",
-                description: "Failed to prepare service request. Please try again.",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
-        }
-    };
-
-    // Обновляем функцию addServices
-    const addServices = () => {
-        submitServices();
-    };
-
     // Создаём объект Open Charge
     const openChargeItem = {
         name: 'Open Charge',
@@ -374,7 +251,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
     };
     
     // Функция добавления нового сервиса Open Charge
-    const addOpenCharge = async () => {
+    const addOpenCharge = () => {
         try {
             // Валидация полей
             if (!itemName.trim()) {
@@ -403,7 +280,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                 return;
             }
             
-            // Создаем новый элемент сервиса СТРОГО в соответствии с требуемым форматом
+            // Создаем новый элемент сервиса СТРОГО в соответствии с требуемым форматом API
             const newService: SubServiceRequest = {
                 title: "Open Charge",
                 name: itemName.trim(), // из поля product/service/fee
@@ -417,7 +294,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                 name: newService.name,
                 price: newService.price,
                 unit: newService.unit,
-                type: 'unit',
+                type: 'user_defined', // Отмечаем, что это сервис, добавленный пользователем
                 parentServiceTitle: newService.title
             };
             
@@ -434,43 +311,10 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                 [newItemIndex]: 1
             }));
             
-            // Извлекаем ID резервации
-            const reservationId = getReservationId(reservation);
-            
-            if (!reservationId) {
-                console.error('Missing reservation ID', { reservation });
-                toast({
-                    title: "Error",
-                    description: "No reservation ID found. Please make sure a valid reservation is selected.",
-                    status: "error",
-                    duration: 3000,
-                    isClosable: true,
-                });
-                return;
-            }
-            
-            // Формируем данные для отправки на сервер
-            const serviceRequest: ServiceOnReservationCreate = {
-                requested_date: new Date().toISOString(),
-                services: [newService],
-                special_instructions: null
-            };
-            
-            // Отправляем запрос на сервер
-            const response = await ReservationsService.requestReservationService({
-                reservationId,
-                requestBody: serviceRequest
-            });
-            
-            console.log('Service creation response:', response);
-            
-            // Инвалидируем кэш React Query для обновления данных
-            queryClient.invalidateQueries();
-            
             // Показываем уведомление об успехе
             toast({
-                title: "Service added",
-                description: `Successfully added "${itemName}" service to reservation`,
+                title: "Service created",
+                description: `"${itemName}" has been added to the list. Click "Add services" to save.`,
                 status: "success",
                 duration: 3000,
                 isClosable: true,
@@ -485,8 +329,111 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
         } catch (error: any) {
             console.error('Error creating Open Charge service:', error);
             toast({
-                title: "Error adding service",
-                description: error.message || "An error occurred while adding the service",
+                title: "Error creating service",
+                description: error.message || "An error occurred while creating the service",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+        }
+    };
+
+    // Функция для удаления пользовательского сервиса
+    const removeCustomService = (idx: number) => {
+        // Проверяем, является ли сервис пользовательским
+        const customIndex = idx - allServiceItems.length;
+        if (customIndex >= 0 && customIndex < customServices.length) {
+            // Удаляем из массива customServices
+            const newCustomServices = [...customServices];
+            newCustomServices.splice(customIndex, 1);
+            setCustomServices(newCustomServices);
+            
+            // Удаляем из quantities
+            const newQuantities = { ...quantities };
+            delete newQuantities[idx];
+            setQuantities(newQuantities);
+            
+            // Показываем уведомление
+            toast({
+                title: "Service removed",
+                description: "The service has been removed from the list",
+                status: "info",
+                duration: 2000,
+                isClosable: true,
+            });
+        }
+    };
+
+    // Функция для обработки нажатия на кнопку "Add services"
+    const addServices = async () => {
+        try {
+            // Получаем все выбранные сервисы
+            const selectedServices = getSelectedServices();
+            
+            if (selectedServices.length === 0) {
+                toast({
+                    title: "No services selected",
+                    description: "Please select at least one service to add",
+                    status: "warning",
+                    duration: 3000,
+                    isClosable: true,
+                });
+                return;
+            }
+            
+            // Получаем ID резервации
+            const reservationId = getReservationId(reservation);
+            
+            if (!reservationId) {
+                console.error('Missing reservation ID', { reservation });
+                toast({
+                    title: "Error",
+                    description: "No reservation ID found. Please make sure a valid reservation is selected.",
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                });
+                return;
+            }
+            
+            // Создаем запрос для отправки на сервер
+            const serviceRequest: ServiceOnReservationCreate = {
+                requested_date: new Date().toISOString(),
+                services: selectedServices,
+                special_instructions: null
+            };
+            
+            console.log('Sending services to API:', JSON.stringify(serviceRequest, null, 2));
+            
+            // Отправляем запрос
+            const response = await ReservationsService.requestReservationService({
+                reservationId,
+                requestBody: serviceRequest
+            });
+            
+            console.log('Service creation response:', response);
+            
+            // Показываем уведомление об успехе
+            toast({
+                title: "Services added",
+                description: `Successfully added ${selectedServices.length} ${selectedServices.length === 1 ? 'service' : 'services'} to reservation`,
+                status: "success",
+                duration: 3000,
+                isClosable: true,
+            });
+            
+            // Инвалидируем кэш React Query
+            queryClient.invalidateQueries();
+            
+            // Закрываем модальное окно
+            setTimeout(() => {
+                onClose();
+            }, 500);
+        } catch (error: any) {
+            console.error('Error adding services:', error);
+            toast({
+                title: "Error adding services",
+                description: error.message || "An error occurred while adding the services",
                 status: "error",
                 duration: 3000,
                 isClosable: true,
@@ -676,7 +623,39 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                                                 </Text>
                                             </Flex>
 
-                                            {item.type === 'unit' ? (
+                                            {/* Для пользовательских сервисов показываем просто кнопку Remove service */}
+                                            {item.type === 'user_defined' ? (
+                                                <Button
+                                                    onClick={() => {
+                                                        if (quantities[idx] && quantities[idx] > 0) {
+                                                            // Полностью удаляем пользовательский сервис
+                                                            removeCustomService(idx);
+                                                        } else {
+                                                            incrementQuantity(idx);
+                                                        }
+                                                    }}
+                                                    variant="outline"
+                                                    borderWidth="1px"
+                                                    borderColor={quantities[idx] && quantities[idx] > 0 ? "#007A7B" : "gray.200"}
+                                                    borderRadius="md"
+                                                    width="100%"
+                                                    height="42px"
+                                                    display="flex"
+                                                    justifyContent="center"
+                                                    alignItems="center"
+                                                    gap="4px"
+                                                    px="md"
+                                                    py="10px"
+                                                    bg={quantities[idx] && quantities[idx] > 0 ? "#E5F2F2" : "white"}
+                                                >
+                                                    <Text fontSize="14px" fontWeight="400">
+                                                        {(quantities[idx] || 0) > 0 ? "Remove service" : "Add item"}
+                                                    </Text>
+                                                    <Box display="flex" justifyContent="center" alignItems="center" textAlign="center" p='10px' as="span" fontSize="17px" fontWeight="400">
+                                                        {(quantities[idx] || 0) > 0 ? "−" : "+"}
+                                                    </Box>
+                                                </Button>
+                                            ) : item.type === 'unit' ? (
                                                 <Flex
                                                     borderWidth="1px"
                                                     borderRadius="md"
@@ -736,7 +715,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                                                     bg={quantities[idx] && quantities[idx] > 0 ? "#E5F2F2" : "white"}
                                                 >
                                                     <Text fontSize="14px" fontWeight="400">
-                                                        {quantities[idx] && quantities[idx] > 0 ? "Remove service" : "Add service"}
+                                                        {quantities[idx] && quantities[idx] > 0 ? "Remove service" : "Add item"}
                                                     </Text>
                                                     <Box display="flex" justifyContent="center" alignItems="center" textAlign="center" p='10px' as="span" fontSize="17px" fontWeight="400">
                                                         {quantities[idx] && quantities[idx] > 0 ? "−" : "+"}

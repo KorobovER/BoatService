@@ -598,7 +598,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                                     </Flex>
                                 </Flex>
                             </Flex>
-                            <Button boxSize="auto" py='xs' px='sm' bg='white' border="1px solid" borderColor="basic.grey200" borderRadius="var(--chakra-space-5xl)" color='brand.secondaryBlue'><Text padding="0" fontSize="12px" fontWeight="400" color='brand.secondaryBlue'>Active booking</Text></Button>
+                            <Box boxSize="auto" py='xs' px='sm' bg='white' border="1px solid" borderColor="basic.grey200" borderRadius="var(--chakra-space-5xl)" color='brand.secondaryBlue'><Text padding="0" fontSize="12px" fontWeight="400" color='brand.secondaryBlue'>Active booking</Text></Box>
                         </Flex>
                         <Button
                             variant="unstyled"

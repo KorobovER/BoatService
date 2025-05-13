@@ -26,6 +26,8 @@ const RetryCharge: React.FC<RetryChargeProps> = ({
     isOpen,
     onClose,
     payment,
+    onRetryCharge,
+    reservationId
 }) => {
     // Extract data from PaymentReceiptPublic
     const services = payment?.service_requests.flatMap(service => service.services) || [];
@@ -33,6 +35,14 @@ const RetryCharge: React.FC<RetryChargeProps> = ({
     const serviceFee = payment?.service_fee || 0;
     const taxes = payment?.taxes || 0;
     const total = subtotal + serviceFee + taxes;
+
+    // Handler for retry charge button
+    const handleRetryCharge = () => {
+        if (onRetryCharge && reservationId) {
+            onRetryCharge(reservationId);
+            onClose();
+        }
+    };
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} isCentered>
@@ -97,6 +107,7 @@ const RetryCharge: React.FC<RetryChargeProps> = ({
                         borderRadius="full"
                         fontWeight="500"
                         _hover={{ bg: "teal.400" }}
+                        onClick={handleRetryCharge}
                     >
                         <Flex gap="4px" fontSize="16px" fontWeight="400" color="white">RETRY CHARGE</Flex>
                     </Button>

@@ -163,13 +163,56 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
         // Reset payment error state before trying
         setPaymentError(false);
 
+        // Show loading toast
+        const loadingToastId = toast({
+            title: "Processing payment",
+            description: "Please wait while we process your payment...",
+            status: "loading",
+            duration: null,
+            isClosable: false,
+        });
+
         // Call createPaymentReceipt endpoint
         ReservationsService.createPaymentReceipt({ reservationId })
             .then(response => {
                 console.log('Payment receipt created:', response);
+                
+                // Close loading toast
+                toast.close(loadingToastId);
+                
+                // Close all modals
                 setIsPaymentModalOpen(false);
-                // Refresh data to reflect changes
-                forceRefresh();
+                setIsRetryChargeModalOpen(false);
+                setIsMarkPaidModalOpen(false);
+                
+                // If we have a payment response with service_requests, update our local data
+                if (response && response.service_requests && response.service_requests.length > 0) {
+                    // Create a new local reservation object with updated service statuses
+                    const updatedReservation = {...localReservation};
+                    
+                    // Get the service IDs from the payment receipt
+                    const paidServiceIds = response.service_requests.map(
+                        service => service.service_reservation_id
+                    );
+                    
+                    // Update the status of paid services in our local data
+                    if (updatedReservation.service_requests) {
+                        updatedReservation.service_requests = updatedReservation.service_requests.map(service => {
+                            if (paidServiceIds.includes(service.service_reservation_id)) {
+                                // Mark as paid
+                                return {...service, status: 'paid'};
+                            }
+                            return service;
+                        });
+                        
+                        // Update local state
+                        setLocalReservation(updatedReservation as ReservationExtenstion);
+                    }
+                } else {
+                    // Fallback to refresh data if we don't have service details
+                    forceRefresh();
+                }
+                
                 // Show success toast
                 toast({
                     title: "Payment processed",
@@ -180,18 +223,39 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 });
             })
             .catch(error => {
+                // Close loading toast
+                toast.close(loadingToastId);
+                
                 console.error('Error creating payment receipt:', error);
+                
                 // Set payment error state to true
                 setPaymentError(true);
                 setIsPaymentModalOpen(false);
-                // Show error toast
+                
+                // Get more specific error message if available
+                let errorMessage = "There was an error processing the payment.";
+                
+                if (error && error.message) {
+                    errorMessage += ` Error details: ${error.message}`;
+                }
+                
+                if (error && error.status === 500) {
+                    errorMessage += " The server encountered an internal error. Please try again later or contact support if the issue persists.";
+                }
+                
+                // Show error toast with more details
                 toast({
                     title: "Payment failed",
-                    description: "There was an error processing the payment.",
+                    description: errorMessage,
                     status: "error",
-                    duration: 3000,
+                    duration: 5000,
                     isClosable: true,
                 });
+                
+                // Try to refresh data to ensure we're in sync with server
+                setTimeout(() => {
+                    forceRefresh();
+                }, 1000);
             });
     };
 
@@ -419,10 +483,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 bg="white"
                 rounded="var(--chakra-space-lg)"
                 position="relative"
-                height='100%'
-                minHeight="400px"
                 width="auto"
-                overflow="hidden"
                 gap="lg"
             >
                 {/* Header - фиксированный */}
@@ -552,7 +613,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                         </Button>
                     </Flex>
                     {/* Content*/}
-                    <Flex flexDirection="column" w="100%" gap="xl">
+                    <Flex flexDirection="column" w="100%" gap="xl" minWidth="400px">
                         <ServicesList
                             reservation={localReservation || reservation}
                             rowId={rowId}
@@ -566,7 +627,19 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 </Flex>
                 {/* Payment details block (Footer) */}
                 {hasCompletedServices && (
-                    <Flex px='xl' py='lg' direction="column" w="100%" borderTop="1px solid" borderColor="gray.200">
+                    <Flex 
+                        px='xl' 
+                        py='lg' 
+                        direction="column" 
+                        w="100%" 
+                        borderTop="1px solid" 
+                        borderColor="gray.200"
+                        position="sticky"
+                        bottom="0"
+                        bg="white"
+                        zIndex="10"
+                        boxShadow="0 -2px 10px rgba(0,0,0,0.1)"
+                    >
                         <Flex
                             w="100%"
                             justifyContent="center"

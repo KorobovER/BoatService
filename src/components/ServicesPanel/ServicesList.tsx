@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Box, Text, Image, Flex, Button, Menu, MenuButton, MenuItem, MenuList, useToast} from '@chakra-ui/react';
 import NoService from './NoService';
 import { ReservationExtenstion } from '../ReservationExtenstion';
-import { ServiceOnReservationPublic, ServiceRequestStatus} from '../../client/models';
+import { ServiceOnReservationPublic, ServiceRequestStatus } from '../../client/models';
 import { getServiceIcon } from './Services';
 import { ReservationsService } from '../../client/services';
 import { useQueryClient } from '@tanstack/react-query';
 import QuantityInputModal from './QuantityInputModal';
 import ServiceCancel from './ServiceCancel';
 import ServiceEdit from './ServiceEdit';
+import CompletedServiceDetails from './CompletedService';
 
 interface ServicesListProps {
     reservation: ReservationExtenstion;
@@ -44,6 +45,8 @@ const ServicesList: React.FC<ServicesListProps> = ({
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editService, setEditService] = useState<ServiceOnReservationPublic | null>(null);
     const [editLoading, setEditLoading] = useState(false);
+    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+    const [selectedPaidService, setSelectedPaidService] = useState<ServiceOnReservationPublic | null>(null);
     const toast = useToast();
     const queryClient = useQueryClient();
 
@@ -72,7 +75,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
         const service = localReservation.service_requests.find(
             service => service.service_reservation_id === serviceId
         );
-        
+
         if (service) {
             setCurrentServiceId(serviceId);
             setCurrentService(service);
@@ -83,21 +86,21 @@ const ServicesList: React.FC<ServicesListProps> = ({
     // Handle quantity modal submission
     const handleQuantitySubmit = async (serviceId: string, newQuantity: number) => {
         if (!serviceId) return;
-        
+
         setIsSubmittingQuantity(true);
-        
+
         try {
             // Find the service
             const service = localReservation.service_requests.find(
                 service => service.service_reservation_id === serviceId
             );
-            
+
             if (!service || !service.services || service.services.length === 0) {
                 throw new Error("Service not found");
             }
-            
+
             // Update local state for optimistic UI
-            const updatedReservation = {...localReservation};
+            const updatedReservation = { ...localReservation };
             updatedReservation.service_requests = localReservation.service_requests.map(service => {
                 if (service.service_reservation_id === serviceId) {
                     return {
@@ -111,17 +114,17 @@ const ServicesList: React.FC<ServicesListProps> = ({
                 }
                 return service;
             });
-            
+
             // Update UI with optimistic change
             setLocalReservation(updatedReservation);
-            
+
             const initialQuantity = service.services[0].quantity;
-            
+
             // If quantity changed, we need to update both quantity and status
             if (newQuantity !== initialQuantity) {
                 // Use updateReservationService to update quantity and status
                 console.log(`Updating service with new quantity: ${newQuantity} (was ${initialQuantity})`);
-                
+
                 // Create updated service object that matches ServiceOnReservationUpdate type
                 const updatedService = {
                     requested_date: service.requested_date,
@@ -134,7 +137,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
                         quantity: subService.name === service.services[0].name ? newQuantity : subService.quantity
                     }))
                 };
-                
+
                 // Update local state for display
                 // First update status with status API (since status isn't part of the update model)
                 await ReservationsService.updateReservationServiceStatus({
@@ -142,7 +145,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
                     serviceId: serviceId,
                     statusIn: 'completed'
                 });
-                
+
                 // Then update the quantity with the service update API
                 try {
                     await ReservationsService.updateReservationService({
@@ -150,7 +153,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
                         serviceId: serviceId,
                         requestBody: updatedService
                     });
-                    
+
                     console.log('Service quantity updated successfully');
                 } catch (error) {
                     console.error('Error updating service quantity:', error);
@@ -165,11 +168,11 @@ const ServicesList: React.FC<ServicesListProps> = ({
                     statusIn: 'completed'
                 });
             }
-            
+
             // Show success message
             const serviceName = service.services[0].name;
             const unit = service.services[0].unit;
-            
+
             toast({
                 title: "Service completed",
                 description: `${serviceName} has been marked as completed with ${newQuantity} ${unit}`,
@@ -177,20 +180,20 @@ const ServicesList: React.FC<ServicesListProps> = ({
                 duration: 3000,
                 isClosable: true,
             });
-            
+
             // Notify parent component about the change
             if (onServiceStatusChange) {
                 onServiceStatusChange(updatedReservation);
             }
-            
+
             // Close the modal
             handleQuantityModalClose();
         } catch (error) {
             console.error('Error updating service:', error);
-            
+
             // Revert to original state on error
             setLocalReservation(reservation);
-            
+
             toast({
                 title: "Update failed",
                 description: "There was an error updating the service",
@@ -213,7 +216,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
     // Handles actions from the dropdown menu
     const handleServiceAction = async (action: string, serviceId: string, serviceStatus: string) => {
         console.log(`Action: ${action} for service: ${serviceId} with status: ${serviceStatus}`);
-        
+
         // Skip if already loading
         if (isLoading[serviceId]) return;
 
@@ -222,13 +225,13 @@ const ServicesList: React.FC<ServicesListProps> = ({
             handleInputQuantity(serviceId);
             return;
         }
-        
+
         // Set loading state for this service
         setIsLoading(prev => ({ ...prev, [serviceId]: true }));
-        
+
         try {
             let newStatus: ServiceRequestStatus | null = null;
-            
+
             // Determine the new status based on action
             switch (action) {
                 case 'mark-in-progress':
@@ -254,11 +257,11 @@ const ServicesList: React.FC<ServicesListProps> = ({
                 // For other actions like 'edit-service', 
                 // we'd need different API calls or UI components
             }
-            
+
             // If we have a new status, update it through the API
             if (newStatus) {
                 // Update local state immediately for optimistic UI
-                const updatedReservation = {...localReservation};
+                const updatedReservation = { ...localReservation };
                 updatedReservation.service_requests = localReservation.service_requests.map(service => {
                     if (service.service_reservation_id === serviceId) {
                         return {
@@ -268,17 +271,17 @@ const ServicesList: React.FC<ServicesListProps> = ({
                     }
                     return service;
                 });
-                
+
                 // Update UI
                 setLocalReservation(updatedReservation);
-                
+
                 // Make API call
                 await ReservationsService.updateReservationServiceStatus({
                     reservationId: localReservation.reservation_id,
                     serviceId: serviceId,
                     statusIn: newStatus
                 });
-                
+
                 // Show success message
                 toast({
                     title: "Status updated",
@@ -295,10 +298,10 @@ const ServicesList: React.FC<ServicesListProps> = ({
             }
         } catch (error) {
             console.error('Error updating service status:', error);
-            
+
             // Revert to original state on error
             setLocalReservation(reservation);
-            
+
             toast({
                 title: "Update failed",
                 description: "There was an error updating the service status",
@@ -416,31 +419,31 @@ const ServicesList: React.FC<ServicesListProps> = ({
     };
 
     // If no services, render the NoService component
-    const hasActiveServices = localReservation.service_requests?.some(service => 
-        service.status === 'pending' || 
-        service.status === 'en-route' || 
+    const hasActiveServices = localReservation.service_requests?.some(service =>
+        service.status === 'pending' ||
+        service.status === 'en-route' ||
         service.status === 'completed'
     );
 
     if (!hasActiveServices) {
         return (
             <Flex flexDirection="column" w="100%">
-                <NoService 
-                    rowId={rowId} 
-                    reservation={localReservation} 
+                <NoService
+                    rowId={rowId}
+                    reservation={localReservation}
                     userName={userName}
                     onServicesAdded={() => {
                         // Принудительно запрашиваем актуальные данные перед обновлением UI
                         console.log('ServicesList: Services added callback triggered');
                         queryClient.invalidateQueries();
-                        
+
                         // Добавляем небольшую задержку для гарантии получения обновленных данных
                         setTimeout(() => {
                             if (localReservation?.reservation_id) {
                                 console.log('ServicesList: Refreshing reservation data after services added');
                                 ReservationsService.readReservation({ id: localReservation.reservation_id })
                                     .then(updatedReservation => {
-                                        console.log('ServicesList: Got updated reservation data:', 
+                                        console.log('ServicesList: Got updated reservation data:',
                                             updatedReservation.service_requests?.length || 0, 'services');
                                         setLocalReservation(updatedReservation as ReservationExtenstion);
                                     })
@@ -465,7 +468,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
     // Get button configuration based on service status
     const getActionButtonConfig = (service: ServiceOnReservationPublic) => {
         const totalPrice = calculateTotalPrice(service);
-        
+
         switch (service.status) {
             case 'pending':
                 return {
@@ -667,6 +670,31 @@ const ServicesList: React.FC<ServicesListProps> = ({
         );
     };
 
+    // Format date as "Mar 04, 25 | 17:08"
+    const formatRequestedDate = (dateString: string) => {
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return dateString;
+            
+            const month = date.toLocaleString('en-US', { month: 'short' });
+            const day = date.getDate().toString().padStart(2, '0');
+            const year = date.getFullYear().toString().slice(-2);
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            
+            return `${month} ${day}, ${year} | ${hours}:${minutes}`;
+        } catch (error) {
+            console.error('Error formatting date:', error);
+            return dateString;
+        }
+    };
+
+    // Handle opening service details
+    const handleOpenServiceDetails = (service: ServiceOnReservationPublic) => {
+        setSelectedPaidService(service);
+        setIsDetailsModalOpen(true);
+    };
+
     // Define categories and their properties
     const serviceCategories: ServiceCategory[] = [
         {
@@ -686,6 +714,57 @@ const ServicesList: React.FC<ServicesListProps> = ({
             status: 'completed',
             filter: (service) => service.status === 'completed',
             renderItem: renderServiceItem
+        },
+        {
+            title: 'Paid services',
+            status: 'paid',
+            filter: (service) => service.status === 'paid',
+            renderItem: (service, index) => {
+                // Calculate total for this service
+                const totalPrice = calculateTotalPrice(service);
+
+                return (
+                    <Flex
+                        key={index}
+                        w="100%"
+                        flexDirection="column"
+                        gap="xs"
+                    >
+                        {service.services.map((subService, i) => (
+                            <Flex gap="8px" key={i} alignItems="center">
+                                <Flex bg="basic.grey200" borderRadius='8px' alignItems="center" justifyContent="center" w="46px" h="46px">
+                                    <Image w='24px' h='auto' src={getServiceIcon(subService.name)} alt={subService.name} filter="brightness(0) invert(1)" />
+                                </Flex>
+                                <Flex flex="1" justify="space-between" flexDirection="column">
+                                    <Text fontSize="14px" fontWeight="700" color='basic.grey700'>
+                                        {service.service_reservation_id}
+                                    </Text>
+                                    <Text fontSize="14px" fontWeight="400" color='basic.grey900'>{formatRequestedDate(service.requested_date)}</Text>
+                                </Flex>
+                                <Button
+                                    variant="unstyled"
+                                    display="flex"
+                                    border='none'
+                                    borderColor='transparent'
+                                    bg='basic.grey100'
+                                    h='46px'
+                                    px='sm'
+                                    py='xs'
+                                    borderRadius='8px'
+                                    w='fit-content'
+                                    alignItems="center"
+                                    justifyContent="center"
+                                    onClick={() => handleOpenServiceDetails(service)}
+                                    cursor="pointer"
+                                    _hover={{ bg: 'basic.grey200' }}
+                                >
+                                    <Text color='basic.grey600' fontSize="14px" fontWeight="400">${totalPrice.toFixed(2)} Total</Text>
+                                </Button>
+                            </Flex>
+                        ))}
+                    </Flex>
+                );
+            }
         }
     ];
 
@@ -712,7 +791,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
 
         const service = currentService.services[0];
         const iconPath = getServiceIcon(service.name);
-        
+
         return {
             serviceName: service.name,
             serviceIcon: iconPath,
@@ -742,10 +821,10 @@ const ServicesList: React.FC<ServicesListProps> = ({
                                     {category.title}
                                 </Text>
                                 {category.status === 'pending' && (
-                                    <Box 
-                                        fontSize="14px" 
-                                        fontWeight="500" 
-                                        color="brand.primaryOrange" 
+                                    <Box
+                                        fontSize="14px"
+                                        fontWeight="500"
+                                        color="brand.primaryOrange"
                                         onClick={handleAddMoreServices}
                                         borderRadius="0"
                                         display="flex"
@@ -797,6 +876,15 @@ const ServicesList: React.FC<ServicesListProps> = ({
                     onUpdate={handleEditUpdate}
                     service={createServiceProps(editService)}
                     loading={editLoading}
+                />
+            )}
+
+            {/* Service Details Modal */}
+            {selectedPaidService && (
+                <CompletedServiceDetails
+                    isOpen={isDetailsModalOpen}
+                    onClose={() => setIsDetailsModalOpen(false)}
+                    service={selectedPaidService}
                 />
             )}
         </>

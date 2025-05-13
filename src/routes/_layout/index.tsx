@@ -217,7 +217,7 @@ function Dashboard() {
             padding="var(--chakra-space-xl)"
             minH="100vh"
         >
-            <Flex direction="row" height="100%">
+            <Flex direction="row">
                 <Box
                     width={selectedReservation ? "70%" : "100%"}
                     transition="all 0.3s ease"

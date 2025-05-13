@@ -480,9 +480,9 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
             {/* Popup content */}
             <Flex
                 flexDirection="column"
+                height="100%"
                 bg="white"
-                rounded="var(--chakra-space-lg)"
-                position="relative"
+                rounded="var(--chakra-space-xl)"
                 width="auto"
                 gap="lg"
             >

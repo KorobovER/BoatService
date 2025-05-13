@@ -632,6 +632,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                         py='lg' 
                         direction="column" 
                         w="100%" 
+                        borderBottomRadius="var(--chakra-space-xl)"
                         borderTop="1px solid" 
                         borderColor="gray.200"
                         position="sticky"

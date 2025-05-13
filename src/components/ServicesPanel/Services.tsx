@@ -6,7 +6,11 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { MarinasService, ReservationsService } from '../../client/services';
 import ServicesList from './ServicesList';
 import PaymentModal from './PaymentModal';
+import RetryCharge from './RetryCharge';
+import MarkUncollectible from './MarkUncollectible';
+import MarkPaid from './MarkPaid';
 import { ReservationExtenstion } from '../ReservationExtenstion';
+import { PaymentReceiptPublic } from '../../client/models';
 
 // Иконки для разных типов услуг
 export const SERVICE_ICONS = {
@@ -96,6 +100,9 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     const [localReservation, setLocalReservation] = useState(reservation);
     const queryClient = useQueryClient();
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+    const [isRetryChargeModalOpen, setIsRetryChargeModalOpen] = useState(false);
+    const [isMarkUncollectibleModalOpen, setIsMarkUncollectibleModalOpen] = useState(false);
+    const [isMarkPaidModalOpen, setIsMarkPaidModalOpen] = useState(false);
     const toast = useToast();
     const [paymentError, setPaymentError] = useState(false);
 
@@ -129,8 +136,10 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
         return currentReservation.service_requests
             .filter(service => service.status === 'completed')
             .flatMap(service => service.services.map(item => ({
+                title: item.title,
                 name: item.name,
                 price: item.price,
+                unit: item.unit,
                 quantity: item.quantity
             })));
     }, [localReservation, reservation]);
@@ -355,6 +364,36 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
         forceRefresh();
     };
 
+
+    // Create a PaymentReceiptPublic object for the RetryCharge component
+    const paymentReceipt: PaymentReceiptPublic = useMemo(() => {
+        const currentReservation = localReservation || reservation;
+        
+        // Get completed service requests
+        const completedServiceRequests = currentReservation?.service_requests
+            ? currentReservation.service_requests.filter(service => service.status === 'completed')
+            : [];
+        
+        // Calculate subtotal based on completed services
+        const subtotal = completedServiceRequests.reduce((total, service) => {
+            return total + service.services.reduce((serviceTotal, item) => {
+                return serviceTotal + (item.price * item.quantity);
+            }, 0);
+        }, 0);
+        
+        // Create a mock PaymentReceiptPublic object
+        return {
+            payment_receipt_id: '',
+            receipt_id: '',
+            subtotal: subtotal,
+            service_fee: serviceFee,
+            taxes: taxes,
+            created_by_user: null,
+            payment_details_simple: null,
+            service_requests: completedServiceRequests
+        };
+    }, [localReservation, reservation, serviceFee, taxes]);
+
     // Handle mark as paid button
     const handleMarkAsPaid = () => {
         // Reset payment error
@@ -367,20 +406,9 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
             duration: 3000,
             isClosable: true,
         });
-    };
-
-    // Handle mark uncollectible button
-    const handleMarkUncollectible = () => {
-        // Reset payment error
-        setPaymentError(false);
-        // Implement mark uncollectible logic here
-        toast({
-            title: "Marked as uncollectible",
-            description: "The payment has been marked as uncollectible.",
-            status: "warning",
-            duration: 3000,
-            isClosable: true,
-        });
+        
+        // Close the modal
+        setIsMarkPaidModalOpen(false);
     };
 
     return (
@@ -631,7 +659,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                                 borderRadius="full"
                                 fontWeight="500"
                                 _hover={{ bg: "teal.400" }}
-                                onClick={() => setIsPaymentModalOpen(true)}
+                                onClick={() => setIsRetryChargeModalOpen(true)}
                             >
                                 <Flex gap="4px" fontSize="16px" fontWeight="400" color="white">RETRY CHARGE<Text fontWeight="700">${calculateTotalForCompleted()}</Text> NOW <Flex align="end" fontSize="12px">(Failed payment)</Flex></Flex>
                             </Button>
@@ -647,7 +675,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                                     py='10px'
                                     variant="unstyled"
                                     color="system.errorRedNew"
-                                    onClick={handleMarkUncollectible}
+                                    onClick={() => setIsMarkUncollectibleModalOpen(true)}
                                 >
                                     Mark uncollectible
                                 </Button>
@@ -662,7 +690,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                                     py='10px'
                                     variant="unstyled"
                                     color="system.successGreen"
-                                    onClick={handleMarkAsPaid}
+                                    onClick={() => setIsMarkPaidModalOpen(true)}
                                 >
                                     Mark as paid
                                 </Button>
@@ -696,6 +724,33 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 onCharge={handleCharge}
                 reservationId={reservation.reservation_id}
             />
+
+            {/* Retry Charge Modal */}
+            <RetryCharge
+                isOpen={isRetryChargeModalOpen}
+                onClose={() => setIsRetryChargeModalOpen(false)}
+                payment={paymentReceipt}
+                onRetryCharge={handleCharge}
+                reservationId={reservation.reservation_id}
+            />
+            
+            {/* Mark Uncollectible Modal */}
+            <MarkUncollectible
+                isOpen={isMarkUncollectibleModalOpen}
+                onClose={() => setIsMarkUncollectibleModalOpen(false)}
+                payment={paymentReceipt}
+                reservationId={reservation.reservation_id}
+            />
+            
+            {/* Mark Paid Modal */}
+            <MarkPaid
+                isOpen={isMarkPaidModalOpen}
+                onClose={() => setIsMarkPaidModalOpen(false)}
+                payment={paymentReceipt}
+                onMarkPaid={handleMarkAsPaid}
+                reservationId={reservation.reservation_id}
+            />
+            
         </>
     );
 };

@@ -364,32 +364,68 @@ const TableDay: React.FC<TableDayProps> = ({
         const currentMinute = currentTime.getMinutes();
         const currentSeconds = currentTime.getSeconds();
         
-        const hourWidth = 100 / hours.length; 
+        // Используем useRef для доступа к DOM-элементам
+        const timelineRef = useRef<HTMLDivElement>(null);
         
-        const hourPosition = currentHour * hourWidth;
-        
-        // Точный расчет минут как доли часа
-        let minuteFraction = currentMinute / 60;
-        const secondFraction = currentSeconds / 3600;
-        
-        // const correction = 0.05;
-        // minuteFraction += correction;
-
-        const exactPosition = hourPosition + ((minuteFraction + secondFraction) * hourWidth);
-        
-        
+        // Функция для обновления положения линии времени
+        useEffect(() => {
+            if (!tableRef.current) return;
+            
+            // Обновляем положение линии времени при изменении размеров окна
+            const updateTimelinePosition = () => {
+                if (!tableRef.current || !timelineRef.current) return;
+                
+                // Получаем контейнер таблицы
+                const tableContainer = tableRef.current.querySelector('table');
+                if (!tableContainer) return;
+                
+                // Находим первую ячейку Th (с часами)
+                const headerHourCell = tableRef.current.querySelector('th:nth-child(2)');
+                if (!headerHourCell) return;
+                
+                // Получаем ширину области с часами (без колонки с номерами швартовок)
+                const hoursCellWidth = headerHourCell.clientWidth;
+                
+                // Находим левый отступ колонки с часами от левого края таблицы
+                const firstColumnWidth = 105; // Ширина первой колонки
+                
+                // Рассчитываем положение для текущего времени
+                const totalMinutesInDay = 24 * 60; // Всего минут в дне
+                const currentTotalMinutes = currentHour * 60 + currentMinute + (currentSeconds / 60);
+                const positionRatio = currentTotalMinutes / totalMinutesInDay;
+                
+                // Рассчитываем абсолютную позицию в пикселях
+                const timePosition = (hoursCellWidth * positionRatio);
+                
+                // Обновляем положение линии
+                timelineRef.current.style.left = `${firstColumnWidth + timePosition}px`;
+            };
+            
+            // Вызываем один раз для начального положения
+            updateTimelinePosition();
+            
+            // Добавляем слушатель для обновления при изменении размера окна
+            window.addEventListener('resize', updateTimelinePosition);
+            
+            // Создаем интервал для периодического обновления позиции
+            const intervalId = setInterval(updateTimelinePosition, 60000); // Обновляем каждую минуту
+            
+            return () => {
+                window.removeEventListener('resize', updateTimelinePosition);
+                clearInterval(intervalId);
+            };
+        }, [currentTime, tableRef, currentHour, currentMinute, currentSeconds]);
         
         return (
             <Box
+                ref={timelineRef}
                 position="absolute"
-                left={`${exactPosition}%`}
-                bottom="0"
-                height="80%"
+                top="52px" // Начинаем после заголовка
+                height="calc(100% - 52px)" // От заголовка до конца таблицы
                 width="2px"
                 backgroundColor="brand.primaryOrange"
                 zIndex={10}
                 pointerEvents="none"
-                ml="105px" // Add left margin to account for the mooring ball column width
             >
                 {/* Time indicator label */}
                 <Flex

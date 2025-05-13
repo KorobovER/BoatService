@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { Box, Text, Image, Flex, Button, useDisclosure, Collapse, Icon } from '@chakra-ui/react';
+import { Box, Text, Image, Flex, Button, useDisclosure, Collapse, Icon, useToast } from '@chakra-ui/react';
 import ServiceAdd from './ServiceAdd';
 import { useMarina } from '../../context/MarinaContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -96,6 +96,8 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     const [localReservation, setLocalReservation] = useState(reservation);
     const queryClient = useQueryClient();
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+    const toast = useToast();
+    const [paymentError, setPaymentError] = useState(false);
 
     // Add query to fetch reservation data
     const { data: reservationData } = useQuery({
@@ -146,19 +148,51 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     const total = useMemo(() => Number((completedServicesTotal + serviceFee + taxes).toFixed(2)), [completedServicesTotal, serviceFee, taxes]);
 
     // Обработчик оплаты
-    const handleCharge = () => {
-        // Здесь будет логика оплаты
-        setIsPaymentModalOpen(false);
-        // Можно добавить уведомление или обновление данных
+    const handleCharge = (reservationId: string) => {
+        if (!reservationId) return;
+
+        // Reset payment error state before trying
+        setPaymentError(false);
+
+        // Call createPaymentReceipt endpoint
+        ReservationsService.createPaymentReceipt({ reservationId })
+            .then(response => {
+                console.log('Payment receipt created:', response);
+                setIsPaymentModalOpen(false);
+                // Refresh data to reflect changes
+                forceRefresh();
+                // Show success toast
+                toast({
+                    title: "Payment processed",
+                    description: `Payment for completed services has been processed successfully.`,
+                    status: "success",
+                    duration: 3000,
+                    isClosable: true,
+                });
+            })
+            .catch(error => {
+                console.error('Error creating payment receipt:', error);
+                // Set payment error state to true
+                setPaymentError(true);
+                setIsPaymentModalOpen(false);
+                // Show error toast
+                toast({
+                    title: "Payment failed",
+                    description: "There was an error processing the payment.",
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                });
+            });
     };
 
     // Check if there are any completed services
     const hasCompletedServices = useMemo(() => {
         if (!localReservation?.service_requests && !reservation?.service_requests) return false;
-        
+
         const currentReservation = localReservation || reservation;
         if (!currentReservation?.service_requests) return false;
-        
+
         return currentReservation.service_requests.some(service => service.status === 'completed');
     }, [localReservation, reservation]);
 
@@ -285,10 +319,10 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     const forceRefresh = useCallback(() => {
         if (reservation?.reservation_id) {
             console.log('Forcing reservation data refresh...');
-            
+
             // Инвалидируем все запросы
             queryClient.invalidateQueries();
-            
+
             // Принудительно запрашиваем актуальные данные с сервера
             ReservationsService.readReservation({ id: reservation.reservation_id })
                 .then(updatedReservation => {
@@ -316,9 +350,37 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     // When closing the popup, reset the current service request and update data
     const handleCloseServiceAdd = () => {
         onServiceAddClose();
-        
+
         // После закрытия попапа обновляем данные о резервации 
         forceRefresh();
+    };
+
+    // Handle mark as paid button
+    const handleMarkAsPaid = () => {
+        // Reset payment error
+        setPaymentError(false);
+        // Implement mark as paid logic here
+        toast({
+            title: "Marked as paid",
+            description: "The payment has been marked as paid.",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+        });
+    };
+
+    // Handle mark uncollectible button
+    const handleMarkUncollectible = () => {
+        // Reset payment error
+        setPaymentError(false);
+        // Implement mark uncollectible logic here
+        toast({
+            title: "Marked as uncollectible",
+            description: "The payment has been marked as uncollectible.",
+            status: "warning",
+            duration: 3000,
+            isClosable: true,
+        });
     };
 
     return (
@@ -476,10 +538,9 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 </Flex>
                 {/* Payment details block (Footer) */}
                 {hasCompletedServices && (
-                    <Flex direction="column" w="100%" borderTop="1px solid" borderColor="gray.200">
+                    <Flex px='xl' py='lg' direction="column" w="100%" borderTop="1px solid" borderColor="gray.200">
                         <Flex
                             w="100%"
-                            py={3}
                             justifyContent="center"
                             alignItems="center"
                             cursor="pointer"
@@ -503,26 +564,113 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                             </Icon>
                         </Flex>
 
-                        <Collapse in={isPaymentDetailsOpen} animateOpacity>
-                            <Flex w="100%" justifyContent="center" p={4}>
+                        <Collapse in={isPaymentDetailsOpen && !paymentError} animateOpacity>
+                            <Button
+                                display="flex"
+                                w="100%"
+                                justifyContent="center"
+                                p='md'
+                                my="10px"
+                                leftIcon={<Box as="span" mr={2}>💳</Box>}
+                                bg="system.successGreen"
+                                color="white"
+                                size="lg"
+                                borderRadius="full"
+                                px='md'
+                                py='10px'
+                                fontWeight="500"
+                                _hover={{ bg: "teal.400" }}
+                                onClick={() => setIsPaymentModalOpen(true)}
+                            >
+                                <Flex gap="4px" fontSize="16px" fontWeight="400" color="white">CHARGE<Text fontWeight="700">${calculateTotalForCompleted()}</Text> NOW <Flex align="end" fontSize="12px">(Completed services ONLY)</Flex></Flex>
+                            </Button>
+                            
+                            {/* Тестовая кнопка для симуляции ошибки оплаты */}
+                            {/* <Button
+                                display="flex"
+                                w="100%" 
+                                justifyContent="center" 
+                                p='md'
+                                my="10px"
+                                leftIcon={<Box as="span" mr={2}>🚨</Box>}
+                                bg="red.400"
+                                color="white"
+                                size="lg"
+                                borderRadius="full"
+                                px='md' 
+                                py='10px'
+                                fontWeight="500"
+                                _hover={{ bg: "red.500" }}
+                                onClick={() => {
+                                    // Симулируем ошибку оплаты
+                                    setPaymentError(true);
+                                    toast({
+                                        title: "Симуляция ошибки",
+                                        description: "Была симулирована ошибка оплаты для тестирования",
+                                        status: "error",
+                                        duration: 3000,
+                                        isClosable: true,
+                                    });
+                                }}
+                            >
+                                <Flex gap="4px" fontSize="16px" fontWeight="400" color="white">SIMULATE A PAYMENT ERROR (test)</Flex>
+                            </Button> */}
+                        </Collapse>
+                        <Collapse in={isPaymentDetailsOpen && paymentError} animateOpacity>
+                            <Button
+                                my="10px"
+                                display="flex"
+                                w="100%"
+                                justifyContent="center"
+                                px='md'
+                                py='10px'
+                                leftIcon={<Box bg="system.errorRed" borderRadius="full"><Image width="30px" height="30px" src="/assets/images/alert-icon-red.svg" alt="Retry" /></Box>}
+                                bg="brand.secondaryBlue"
+                                color="white"
+                                size="lg"
+                                borderRadius="full"
+                                fontWeight="500"
+                                _hover={{ bg: "teal.400" }}
+                                onClick={() => setIsPaymentModalOpen(true)}
+                            >
+                                <Flex gap="4px" fontSize="16px" fontWeight="400" color="white">RETRY CHARGE<Text fontWeight="700">${calculateTotalForCompleted()}</Text> NOW <Flex align="end" fontSize="12px">(Failed payment)</Flex></Flex>
+                            </Button>
+                            <Flex w="100%" justifyContent="space-between">
                                 <Button
-                                    leftIcon={<Box as="span" mr={2}>💳</Box>}
-                                    bg="system.successGreen"
-                                    color="white"
-                                    size="lg"
-                                    borderRadius="full"
-                                    px={8}
-                                    py={6}
-                                    fontWeight="500"
-                                    _hover={{ bg: "teal.400" }}
-                                    onClick={() => setIsPaymentModalOpen(true)}
+                                    leftIcon={<Image ml='4px' h='auto' src='assets/images/close-red.svg' />}
+                                    fontSize="16px"
+                                    fontWeight="400"
+                                    textDecoration='underline'
+                                    w="100%"
+                                    flex="1"
+                                    px='md'
+                                    py='10px'
+                                    variant="unstyled"
+                                    color="system.errorRedNew"
+                                    onClick={handleMarkUncollectible}
                                 >
-                                    <Flex gap="4px" fontSize="16px" fontWeight="400" color="white">CHARGE<Text fontWeight="700">${calculateTotalForCompleted()}</Text> NOW <Flex align="end" fontSize="12px">(Completed services ONLY)</Flex></Flex>
+                                    Mark uncollectible
+                                </Button>
+                                <Button
+                                    leftIcon={<Image ml='4px' h='auto' src='assets/images/check-icon-green.svg' />}
+                                    fontSize="16px"
+                                    fontWeight="400"
+                                    textDecoration='underline'
+                                    w="100%"
+                                    flex="1"
+                                    px='md'
+                                    py='10px'
+                                    variant="unstyled"
+                                    color="system.successGreen"
+                                    onClick={handleMarkAsPaid}
+                                >
+                                    Mark as paid
                                 </Button>
                             </Flex>
                         </Collapse>
                     </Flex>
                 )}
+
             </Flex>
 
             {/* Service Add */}
@@ -546,6 +694,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 taxes={taxes}
                 total={total}
                 onCharge={handleCharge}
+                reservationId={reservation.reservation_id}
             />
         </>
     );

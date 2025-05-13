@@ -26,7 +26,8 @@ interface PaymentModalProps {
   serviceFee: number;
   taxes: number;
   total: number;
-  onCharge: () => void;
+  onCharge: (reservationId: string) => void;
+  reservationId: string;
 }
 
 const PaymentModal: React.FC<PaymentModalProps> = ({
@@ -36,7 +37,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   serviceFee,
   taxes,
   total,
-  onCharge
+  onCharge,
+  reservationId
 }) => (
   <Modal isOpen={isOpen} onClose={onClose} isCentered>
     <ModalOverlay />
@@ -102,7 +104,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           bg='system.successGreen'
           color='white'
           borderRadius='full'
-          onClick={onCharge}
+          onClick={() => onCharge(reservationId)}
           fontSize="16px"
           fontWeight="400"
           leftIcon={<Image ml='4px' h='auto' src='assets/images/check-icon.svg' />}

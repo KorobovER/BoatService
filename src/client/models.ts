@@ -615,7 +615,7 @@ export type ServiceOnReservationUpdate = {
 export type ServiceRequestStatus =
   | "pending"
   | "approved"
-  | "en-route"
+  | "en_route"
   | "completed"
   | "paid"
   | "manually_paid"

@@ -3246,7 +3246,7 @@ export const $ServiceRequestStatus = {
   enum: [
     "pending",
     "approved",
-    "en-route",
+    "en_route",
     "completed",
     "paid",
     "manually_paid",

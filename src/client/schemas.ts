@@ -3249,10 +3249,10 @@ export const $ServiceRequestStatus = {
     "en-route",
     "completed",
     "paid",
-    "manually-paid",
+    "manually_paid",
     "denied",
     "cancelled",
-    "failed",
+    "payment_failed",
   ],
 } as const
 

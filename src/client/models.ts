@@ -618,10 +618,10 @@ export type ServiceRequestStatus =
   | "en-route"
   | "completed"
   | "paid"
-  | "manually-paid"
+  | "manually_paid"
   | "denied"
   | "cancelled"
-  | "failed"
+  | "payment_failed"
 
 export type StripeCardPublic = {
   country: string

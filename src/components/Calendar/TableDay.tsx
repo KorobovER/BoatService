@@ -78,12 +78,10 @@ const TableDay: React.FC<TableDayProps> = ({
     useEffect(() => {
         if (typeof window !== 'undefined' && 'Intl' in window) {
             updateTimeZone();
-            window.addEventListener('languagechange', updateTimeZone);
             window.addEventListener('focus', updateTimeZone);
             const intervalId = setInterval(updateTimeZone, 60000);
 
             return () => {
-                window.removeEventListener('languagechange', updateTimeZone);
                 window.removeEventListener('focus', updateTimeZone);
                 clearInterval(intervalId);
             };

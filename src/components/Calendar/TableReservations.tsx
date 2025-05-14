@@ -135,26 +135,10 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     useEffect(() => {
         // Проверяем доступность API Intl
         if (typeof window !== 'undefined' && 'Intl' in window) {
-            // Обновляем при загрузке
             updateTimeZone();
-
-            // В идеале нужно слушать событие изменения временной зоны,
-            // но такого стандартного события нет. Вместо этого,
-            // мы можем отслеживать другие события, которые могут
-            // указывать на изменение временной зоны.
-
-            // Слушаем событие изменения языка
-            window.addEventListener('languagechange', updateTimeZone);
-
-            // Слушаем события фокуса/расфокуса окна
             window.addEventListener('focus', updateTimeZone);
-
-            // Периодически проверяем временную зону
-            const intervalId = setInterval(updateTimeZone, 60000); // каждую минуту
-
-            // Очистка при размонтировании
+            const intervalId = setInterval(updateTimeZone, 60000);
             return () => {
-                window.removeEventListener('languagechange', updateTimeZone);
                 window.removeEventListener('focus', updateTimeZone);
                 clearInterval(intervalId);
             };

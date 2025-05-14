@@ -12,24 +12,27 @@ import {
     Image,
     Box,
     Input,
-    Textarea
+    Textarea,
+    useToast
 } from '@chakra-ui/react';
-import { PaymentReceiptPublic, SubServiceRequest } from '../../client/models';
+import { PaymentReceiptPublic, SubServiceRequest, ServiceRequestStatus } from '../../client/models';
+import { ReservationsService } from '../../client/services';
+import { useQueryClient, InvalidateQueryFilters } from '@tanstack/react-query';
 
 interface MarkPaidProps {
     isOpen: boolean;
     onClose: () => void;
     payment: PaymentReceiptPublic;
-    onMarkPaid: (reservationId: string) => void;
     reservationId: string;
+    onServiceStatusChange?: (updatedReservation: any) => void;
 }
 
 const MarkPaid: React.FC<MarkPaidProps> = ({
     isOpen,
     onClose,
     payment,
-    onMarkPaid,
-    reservationId
+    reservationId,
+    onServiceStatusChange,
 }) => {
     // Refs for input fields
     const itemNameRef = useRef<HTMLInputElement>(null);
@@ -38,6 +41,10 @@ const MarkPaid: React.FC<MarkPaidProps> = ({
     // State for input values
     const [itemName, setItemName] = useState('');
     const [description, setDescription] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    const toast = useToast();
+    const queryClient = useQueryClient();
 
     // Handle input changes
     const handleItemNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,6 +62,115 @@ const MarkPaid: React.FC<MarkPaidProps> = ({
     const taxes = payment?.taxes || 0;
     const total = subtotal + serviceFee + taxes;
 
+    const handleMarkPaid = async () => {
+        // Validate input
+        if (!itemName.trim()) {
+            toast({
+                title: "Error",
+                description: "Please specify the payment method",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+            return;
+        }
+
+        // Ensure we have a reservationId and at least one service
+        if (!reservationId || !payment?.service_requests?.length) {
+            toast({
+                title: "Error",
+                description: "No services found to mark as paid",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            // Prepare updated reservation for local state
+            const updatedReservation = {
+                ...payment,
+                service_requests: payment.service_requests.map(service => ({
+                    ...service,
+                    status: 'paid'
+                }))
+            };
+
+            // Optimistically update local state
+            if (onServiceStatusChange) {
+                onServiceStatusChange(updatedReservation);
+            }
+
+            // Update status for each service in the payment
+            await Promise.all(payment.service_requests.map(service => 
+                ReservationsService.updateReservationServiceStatus({
+                    reservationId: reservationId,
+                    serviceId: service.service_reservation_id,
+                    statusIn: 'paid'
+                })
+            ));
+
+            // Fetch the updated reservation to ensure data consistency
+            const updatedReservationData = await ReservationsService.readReservation({ 
+                id: reservationId 
+            });
+
+            // Update local state with the fetched reservation data
+            if (onServiceStatusChange) {
+                onServiceStatusChange(updatedReservationData);
+            }
+
+            // Show success toast
+            toast({
+                title: "Payment Marked Manually Paid",
+                description: `The remaining $${total.toFixed(2)} has been marked as manually paid via ${itemName}${description ? `: ${description}` : ''}.`,
+                status: "success",
+                duration: 3000,
+                isClosable: true,
+            });
+
+            // Close the modal
+            onClose();
+
+            // Invalidate queries related to this reservation
+            queryClient.invalidateQueries({ 
+                predicate: (query) => {
+                    const queryKey = query.queryKey as string[];
+                    return queryKey.includes('reservations') && 
+                           queryKey.includes(reservationId);
+                }
+            });
+        } catch (error) {
+            // Revert local state update if API call fails
+            toast({
+                title: "Error",
+                description: "Failed to mark payment as manually paid",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+            console.error('Error marking payment as manually paid:', error);
+
+            // Invalidate queries related to this reservation to ensure fresh data
+            queryClient.invalidateQueries({ 
+                predicate: (query) => {
+                    const queryKey = query.queryKey as string[];
+                    return queryKey.includes('reservations') && 
+                           queryKey.includes(reservationId);
+                }
+            });
+
+            // If onServiceStatusChange is provided, revert to original state
+            if (onServiceStatusChange) {
+                onServiceStatusChange(payment);
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <Modal isOpen={isOpen} onClose={onClose} isCentered>
             <ModalOverlay />
@@ -70,7 +186,7 @@ const MarkPaid: React.FC<MarkPaidProps> = ({
                                     Mark Bill as Manually Paid?
                                 </Text>
                                 <Text color="gray.700" fontSize="14px" fontWeight="300">
-                                    The remaining ${total.toFixed(2)}  (including 7.5% platform fee) will be marked as manually paid, and the bill will be moved to the Statement Charges section.
+                                    The remaining $${total.toFixed(2)}  (including 7.5% platform fee) will be marked as manually paid, and the bill will be moved to the Statement Charges section.
                                 </Text>
                             </Box>
                         </Flex>
@@ -161,7 +277,9 @@ const MarkPaid: React.FC<MarkPaidProps> = ({
                         borderRadius='full'
                         fontSize="16px"
                         fontWeight="400"
-                        onClick={() => onMarkPaid(reservationId)}
+                        onClick={handleMarkPaid}
+                        isLoading={isLoading}
+                        loadingText="Marking as Paid"
                         leftIcon={<Image ml='4px' h='auto' src='assets/images/check-icon-green.svg' filter="brightness(0) invert(1)" />}
                     >
                         Mark as paid

@@ -422,7 +422,8 @@ const ServicesList: React.FC<ServicesListProps> = ({
     const hasActiveServices = localReservation.service_requests?.some(service =>
         service.status === 'pending' ||
         service.status === 'en-route' ||
-        service.status === 'completed'
+        service.status === 'completed' ||
+        service.status === 'paid'
     );
 
     if (!hasActiveServices) {

@@ -2,8 +2,6 @@ import { Flex, Text, Button, Image, useDisclosure, useToast } from '@chakra-ui/r
 import { useMarina } from '../../context/MarinaContext';
 import ServiceAdd from './ServiceAdd';
 import { ReservationExtenstion } from '../ReservationExtenstion';
-import { useQuery } from '@tanstack/react-query';
-import { MarinasService } from '../../client/services';
 import { useMemo } from 'react';
 
 interface NoServiceProps {
@@ -58,12 +56,7 @@ const NoService: React.FC<NoServiceProps> = ({ reservation, userName, rowId}) =>
         return "";
     }, [reservation]);
     
-    // Fetch services data using the same query as in Services.tsx
-    const { data: servicesData } = useQuery({
-        queryKey: ['marina-services'],
-        queryFn: () => MarinasService.readServices(),
-        enabled: !!selectedMarina // Only fetch when marina is selected
-    });
+
 
     const openServiceAdd = () => {
         // Проверка статуса перед открытием модального окна

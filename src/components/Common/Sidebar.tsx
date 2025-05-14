@@ -78,9 +78,7 @@ const Sidebar = () => {
       <Box
         bg={bgColor}
         w="full"
-        paddingTop="xl"
-        paddingRight="xl"
-        paddingLeft="xl"
+        p="xl"
         position="relative"
         display={{ base: "none", md: "flex" }}
       >

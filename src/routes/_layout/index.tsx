@@ -240,10 +240,10 @@ function Dashboard() {
     return (
         <Box
             bg="var(--chakra-colors-ui-light)"
-            padding="var(--chakra-space-xl)"
-            minH="100vh"
+            paddingLeft="var(--chakra-space-xl)"
+            paddingRight="var(--chakra-space-xl)"
         >
-            <Flex direction="row">
+            <Flex direction="row" justifyContent="space-between">
                 <Box
                     width={selectedReservation ? "66%" : "100%"}
                     transition="all 0.3s ease"
@@ -290,7 +290,6 @@ function Dashboard() {
                 {selectedReservation && (
                     <Box
                         width="33%"
-                        paddingLeft="var(--chakra-space-lg)"
                     >
                         <PopupReserved
                             isOpen={!!selectedReservation}

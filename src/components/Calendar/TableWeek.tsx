@@ -1,9 +1,10 @@
 // TableWeek.tsx
 import React, { useMemo } from 'react';
-import { Box, Text, Spinner, Center } from '@chakra-ui/react';
+import { Box, Text, Spinner, Center, Flex } from '@chakra-ui/react';
 import TableReservations from './TableReservations';
 import BoatCell from './BoatCell';
 import { ReservationExtenstion } from '../ReservationExtenstion';
+import { renderEdgeIcon } from './TableReservations';
 
 interface TableWeekProps {
     currentWeekStart: string;
@@ -156,7 +157,45 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
     );
 
     const renderBoatCell = (reservation: ReservationExtenstion, colspan: number, textColor: string) => {
-        return <BoatCell reservation={reservation} textColor={textColor} colspan={colspan} />;
+        return (
+            <Flex 
+                position="relative" 
+                width="100%" 
+                height="100%" 
+                alignItems="center" 
+                justifyContent="center"
+            >
+                <BoatCell reservation={reservation} textColor={textColor} colspan={colspan} />
+                {(reservation.startsBefore || reservation.endsAfter) && (
+                    <>
+                        {reservation.startsBefore && (
+                            <Box
+                                position="absolute"
+                                top="0"
+                                left="0"
+                                height="100%"
+                                width="8px"
+                                bg="white"
+                            >
+                                {renderEdgeIcon(reservation, true)}
+                            </Box>
+                        )}
+                        {reservation.endsAfter && (
+                            <Box
+                                position="absolute"
+                                top="0"
+                                right="0"
+                                height="100%"
+                                width="8px"
+                                bg="white"
+                            >
+                                {renderEdgeIcon(reservation, false)}
+                            </Box>
+                        )}
+                    </>
+                )}
+            </Flex>
+        );
     };
 
     return (

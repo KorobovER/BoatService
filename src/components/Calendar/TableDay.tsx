@@ -310,19 +310,19 @@ const TableDay: React.FC<TableDayProps> = ({
                     // Положение метки в процентах (от 0 до 100)
                     // Деление на hours.length дает шаг сетки
                     const position = (hourIndex * 100) / hours.length;
-                    
+
                     return (
-                        <Box 
-                            key={`timescale-${hour}`} 
-                            position="absolute" 
+                        <Box
+                            key={`timescale-${hour}`}
+                            position="absolute"
                             left={`${position}%`}
                             top="50%"
-                            transform="translate(-50%, -50%)" 
+                            transform="translate(-50%, -50%)"
                             zIndex={3}
                         >
-                            <Text 
-                                color="basic.grey600" 
-                                fontSize="14px" 
+                            <Text
+                                color="basic.grey600"
+                                fontSize="14px"
                                 fontWeight="500"
                                 whiteSpace="nowrap"
                             >
@@ -340,12 +340,12 @@ const TableDay: React.FC<TableDayProps> = ({
         const updateCurrentTime = () => {
             setCurrentTime(new Date());
         };
-        
+
         updateCurrentTime();
-        
+
         // Then update every minute
         const timer = setInterval(updateCurrentTime, 60000);
-        
+
         return () => clearInterval(timer);
     }, []);
 
@@ -355,65 +355,65 @@ const TableDay: React.FC<TableDayProps> = ({
         const today = new Date();
         const todayFormatted = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
         const isToday = currentDate === todayFormatted;
-        
+
         if (!isToday) return null;
-        
+
         const currentHour = currentTime.getHours();
         const currentMinute = currentTime.getMinutes();
         const currentSeconds = currentTime.getSeconds();
-        
+
         // Используем useRef для доступа к DOM-элементам
         const timelineRef = useRef<HTMLDivElement>(null);
-        
+
         // Функция для обновления положения линии времени
         useEffect(() => {
             if (!tableRef.current) return;
-            
+
             // Обновляем положение линии времени при изменении размеров окна
             const updateTimelinePosition = () => {
                 if (!tableRef.current || !timelineRef.current) return;
-                
+
                 // Получаем контейнер таблицы
                 const tableContainer = tableRef.current.querySelector('table');
                 if (!tableContainer) return;
-                
+
                 // Находим первую ячейку Th (с часами)
                 const headerHourCell = tableRef.current.querySelector('th:nth-child(2)');
                 if (!headerHourCell) return;
-                
+
                 // Получаем ширину области с часами (без колонки с номерами швартовок)
                 const hoursCellWidth = headerHourCell.clientWidth;
-                
+
                 // Находим левый отступ колонки с часами от левого края таблицы
                 const firstColumnWidth = 105; // Ширина первой колонки
-                
+
                 // Рассчитываем положение для текущего времени
                 const totalMinutesInDay = 24 * 60; // Всего минут в дне
                 const currentTotalMinutes = currentHour * 60 + currentMinute + (currentSeconds / 60);
                 const positionRatio = currentTotalMinutes / totalMinutesInDay;
-                
+
                 // Рассчитываем абсолютную позицию в пикселях
                 const timePosition = (hoursCellWidth * positionRatio);
-                
+
                 // Обновляем положение линии
                 timelineRef.current.style.left = `${firstColumnWidth + timePosition}px`;
             };
-            
+
             // Вызываем один раз для начального положения
             updateTimelinePosition();
-            
+
             // Добавляем слушатель для обновления при изменении размера окна
             window.addEventListener('resize', updateTimelinePosition);
-            
+
             // Создаем интервал для периодического обновления позиции
             const intervalId = setInterval(updateTimelinePosition, 60000); // Обновляем каждую минуту
-            
+
             return () => {
                 window.removeEventListener('resize', updateTimelinePosition);
                 clearInterval(intervalId);
             };
         }, [currentTime, tableRef, currentHour, currentMinute, currentSeconds]);
-        
+
         return (
             <Box
                 ref={timelineRef}
@@ -478,7 +478,7 @@ const TableDay: React.FC<TableDayProps> = ({
             }} position="relative" ref={tableRef}>
                 {/* Current time indicator */}
                 <CurrentTimeIndicator />
-                
+
                 <Table variant="unstyled" width="100%">
                     <Thead>
                         <Tr>
@@ -533,7 +533,7 @@ const TableDay: React.FC<TableDayProps> = ({
                                         rowId: row.id,
                                         mooring_ball: boat.mooring_ball
                                     });
-                                    
+
                                     // First check if the mooring ball IDs match
                                     let mooringBallMatches = false;
                                     if (boat.mooring_ball && boat.mooring_ball.ball_number) {
@@ -782,48 +782,66 @@ const TableDay: React.FC<TableDayProps> = ({
 
                                 const textColor = getCellColor(boatForHalfHour).textColor;
 
-                                    cells.push(
-                                        <Td
-                                            height="52px"
-                                            key={`boat-${row.id}-${hour}-${boatForHalfHour.id}-${halfHour}-${currentDate}`}
-                                            color={textColor}
-                                            colSpan={halfHourColspan}
-                                            p={0}
-                                            textAlign="center"
-                                            onClick={() => handleCellClick(row.id, hour, halfHour, boatForHalfHour)}
-                                            cursor="pointer"
-                                            className={selectedCell?.reservation?.reservation_id === boatForHalfHour.id ? 'selected-cell' : ''}
-                                            borderRight={hourIndex < hours.length - 1 && (hourIndex + 1) % 1 === 0 && (halfHourIndex + halfHourColspan) % 2 === 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
-                                            borderLeft={isFirstHalf && hourIndex > 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
-                                            borderTop="1px solid var(--chakra-colors-basic-grey100)"
+                                cells.push(
+                                    <Td
+                                        height="52px"
+                                        key={`boat-${row.id}-${hour}-${boatForHalfHour.id}-${halfHour}-${currentDate}`}
+                                        color={textColor}
+                                        colSpan={halfHourColspan}
+                                        p={0}
+                                        textAlign="center"
+                                        onClick={() => handleCellClick(row.id, hour, halfHour, boatForHalfHour)}
+                                        cursor="pointer"
+                                        className={selectedCell?.reservation?.reservation_id === boatForHalfHour.id ? 'selected-cell' : ''}
+                                        borderRight={hourIndex < hours.length - 1 && (hourIndex + 1) % 1 === 0 && (halfHourIndex + halfHourColspan) % 2 === 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
+                                        borderLeft={isFirstHalf && hourIndex > 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
+                                        borderTop="1px solid var(--chakra-colors-basic-grey100)"
+                                        data-boat-id={boatForHalfHour.id}
+                                        data-boat-name={boatForHalfHour.name}
+                                        data-boat-code={boatForHalfHour.code}
+                                        data-day={currentDate}
+                                        data-hour={hour}
+                                        bg={hourIndex % 2 === 0 ? "white" : "basic.grey50"}
+                                        sx={{
+                                            overflow: "hidden",
+                                        }}
+                                    >
+                                        <Flex
+                                            height="44px"
+                                            width="calc(100% - 4px)"
+                                            margin="0 2px"
+                                            alignItems="center"
+                                            justifyContent="center"
+                                            bg={getCellColor(boatForHalfHour).bg}
+                                            borderRadius={borderRadius}
+                                            className="boat-cell-container"
                                             data-boat-id={boatForHalfHour.id}
-                                            data-boat-name={boatForHalfHour.name}
-                                            data-boat-code={boatForHalfHour.code}
-                                            data-day={currentDate}
-                                            data-hour={hour}
-                                            bg={hourIndex % 2 === 0 ? "white" : "basic.grey50"}
-                                            sx={{
-                                                overflow: "hidden",
-                                            }}
+                                            position="relative"
                                         >
-                                            <Flex
-                                                height="44px"
-                                                width="calc(100% - 4px)"
-                                                margin="0 2px"
-                                                alignItems="center"
-                                                justifyContent="center"
-                                                bg={getCellColor(boatForHalfHour).bg}
-                                                borderRadius={borderRadius}
-                                                className="boat-cell-container"
-                                                data-boat-id={boatForHalfHour.id}
-                                            >
-                                                {renderBoatCell(boatForHalfHour, textColor)}
-                                            </Flex>
-                                        </Td>
-                                    );
+                                            {renderBoatCell(boatForHalfHour, textColor)}
+                                            {(boatForHalfHour.startsBefore || boatForHalfHour.endsAfter) && (
+                                                <Box
+                                                    position="absolute"
+                                                    top="0"
+                                                    left={boatForHalfHour.startsBefore ? "0" : "auto"}
+                                                    right={boatForHalfHour.endsAfter ? "0" : "auto"}
+                                                    height="100%"
+                                                    width="8px"
+                                                    objectFit="cover"
+                                                    transform={boatForHalfHour.startsBefore ? "rotate(180deg)" : "rotate(0deg)"}
+                                                    bg='white'
+                                                >
+                                                    <svg width="13" height="44" viewBox="0 0 13 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M4.02539 7.5L12.0254 0H0.0253906V44H12.0254L4.02539 36.5L12.0254 29.6629L4.02539 22L12.0254 13.8427L4.02539 7.5Z" fill={getCellColor(boatForHalfHour).bg} />
+                                                    </svg>
+                                                </Box>
+                                            )}
+                                        </Flex>
+                                    </Td>
+                                );
 
                                 halfHourIndex += halfHourColspan;
-                                }
+                            }
 
                             return (
                                 <Tr key={`row-${row.id}`} height="52px">

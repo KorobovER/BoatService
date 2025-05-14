@@ -6,12 +6,12 @@ export const getCellColor = (reservation: ReservationPublic): { bg: string; text
     }
 
     if (reservation.admin_status === 'future_action') {
-        return { bg: "system.warningYellow", textColor: "white" };
+        return { bg: "#FEA02F", textColor: "white" };
     }
 
     if (reservation.admin_status === 'completed') {
-        return { bg: "bg.success", textColor: "basic.grey700" };
+        return { bg: "#E5F2F2", textColor: "basic.grey700" };
     }
 
-    return { bg: "system.successGreen", textColor: "white" };
+    return { bg: "#007A7B", textColor: "white" };
 };

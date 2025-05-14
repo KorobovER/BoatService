@@ -1,9 +1,10 @@
 // TableMonth.tsx
 import React from 'react';
-import { Box, Text, Flex} from '@chakra-ui/react';
+import { Box, Text, Flex } from '@chakra-ui/react';
 import TableReservations from '../Calendar/TableReservations';
 import BoatCell from './BoatCell';
 import { ReservationExtenstion } from '../ReservationExtenstion';
+import { renderEdgeIcon } from './TableReservations';
 
 interface TableMonthProps {
     currentMonthDate: string;
@@ -109,7 +110,45 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
     );
 
     const renderBoatCell = (boat: ReservationExtenstion, colspan: number, textColor: string) => {
-        return <BoatCell reservation={boat} textColor={textColor} colspan={colspan} isMonthView={true} />;
+        return (
+            <Flex 
+                position="relative" 
+                width="100%" 
+                height="100%" 
+                alignItems="center" 
+                justifyContent="center"
+            >
+                <BoatCell reservation={boat} textColor={textColor} colspan={colspan} isMonthView={true} />
+                {(boat.startsBefore || boat.endsAfter) && (
+                    <>
+                        {boat.startsBefore && (
+                            <Box
+                                position="absolute"
+                                top="0"
+                                left="0"
+                                height="100%"
+                                width="8px"
+                                bg="white"
+                            >
+                                {renderEdgeIcon(boat, true)}
+                            </Box>
+                        )}
+                        {boat.endsAfter && (
+                            <Box
+                                position="absolute"
+                                top="0"
+                                right="0"
+                                height="100%"
+                                width="8px"
+                                bg="white"
+                            >
+                                {renderEdgeIcon(boat, false)}
+                            </Box>
+                        )}
+                    </>
+                )}
+            </Flex>
+        );
     };
 
     // Get the dates once

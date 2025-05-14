@@ -1,4 +1,4 @@
-import React, { useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
     Box,
@@ -22,6 +22,7 @@ import { useMarina } from '../../context/MarinaContext';
 import PopupFreeCell from './PopupFreeCell';
 import { ReservationExtenstion } from '../ReservationExtenstion';
 import PopupReserved from '../ServicesPanel/Services';
+import { getCellColor } from '../../utilsBola';
 
 interface Row {
     id: string;
@@ -39,24 +40,6 @@ interface TableReservationsProps {
     onReservationClick: (rowId: string, day: string, reservation?: ReservationExtenstion, timeOfDay?: 'AM' | 'PM') => void;
     isMonthView?: boolean;
 }
-
-export const getCellColor = (reservation: ReservationExtenstion): { bg: string; textColor: string } => {
-    // Используем статусы из API через поле admin_status
-    if (reservation.admin_status === 'require_action') {
-        return { bg: "system-error", textColor: "white" }; // red - требует действия
-    }
-
-    if (reservation.admin_status === 'future_action') {
-        return { bg: "system.warningYellow", textColor: "white" }; // yellow - будущее действие
-    }
-
-    if (reservation.admin_status === 'completed') {
-        return { bg: "bg.success", textColor: "basic.grey700" }; // light green - завершено
-    }
-
-    // По умолчанию - нормальное состояние
-    return { bg: "system.successGreen", textColor: "white" }; // green (default) - нормальное состояние
-};
 
 // Функция для создания опций запроса на получение швартовок
 function getMooringBallsQueryOptions(marinaId: string | undefined, currentTimeZone: string) {
@@ -98,6 +81,33 @@ function getReservationsQueryOptions(currentDate: string, marinaId: string | und
         refetchOnWindowFocus: true, // Перезапрашивать данные при фокусе окна
     };
 }
+
+const renderEdgeIcon = (reservation: ReservationExtenstion, isStart: boolean) => {
+    const cellColor = getCellColor(reservation);
+    
+    return (
+        <svg 
+            width="13" 
+            height="44" 
+            viewBox="0 0 13 44" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ 
+                transform: (isStart && reservation.startsBefore)? "rotate(180deg)" : "rotate(0deg)",
+                transformOrigin: "center"
+            }}
+        >
+            <path
+                d="M4.02539 7.5L12.0254 0H0.0253906V44H12.0254L4.02539 36.5L12.0254 29.6629L4.02539 22L12.0254 13.8427L4.02539 7.5Z"
+                fill={cellColor.bg}
+            />
+        </svg>
+    );
+};
+
+
+
+export { renderEdgeIcon };
 
 const TableReservations: React.FC<TableReservationsProps> = ({
     days,
@@ -230,7 +240,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                 return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
                             };
                             // Используем локальное время для всей таблицы
-                            const r: ReservationExtenstion =  {
+                            const r: ReservationExtenstion = {
                                 ...reservation,
                                 startDay: formatLocalDate(startDateUTC),
                                 endDay: formatLocalDate(endDateUTC),
@@ -261,7 +271,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                     })
                     .filter(Boolean) as ReservationExtenstion[];
 
-                    setReservations(apiBoats);
+                setReservations(apiBoats);
             } catch (error) {
                 console.error('Error processing reservations:', error);
             }
@@ -439,332 +449,332 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                     </Thead>
                     <Tbody>
                         {
-                        allRows.map(row => {
-                            // Первый проход - отмечаем занятые дни и половины дней
-                            // Изменяем массив с boolean на массив с 'AM' | 'PM' | 'FULL' | null
-                            const occupiedHalfDays = Array(days.length * 2).fill(null);
+                            allRows.map(row => {
+                                // Первый проход - отмечаем занятые дни и половины дней
+                                // Изменяем массив с boolean на массив с 'AM' | 'PM' | 'FULL' | null
+                                const occupiedHalfDays = Array(days.length * 2).fill(null);
 
-                            days.forEach((day, dayIndex) => {
-                                const amIndex = dayIndex * 2;
-                                const pmIndex = dayIndex * 2 + 1;
+                                days.forEach((day, dayIndex) => {
+                                    const amIndex = dayIndex * 2;
+                                    const pmIndex = dayIndex * 2 + 1;
 
-                                if (occupiedHalfDays[amIndex] !== null && occupiedHalfDays[pmIndex] !== null) return;
+                                    if (occupiedHalfDays[amIndex] !== null && occupiedHalfDays[pmIndex] !== null) return;
 
-                                // Находим все лодки для этого дня и стойки
-                                const dayBoats = reservations.filter(r => {
-                                    try {
-                                        // Преобразуем компоненты даты и создаем даты в локальной временной зоне
-                                        const [curYear, curMonth, curDay] = day.split('-').map(Number);
-                                        const currentDay = new Date(curYear, curMonth - 1, curDay);
+                                    // Находим все лодки для этого дня и стойки
+                                    const dayBoats = reservations.filter(r => {
+                                        try {
+                                            // Преобразуем компоненты даты и создаем даты в локальной временной зоне
+                                            const [curYear, curMonth, curDay] = day.split('-').map(Number);
+                                            const currentDay = new Date(curYear, curMonth - 1, curDay);
 
-                                        const [startYear, startMonth, startDay] = r.startDay.split('-').map(Number);
-                                        const startDate = new Date(startYear, startMonth - 1, startDay);
+                                            const [startYear, startMonth, startDay] = r.startDay.split('-').map(Number);
+                                            const startDate = new Date(startYear, startMonth - 1, startDay);
 
-                                        const [endYear, endMonth, endDay] = r.endDay.split('-').map(Number);
-                                        const endDate = new Date(endYear, endMonth - 1, endDay, 23, 59, 59);
-                                        return r.mooring_ball.ball_number.toLocaleString() === row.id && currentDay >= startDate && currentDay <= endDate;
-                                    } catch (error) {
-                                        return false;
+                                            const [endYear, endMonth, endDay] = r.endDay.split('-').map(Number);
+                                            const endDate = new Date(endYear, endMonth - 1, endDay, 23, 59, 59);
+                                            return r.mooring_ball.ball_number.toLocaleString() === row.id && currentDay >= startDate && currentDay <= endDate;
+                                        } catch (error) {
+                                            return false;
+                                        }
+                                    });
+
+                                    // Проверяем AM
+                                    const amBoat = dayBoats.find(b => {
+                                        const isStartDay = b.startDay === day;
+                                        // Если это день начала и лодка начинается после полудня (PM),
+                                        // то не занимает AM
+                                        if (isStartDay && b.startsInSecondHalf) {
+                                            return false;
+                                        }
+                                        return true;
+                                    });
+
+                                    // Проверяем PM
+                                    const pmBoat = dayBoats.find(b => {
+                                        const isEndDay = b.endDay === day;
+                                        // Если это день окончания и лодка заканчивается до полудня (AM),
+                                        // то не занимает PM
+                                        if (isEndDay && b.endsInFirstHalf) {
+                                            return false;
+                                        }
+                                        return true;
+                                    });
+
+                                    // Отмечаем занятые половины дня
+                                    if (amBoat) {
+                                        occupiedHalfDays[amIndex] = amBoat;
+                                    }
+                                    if (pmBoat) {
+                                        occupiedHalfDays[pmIndex] = pmBoat;
                                     }
                                 });
 
-                                // Проверяем AM
-                                const amBoat = dayBoats.find(b => {
-                                    const isStartDay = b.startDay === day;
-                                    // Если это день начала и лодка начинается после полудня (PM),
-                                    // то не занимает AM
-                                    if (isStartDay && b.startsInSecondHalf) {
-                                        return false;
+                                // Готовим массив ячеек для строки
+                                const cells: JSX.Element[] = [];
+
+                                // Проходим по половинам дней
+                                let halfDayIndex = 0;
+                                while (halfDayIndex < occupiedHalfDays.length) {
+                                    const dayIndex = Math.floor(halfDayIndex / 2);
+                                    const day = days[dayIndex];
+                                    const isAM = halfDayIndex % 2 === 0;
+                                    const timeOfDay = isAM ? 'AM' : 'PM';
+                                    const boatMatch = occupiedHalfDays[halfDayIndex];
+
+                                    // Если половина дня не занята, добавляем пустую ячейку
+                                    if (boatMatch === null) {
+                                        cells.push(
+                                            <Td
+                                                key={`empty-${row.id}-${day}-${timeOfDay}`}
+                                                height="52px"
+                                                padding={0}
+                                                position="relative"
+                                                _hover={{
+                                                    bg: 'brand.primaryOrange26'
+                                                }}
+                                                cursor="pointer"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleCellClick(row.id, day, undefined, timeOfDay);
+                                                }}
+                                                borderRight={!isAM && dayIndex < days.length - 1 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
+                                                borderTop="1px solid var(--chakra-colors-basic-grey100)"
+                                            >
+                                                <Box height="100%" width="100%" display="flex" alignItems="center" justifyContent="center" />
+                                            </Td>
+                                        );
+                                        halfDayIndex++;
+                                        continue;
                                     }
-                                    return true;
-                                });
 
-                                // Проверяем PM
-                                const pmBoat = dayBoats.find(b => {
-                                    const isEndDay = b.endDay === day;
-                                    // Если это день окончания и лодка заканчивается до полудня (AM),
-                                    // то не занимает PM
-                                    if (isEndDay && b.endsInFirstHalf) {
-                                        return false;
+                                    // Определяем, сколько последовательных половин дней занимает эта резервация
+                                    let halfDayColspan = 1;
+                                    let nextIndex = halfDayIndex + 1;
+
+                                    // Ищем последовательные ячейки той же резервации
+                                    while (nextIndex < occupiedHalfDays.length) {
+                                        const nextBoat = occupiedHalfDays[nextIndex];
+
+                                        // Проверяем, относится ли следующая ячейка к той же резервации
+                                        // Сравниваем ID, имя, дату начала и окончания
+                                        if (nextBoat &&
+                                            boatMatch.reservation_id === nextBoat.reservation_id &&
+                                            boatMatch.mooring_ball_id === nextBoat.mooring_ball_id &&
+                                            boatMatch.name === nextBoat.name &&
+                                            boatMatch.startDay === nextBoat.startDay &&
+                                            boatMatch.endDay === nextBoat.endDay) {
+                                            halfDayColspan++;
+                                            occupiedHalfDays[nextIndex] = null; // Отмечаем как обработанную
+                                            nextIndex++;
+                                        } else {
+                                            // Как только нашли другую резервацию или пустую ячейку, останавливаемся
+                                            break;
+                                        }
                                     }
-                                    return true;
-                                });
 
-                                // Отмечаем занятые половины дня
-                                if (amBoat) {
-                                    occupiedHalfDays[amIndex] = amBoat;
-                                }
-                                if (pmBoat) {
-                                    occupiedHalfDays[pmIndex] = pmBoat;
-                                }
-                            });
+                                    // Определяем границы для резервации
+                                    const isFirstDayOfWeek = dayIndex === 0;
+                                    const isLastDayOfWeek = Math.floor((halfDayIndex + halfDayColspan - 1) / 2) === days.length - 1;
+                                    const isStartDay = boatMatch.startDay === day;
+                                    const isEndDay = boatMatch.endDay === days[Math.floor((halfDayIndex + halfDayColspan - 1) / 2)];
 
-                            // Готовим массив ячеек для строки
-                            const cells: JSX.Element[] = [];
+                                    // Проверка границ видимого периода
+                                    const [firstDay, firstMonth, firstYear] = days[0].split('-').map(Number);
+                                    const firstVisibleDay = new Date(firstYear, firstMonth - 1, firstDay);
 
-                            // Проходим по половинам дней
-                            let halfDayIndex = 0;
-                            while (halfDayIndex < occupiedHalfDays.length) {
-                                const dayIndex = Math.floor(halfDayIndex / 2);
-                                const day = days[dayIndex];
-                                const isAM = halfDayIndex % 2 === 0;
-                                const timeOfDay = isAM ? 'AM' : 'PM';
-                                const boatMatch = occupiedHalfDays[halfDayIndex];
+                                    const [lastDay, lastMonth, lastYear] = days[days.length - 1].split('-').map(Number);
+                                    const lastVisibleDay = new Date(lastYear, lastMonth - 1, lastDay, 23, 59, 59);
 
-                                // Если половина дня не занята, добавляем пустую ячейку
-                                if (boatMatch === null) {
+                                    const [boatStartDay, boatStartMonth, boatStartYear] = boatMatch.startDay.split('-').map(Number);
+                                    const boatStartDate = new Date(boatStartYear, boatStartMonth - 1, boatStartDay);
+
+                                    const [boatEndDay, boatEndMonth, boatEndYear] = boatMatch.endDay.split('-').map(Number);
+                                    const boatEndDate = new Date(boatEndYear, boatEndMonth - 1, boatEndDay, 23, 59, 59);
+
+                                    const startsBeforeVisiblePeriod = boatStartDate < firstVisibleDay;
+                                    const endsAfterVisiblePeriod = boatEndDate > lastVisibleDay;
+
+                                    const isSelected = selectedCell?.rowId === row.id && selectedCell?.day === day;
+
+                                    // Определяем нужно ли скруглять каждый из краев
+                                    let needsLeftRadius = false;
+                                    let needsRightRadius = false;
+
+                                    // Левый край скруглен, если:
+                                    // 1. Это первый день видимого периода и резервация не начинается раньше
+                                    // 2. Или это день начала резервации и:
+                                    //    - для AM: всегда
+                                    //    - для PM: только если резервация начинается после полудня
+                                    needsLeftRadius = (isFirstDayOfWeek && !startsBeforeVisiblePeriod) ||
+                                        (isStartDay && (isAM || boatMatch.startsInSecondHalf));
+
+                                    // Правый край скруглен, если:
+                                    // 1. Это последний день видимого периода и резервация не продолжается дальше
+                                    // 2. Или это день окончания резервации и:
+                                    //    - для AM: только если резервация заканчивается до полудня
+                                    //    - для PM: всегда
+                                    const lastHalfDay = (halfDayIndex + halfDayColspan - 1) % 2 === 0; // Последняя часть - AM
+                                    needsRightRadius = (isLastDayOfWeek && !endsAfterVisiblePeriod) ||
+                                        (isEndDay && ((!lastHalfDay) || boatMatch.endsInFirstHalf));
+
+                                    // For month view - straight edges at month boundaries
+                                    if (isMonthView) {
+                                        // If this is the first day of the month and the reservation starts in the previous month - straight left edge
+                                        if (isFirstDayOfWeek) {
+                                            // Get the day of the month for the first day in the visible period
+                                            const [, , firstDayOfMonth] = days[0].split('-').map(Number);
+
+                                            // If this is the first day of the month (1st) and the reservation started earlier
+                                            if (firstDayOfMonth === 1 && startsBeforeVisiblePeriod) {
+                                                needsLeftRadius = false;
+                                                console.log('Detected reservation starting in previous month:', boatMatch);
+                                            }
+                                        }
+
+                                        // If this is the last day of the month and the reservation continues in the next month - straight right edge
+                                        if (isLastDayOfWeek) {
+                                            const [year, month, lastDayOfMonth] = days[days.length - 1].split('-').map(Number);
+
+                                            // Correct determination of the last day of the current month
+                                            // Months in JavaScript are indexed from 0, so for April we use month=4
+                                            const lastDayInMonth = new Date(year, month, 0).getDate();
+
+                                            console.log('Checking last day of month:', {
+                                                year,
+                                                month,
+                                                currentDay: lastDayOfMonth,
+                                                lastDayOfMonth: lastDayInMonth,
+                                                continuesBeyond: endsAfterVisiblePeriod,
+                                                boat: boatMatch.name,
+                                                start: boatMatch.startDay,
+                                                end: boatMatch.endDay
+                                            });
+
+                                            // For April (month 4 in our case) the last day is 30
+                                            if (lastDayOfMonth === lastDayInMonth && endsAfterVisiblePeriod) {
+                                                needsRightRadius = false;
+                                                console.log('Detected reservation continuing to next month:', boatMatch);
+                                            }
+                                        }
+                                    }
+
+                                    // Debug for the specific case of April-May
+                                    const startMonth = parseInt(boatMatch.startDay.split('-')[1]);
+                                    const endMonth = parseInt(boatMatch.endDay.split('-')[1]);
+
+                                    if (isMonthView) {
+                                        // If current day is April 30 and the reservation continues into May
+                                        if (day.endsWith('-04-30') && endMonth === 5) {
+                                            needsRightRadius = false;
+                                            console.log('Applied special rule for April 30:', boatMatch);
+                                        }
+
+                                        // If current day is May 1 and the reservation started in April
+                                        if (day.endsWith('-05-01') && startMonth === 4) {
+                                            needsLeftRadius = false;
+                                            console.log('Applied special rule for May 1:', boatMatch);
+                                        }
+                                    }
+
+                                    // Определяем итоговый borderRadius
+                                    let borderRadius = "0";
+                                    if (needsLeftRadius && needsRightRadius) {
+                                        borderRadius = "1000px";
+                                    } else if (needsLeftRadius) {
+                                        borderRadius = "1000px 0 0 1000px";
+                                    } else if (needsRightRadius) {
+                                        borderRadius = "0 1000px 1000px 0";
+                                    }
+
                                     cells.push(
                                         <Td
-                                            key={`empty-${row.id}-${day}-${timeOfDay}`}
                                             height="52px"
-                                            padding={0}
-                                            position="relative"
-                                            _hover={{
-                                                bg: 'brand.primaryOrange26'
-                                            }}
+                                            key={`boat-${row.id}-${day}-${boatMatch.id}-${timeOfDay}`}
+                                            color={getCellColor(boatMatch).textColor}
+                                            colSpan={halfDayColspan}
+                                            p={0}
+                                            textAlign="center"
+                                            onClick={() => handleCellClick(row.id, day, boatMatch, timeOfDay)}
                                             cursor="pointer"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleCellClick(row.id, day, undefined, timeOfDay);
-                                            }}
-                                            borderRight={!isAM && dayIndex < days.length - 1 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
+                                            className={isSelected ? 'selected-cell' : ''}
+                                            borderRight={dayIndex < days.length - 1 && (halfDayIndex + halfDayColspan) % 2 === 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
                                             borderTop="1px solid var(--chakra-colors-basic-grey100)"
-                                        >
-                                            <Box height="100%" width="100%" display="flex" alignItems="center" justifyContent="center" />
-                                        </Td>
-                                    );
-                                    halfDayIndex++;
-                                    continue;
-                                }
-
-                                // Определяем, сколько последовательных половин дней занимает эта резервация
-                                let halfDayColspan = 1;
-                                let nextIndex = halfDayIndex + 1;
-
-                                // Ищем последовательные ячейки той же резервации
-                                while (nextIndex < occupiedHalfDays.length) {
-                                    const nextBoat = occupiedHalfDays[nextIndex];
-
-                                    // Проверяем, относится ли следующая ячейка к той же резервации
-                                    // Сравниваем ID, имя, дату начала и окончания
-                                    if (nextBoat &&
-                                        boatMatch.reservation_id === nextBoat.reservation_id &&
-                                        boatMatch.mooring_ball_id === nextBoat.mooring_ball_id &&
-                                        boatMatch.name === nextBoat.name &&
-                                        boatMatch.startDay === nextBoat.startDay &&
-                                        boatMatch.endDay === nextBoat.endDay) {
-                                        halfDayColspan++;
-                                        occupiedHalfDays[nextIndex] = null; // Отмечаем как обработанную
-                                        nextIndex++;
-                                    } else {
-                                        // Как только нашли другую резервацию или пустую ячейку, останавливаемся
-                                        break;
-                                    }
-                                }
-
-                                // Определяем границы для резервации
-                                const isFirstDayOfWeek = dayIndex === 0;
-                                const isLastDayOfWeek = Math.floor((halfDayIndex + halfDayColspan - 1) / 2) === days.length - 1;
-                                const isStartDay = boatMatch.startDay === day;
-                                const isEndDay = boatMatch.endDay === days[Math.floor((halfDayIndex + halfDayColspan - 1) / 2)];
-
-                                // Проверка границ видимого периода
-                                const [firstDay, firstMonth, firstYear] = days[0].split('-').map(Number);
-                                const firstVisibleDay = new Date(firstYear, firstMonth - 1, firstDay);
-
-                                const [lastDay, lastMonth, lastYear] = days[days.length - 1].split('-').map(Number);
-                                const lastVisibleDay = new Date(lastYear, lastMonth - 1, lastDay, 23, 59, 59);
-
-                                const [boatStartDay, boatStartMonth, boatStartYear] = boatMatch.startDay.split('-').map(Number);
-                                const boatStartDate = new Date(boatStartYear, boatStartMonth - 1, boatStartDay);
-
-                                const [boatEndDay, boatEndMonth, boatEndYear] = boatMatch.endDay.split('-').map(Number);
-                                const boatEndDate = new Date(boatEndYear, boatEndMonth - 1, boatEndDay, 23, 59, 59);
-
-                                const startsBeforeVisiblePeriod = boatStartDate < firstVisibleDay;
-                                const endsAfterVisiblePeriod = boatEndDate > lastVisibleDay;
-
-                                const isSelected = selectedCell?.rowId === row.id && selectedCell?.day === day;
-
-                                // Определяем нужно ли скруглять каждый из краев
-                                let needsLeftRadius = false;
-                                let needsRightRadius = false;
-
-                                // Левый край скруглен, если:
-                                // 1. Это первый день видимого периода и резервация не начинается раньше
-                                // 2. Или это день начала резервации и:
-                                //    - для AM: всегда
-                                //    - для PM: только если резервация начинается после полудня
-                                needsLeftRadius = (isFirstDayOfWeek && !startsBeforeVisiblePeriod) ||
-                                                (isStartDay && (isAM || boatMatch.startsInSecondHalf));
-
-                                // Правый край скруглен, если:
-                                // 1. Это последний день видимого периода и резервация не продолжается дальше
-                                // 2. Или это день окончания резервации и:
-                                //    - для AM: только если резервация заканчивается до полудня
-                                //    - для PM: всегда
-                                const lastHalfDay = (halfDayIndex + halfDayColspan - 1) % 2 === 0; // Последняя часть - AM
-                                needsRightRadius = (isLastDayOfWeek && !endsAfterVisiblePeriod) ||
-                                                 (isEndDay && ((!lastHalfDay) || boatMatch.endsInFirstHalf));
-
-                                // For month view - straight edges at month boundaries
-                                if (isMonthView) {
-                                    // If this is the first day of the month and the reservation starts in the previous month - straight left edge
-                                    if (isFirstDayOfWeek) {
-                                        // Get the day of the month for the first day in the visible period
-                                        const [, , firstDayOfMonth] = days[0].split('-').map(Number);
-                                        
-                                        // If this is the first day of the month (1st) and the reservation started earlier
-                                        if (firstDayOfMonth === 1 && startsBeforeVisiblePeriod) {
-                                            needsLeftRadius = false;
-                                            console.log('Detected reservation starting in previous month:', boatMatch);
-                                        }
-                                    }
-                                    
-                                    // If this is the last day of the month and the reservation continues in the next month - straight right edge
-                                    if (isLastDayOfWeek) {
-                                        const [year, month, lastDayOfMonth] = days[days.length - 1].split('-').map(Number);
-                                        
-                                        // Correct determination of the last day of the current month
-                                        // Months in JavaScript are indexed from 0, so for April we use month=4
-                                        const lastDayInMonth = new Date(year, month, 0).getDate();
-                                        
-                                        console.log('Checking last day of month:', {
-                                            year,
-                                            month,
-                                            currentDay: lastDayOfMonth,
-                                            lastDayOfMonth: lastDayInMonth,
-                                            continuesBeyond: endsAfterVisiblePeriod,
-                                            boat: boatMatch.name,
-                                            start: boatMatch.startDay,
-                                            end: boatMatch.endDay
-                                        });
-                                        
-                                        // For April (month 4 in our case) the last day is 30
-                                        if (lastDayOfMonth === lastDayInMonth && endsAfterVisiblePeriod) {
-                                            needsRightRadius = false;
-                                            console.log('Detected reservation continuing to next month:', boatMatch);
-                                        }
-                                    }
-                                }
-
-                                // Debug for the specific case of April-May
-                                const startMonth = parseInt(boatMatch.startDay.split('-')[1]);
-                                const endMonth = parseInt(boatMatch.endDay.split('-')[1]);
-
-                                if (isMonthView) {
-                                    // If current day is April 30 and the reservation continues into May
-                                    if (day.endsWith('-04-30') && endMonth === 5) {
-                                        needsRightRadius = false;
-                                        console.log('Applied special rule for April 30:', boatMatch);
-                                    }
-                                    
-                                    // If current day is May 1 and the reservation started in April
-                                    if (day.endsWith('-05-01') && startMonth === 4) {
-                                        needsLeftRadius = false;
-                                        console.log('Applied special rule for May 1:', boatMatch);
-                                    }
-                                }
-
-                                // Определяем итоговый borderRadius
-                                let borderRadius = "0";
-                                if (needsLeftRadius && needsRightRadius) {
-                                    borderRadius = "1000px";
-                                } else if (needsLeftRadius) {
-                                    borderRadius = "1000px 0 0 1000px";
-                                } else if (needsRightRadius) {
-                                    borderRadius = "0 1000px 1000px 0";
-                                }
-
-                                cells.push(
-                                    <Td
-                                        height="52px"
-                                        key={`boat-${row.id}-${day}-${boatMatch.id}-${timeOfDay}`}
-                                        color={getCellColor(boatMatch).textColor}
-                                        colSpan={halfDayColspan}
-                                        p={0}
-                                        textAlign="center"
-                                        onClick={() => handleCellClick(row.id, day, boatMatch, timeOfDay)}
-                                        cursor="pointer"
-                                        className={isSelected ? 'selected-cell' : ''}
-                                        borderRight={dayIndex < days.length - 1 && (halfDayIndex + halfDayColspan) % 2 === 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
-                                        borderTop="1px solid var(--chakra-colors-basic-grey100)"
-                                        data-boat-id={boatMatch.id}
-                                        data-mooring-ball-id={boatMatch.mooring_ball_id}
-                                        data-boat-name={boatMatch.name}
-                                        data-boat-code={boatMatch.code}
-                                        sx={{
-                                            overflow: "hidden",
-                                            '&.selected-cell': {
-                                                zIndex: 1000,
-                                            }
-                                        }}
-                                    >
-                                        <Flex
-                                            height="44px"
-                                            width="calc(100% - 4px)"
-                                            margin="0 2px"
-                                            alignItems="center"
-                                            justifyContent="center"
-                                            bg={getCellColor(boatMatch).bg}
-                                            borderRadius={borderRadius}
-                                            className="boat-cell-container"
                                             data-boat-id={boatMatch.id}
                                             data-mooring-ball-id={boatMatch.mooring_ball_id}
+                                            data-boat-name={boatMatch.name}
+                                            data-boat-code={boatMatch.code}
+                                            sx={{
+                                                overflow: "hidden",
+                                                '&.selected-cell': {
+                                                    zIndex: 1000,
+                                                }
+                                            }}
                                         >
-                                            {/* Показываем информацию о лодке */}
-                                            {renderBoatCell(boatMatch, halfDayColspan / 2, getCellColor(boatMatch).textColor)}
-                                        </Flex>
-                                    </Td>
-                                );
-
-                                // Переходим к следующей необработанной половине дня
-                                halfDayIndex += halfDayColspan;
-                            }
-
-                            return (
-                                <Tr key={`row-${row.id}`} height="52px">
-                                    <Td
-                                        height="52px"
-                                        p={0}
-                                        position="sticky"
-                                        left="0"
-                                        bg="white"
-                                        zIndex={1}
-                                        borderRight="1px solid var(--chakra-colors-basic-grey100)"
-                                        borderTop="1px solid var(--chakra-colors-basic-grey100)"
-                                    >
-                                        <Flex
-                                            height="44px"
-                                            alignItems="center"
-                                            justifyContent="flex-start"
-                                            gap="8px"
-                                            padding="16px"
-                                        >
-                                            <Image
-                                                w="24px"
-                                                h="24px"
-                                                src={BolaCell}
-                                                alt="Bola"
-                                            />
-                                            <Text
-                                                fontSize="16px"
-                                                lineHeight="24px"
-                                                textOverflow="ellipsis"
-                                                whiteSpace="nowrap"
-                                                overflow="hidden"
-                                                flex="1"
-                                                color="basic.grey900"
-                                                fontWeight="500"
+                                            <Flex
+                                                height="44px"
+                                                width="calc(100% - 4px)"
+                                                margin="0 2px"
+                                                alignItems="center"
+                                                justifyContent="center"
+                                                bg={getCellColor(boatMatch).bg}
+                                                borderRadius={borderRadius}
+                                                className="boat-cell-container"
+                                                data-boat-id={boatMatch.id}
+                                                data-mooring-ball-id={boatMatch.mooring_ball_id}
                                             >
-                                                {row.label}
-                                            </Text>
-                                        </Flex>
-                                    </Td>
-                                    {cells}
-                                </Tr>
-                            );
-                        })}
+                                                {/* Показываем информацию о лодке */}
+                                                {renderBoatCell(boatMatch, halfDayColspan / 2, getCellColor(boatMatch).textColor)}
+                                            </Flex>
+                                        </Td>
+                                    );
+
+                                    // Переходим к следующей необработанной половине дня
+                                    halfDayIndex += halfDayColspan;
+                                }
+
+                                return (
+                                    <Tr key={`row-${row.id}`} height="52px">
+                                        <Td
+                                            height="52px"
+                                            p={0}
+                                            position="sticky"
+                                            left="0"
+                                            bg="white"
+                                            zIndex={1}
+                                            borderRight="1px solid var(--chakra-colors-basic-grey100)"
+                                            borderTop="1px solid var(--chakra-colors-basic-grey100)"
+                                        >
+                                            <Flex
+                                                height="44px"
+                                                alignItems="center"
+                                                justifyContent="flex-start"
+                                                gap="8px"
+                                                padding="16px"
+                                            >
+                                                <Image
+                                                    w="24px"
+                                                    h="24px"
+                                                    src={BolaCell}
+                                                    alt="Bola"
+                                                />
+                                                <Text
+                                                    fontSize="16px"
+                                                    lineHeight="24px"
+                                                    textOverflow="ellipsis"
+                                                    whiteSpace="nowrap"
+                                                    overflow="hidden"
+                                                    flex="1"
+                                                    color="basic.grey900"
+                                                    fontWeight="500"
+                                                >
+                                                    {row.label}
+                                                </Text>
+                                            </Flex>
+                                        </Td>
+                                        {cells}
+                                    </Tr>
+                                );
+                            })}
                     </Tbody>
                 </Table>
             </Box>

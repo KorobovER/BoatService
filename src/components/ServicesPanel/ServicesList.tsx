@@ -612,7 +612,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
                             <Text fontSize="14px" fontWeight="700" color='basic.grey700' noOfLines={1} textOverflow="ellipsis">
                                 {subService.quantity}x {subService.name}
                             </Text>
-                            <Text fontSize="14px" fontWeight="400" color='basic.grey900' noOfLines={1} textOverflow="ellipsis">${subService.price} / {subService.unit}</Text>
+                            <Text fontSize="14px" fontWeight="400" color='basic.grey900' noOfLines={1} textOverflow="ellipsis">${subService.price.toFixed(2)} / {subService.unit}</Text>
                         </Flex>
                         <Button
                             w={buttonConfig.styles.w}

@@ -84,13 +84,13 @@ function getReservationsQueryOptions(currentDate: string, marinaId: string | und
 
 const renderEdgeIcon = (reservation: ReservationExtenstion, isStart: boolean) => {
     const cellColor = getCellColor(reservation);
-    
+
     return (
         <svg 
-            width="13" 
-            height="44" 
-            viewBox="0 0 13 44" 
-            fill="none" 
+            width="13"
+            height="44"
+            viewBox="0 0 13 44"
+            fill="none"
             xmlns="http://www.w3.org/2000/svg"
             style={{ 
                 transform: (isStart && reservation.startsBefore)? "rotate(180deg)" : "rotate(0deg)",

@@ -36,10 +36,10 @@ const colors = {
   },
   calendar: {
     todayBg: "#FAE8D9",
-    BgRed: "#A85555",
-    BgYellow: "#FEA02F",
-    BgLightGreen: "#E5F2F2",
-    BgGreen: "#007A7B",
+    bgRed: "#A85555",
+    bgYellow: "#FEA02F",
+    bgLightGreen: "#E5F2F2",
+    bgGreen: "#007A7B",
   },
   // Градиенты
   gradient: {

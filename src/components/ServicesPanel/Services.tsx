@@ -644,12 +644,11 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                             <Flex alignItems="center" flexDirection="column" justifyContent="center" w="100%">
                                 <Button
                                     display="flex"
+                                    height='50px'
                                     justifyContent="center"
-                                    my="10px"
-                                    leftIcon={<Box as="span" mr={2}>💳</Box>}
+                                    leftIcon={<Image p='10px' src="/assets/images/credit-card.svg" alt="Card" />}
                                     bg="system.successGreen"
                                     color="white"
-                                    size="lg"
                                     borderRadius="full"
                                     px='md'
                                     py='10px'
@@ -695,6 +694,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                         <Collapse in={isPaymentDetailsOpen && paymentError} animateOpacity>
                             <Flex alignItems="center" flexDirection="column" justifyContent="center" w="100%">
                                 <Button
+                                    height='50px'
                                     py="10px"
                                     px='md'
                                     my="10px"
@@ -703,7 +703,6 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                                     leftIcon={<Box bg="system.errorRedNew" borderRadius="full"><Image width="30px" height="30px" src="/assets/images/alert-icon-white.svg" alt="Retry" /></Box>}
                                     bg="brand.secondaryBlue"
                                     color="white"
-                                    size="lg"
                                     borderRadius="full"
                                     fontWeight="500"
                                     _hover={{ bg: "teal.400" }}

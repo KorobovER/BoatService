@@ -186,7 +186,7 @@ const MarkPaid: React.FC<MarkPaidProps> = ({
                                     Mark Bill as Manually Paid?
                                 </Text>
                                 <Text color="gray.700" fontSize="14px" fontWeight="300">
-                                    The remaining $${total.toFixed(2)}  (including 7.5% platform fee) will be marked as manually paid, and the bill will be moved to the Statement Charges section.
+                                    The remaining ${total.toFixed(2)}  (including 7.5% platform fee) will be marked as manually paid, and the bill will be moved to the Statement Charges section.
                                 </Text>
                             </Box>
                         </Flex>

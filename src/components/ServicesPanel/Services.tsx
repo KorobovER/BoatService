@@ -407,7 +407,9 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     if (!isOpen || !reservation) return null;
 
     // Get user name from the boat object if available
-    const userName = `${reservation.user.first_name} ${reservation.user.last_name}`
+    const userName = reservation?.user 
+        ? `${reservation.user.first_name || ''} ${reservation.user.last_name || ''}`.trim() 
+        : 'Unknown User'
 
     // Function to handle adding more services to existing reservation
     const handleAddMoreServices = () => {
@@ -501,12 +503,12 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                         align="center"
                         gap="12px">
                         <Image
-                            src={reservation.boat.vessel_type === 'power'
+                            src={reservation?.boat?.vessel_type === 'power'
                                 ? "/assets/images/power-boat.svg"
-                                : reservation.boat.vessel_type === 'catamaran'
+                                : reservation?.boat?.vessel_type === 'catamaran'
                                     ? "/assets/images/catamaran-boat.svg"
                                     : "/assets/images/monohul-boat.svg"}
-                            alt={reservation.boat.boatname}
+                            alt={reservation?.boat?.boatname || 'Boat'}
                             width="32px"
                             height="32px"
                             filter="invert(40%) sepia(90%) saturate(2259%) hue-rotate(352deg) brightness(98%) contrast(97%)"
@@ -514,14 +516,14 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                         <Box w="100%">
                             <Flex justifyContent="space-between" align="center" gap="4px">
                                 <Flex align="center" gap="4px">
-                                    <Text fontSize="16px" fontWeight="500" color="gray.900">{reservation.boat.boatname}</Text>
+                                    <Text fontSize="16px" fontWeight="500" color="gray.900">{reservation?.boat?.boatname || 'Unknown Boat'}</Text>
                                     <Text fontSize="12px" fontWeight="300" color="gray.600">|</Text>
                                     <Text fontSize="12px" fontWeight="300" color="gray.600">{userName}</Text>
                                 </Flex>
-                                <Text bg="basic.grey100" px="sm" py="xs" borderRadius="var(--chakra-space-sm)" fontSize="16px" fontWeight="500" color="gray.900">{reservation.boat.registration_number}</Text>
+                                <Text bg="basic.grey100" px="sm" py="xs" borderRadius="var(--chakra-space-sm)" fontSize="16px" fontWeight="500" color="gray.900">{reservation?.boat?.registration_number || 'N/A'}</Text>
                             </Flex>
                             <Flex justifyContent="space-between" align="center">
-                                <Text fontSize="12px" fontWeight="300" color="gray.900">LOA {reservation.boat.loa}ft | Draft {reservation.boat.draft}ft</Text>
+                                <Text fontSize="12px" fontWeight="300" color="gray.900">LOA {reservation?.boat?.loa || 'N/A'}ft | Draft {reservation?.boat?.draft || 'N/A'}ft</Text>
                             </Flex>
                         </Box>
                     </Flex>
@@ -809,6 +811,13 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 onClose={() => setIsMarkUncollectibleModalOpen(false)}
                 payment={paymentReceipt}
                 reservationId={reservation.reservation_id}
+                onServiceStatusChange={(updatedReservation) => {
+                    setLocalReservation(updatedReservation);
+                    // Invalidate and refetch reservation query to ensure fresh data
+                    queryClient.invalidateQueries({ 
+                        queryKey: ['reservation', reservation?.reservation_id] 
+                    });
+                }}
             />
             
             {/* Mark Paid Modal */}

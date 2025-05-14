@@ -10,21 +10,27 @@ import {
     Text,
     Flex,
     Image,
-    Box
+    Box,
+    useToast
 } from '@chakra-ui/react';
 import { PaymentReceiptPublic, SubServiceRequest } from '../../client/models';
+import { ReservationsService } from '../../client/services';
+import { useState } from 'react';
 
 interface MarkUncollectibleProps {
     isOpen: boolean;
     onClose: () => void;
     payment: PaymentReceiptPublic;
     reservationId: string;
+    onServiceStatusChange?: (updatedReservation: any) => void;
 }
 
 const MarkUncollectible: React.FC<MarkUncollectibleProps> = ({
     isOpen,
     onClose,
     payment,
+    reservationId,
+    onServiceStatusChange,
 }) => {
     // Extract data from PaymentReceiptPublic
     const subtotal = payment?.subtotal || 0;
@@ -32,6 +38,88 @@ const MarkUncollectible: React.FC<MarkUncollectibleProps> = ({
     const taxes = payment?.taxes || 0;
     const total = subtotal + serviceFee + taxes;
     const services = payment?.service_requests?.flatMap(service => service.services) || [];
+
+    const toast = useToast();
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleMarkUncollectible = async () => {
+        // Ensure we have a reservationId and at least one service
+        if (!reservationId || !payment?.service_requests?.length) {
+            toast({
+                title: "Error",
+                description: "No services found to mark uncollectible",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            // Prepare updated reservation for local state
+            const updatedReservation = {
+                ...payment,
+                service_requests: payment.service_requests.map(service => ({
+                    ...service,
+                    status: 'failed'
+                }))
+            };
+
+            // Optimistically update local state
+            if (onServiceStatusChange) {
+                onServiceStatusChange(updatedReservation);
+            }
+
+            // Update status for each service in the payment
+            await Promise.all(payment.service_requests.map(service => 
+                ReservationsService.updateReservationServiceStatus({
+                    reservationId: reservationId,
+                    serviceId: service.service_reservation_id,
+                    statusIn: 'failed'
+                })
+            ));
+
+            // Fetch the updated reservation to ensure data consistency
+            const updatedReservationData = await ReservationsService.readReservation({ 
+                id: reservationId 
+            });
+
+            // Update local state with the fetched reservation data
+            if (onServiceStatusChange) {
+                onServiceStatusChange(updatedReservationData);
+            }
+
+            // Show success toast
+            toast({
+                title: "Services Marked Uncollectible",
+                description: `The remaining $${total.toFixed(2)} due has been marked as uncollectible.`,
+                status: "success",
+                duration: 3000,
+                isClosable: true,
+            });
+
+            // Close the modal
+            onClose();
+        } catch (error) {
+            // Revert local state update if API call fails
+            toast({
+                title: "Error",
+                description: "Failed to mark services as uncollectible",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+            console.error('Error marking services uncollectible:', error);
+
+            // If onServiceStatusChange is provided, revert to original state
+            if (onServiceStatusChange) {
+                onServiceStatusChange(payment);
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} isCentered>
@@ -91,6 +179,9 @@ const MarkUncollectible: React.FC<MarkUncollectibleProps> = ({
                         fontSize="16px"
                         fontWeight="400"
                         leftIcon={<Image ml='4px' h='auto' src='assets/images/close-red.svg' filter="brightness(0) invert(1)" />}
+                        onClick={handleMarkUncollectible}
+                        isLoading={isLoading}
+                        loadingText="Marking Uncollectible"
                     >
                         Mark uncollectible
                     </Button>

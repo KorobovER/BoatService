@@ -44,7 +44,6 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
     onClose,
     services,
     reservation,
-    userName = '',
     rowId = ''
 }) => {
     const toast = useToast();
@@ -479,21 +478,23 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                         {reservation && (
                             <>
                                 <Image
-                                    src={reservation.boat.vessel_type === 'power'
+                                    src={reservation?.boat?.vessel_type === 'power'
                                         ? "/assets/images/power-boat.svg"
-                                        : reservation.boat.vessel_type === 'catamaran'
+                                        : reservation?.boat?.vessel_type === 'catamaran'
                                             ? "/assets/images/catamaran-boat.svg"
                                             : "/assets/images/monohul-boat.svg"}
-                                    alt={reservation.boat.boatname}
-                                    width="40px"
-                                    height="40px"
+                                    alt={reservation?.boat?.boatname || 'Boat'}
+                                    width="32px"
+                                    height="32px"
                                     filter="invert(40%) sepia(90%) saturate(2259%) hue-rotate(352deg) brightness(98%) contrast(97%)"
                                     marginLeft="lg"
                                 />
-                                <Text fontSize="14px" fontWeight="500" color="gray.600" pl="lg" pr="4px">{reservation.boat.boatname}</Text>
+                                <Text fontSize="14px" fontWeight="500" color="gray.600" pl="lg" pr="4px">
+                                    {reservation?.boat?.boatname || 'Unknown Boat'}
+                                </Text>
                                 <Text fontSize="12px" fontWeight="300" color="gray.600">|</Text>
                                 <Text fontSize="12px" fontWeight="300" color="gray.600" pl="4px">
-                                    {userName || `${reservation.user.first_name || ''} ${reservation.user.last_name || ''}`}
+                                    {`${reservation?.user?.first_name || ''} ${reservation?.user?.last_name || ''}`.trim() || 'Unknown User'}
                                 </Text>
                             </>
                         )}

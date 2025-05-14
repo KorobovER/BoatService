@@ -378,7 +378,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     );
 
     return (
-        <Box display="flex" alignItems="flex-start" width="100%" position="relative">
+        <Box display="flex" alignItems="flex-start" width="100%" position="relative" minHeight="100vh" bg="white">
             {/* Показываем оверлей при обновлении данных */}
             {isFetching && !isLoading && (
                 <Box

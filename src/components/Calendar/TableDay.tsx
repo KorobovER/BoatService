@@ -466,7 +466,7 @@ const TableDay: React.FC<TableDayProps> = ({
     );
 
     return (
-        <Box display="flex" alignItems="flex-start" width="100%">
+        <Box display="flex" alignItems="flex-start" width="100%" minHeight="100vh" bg="white">
             <Box flex="1" overflowX="auto" sx={{
                 '&:focus': { outline: 'none' },
                 '&:focus-visible': { outline: 'none' },

@@ -7,7 +7,9 @@ interface HoverReservationProps {
 }
 
 const HoverReservation: React.FC<HoverReservationProps> = ({ reservation }) => {
-    const serviceRequests = reservation.service_requests || [];
+    const serviceRequests = (reservation.service_requests || []).filter(
+        request => !['denied', 'cancelled', 'failed'].includes(request.status)
+    );
     const hasServiceRequests = serviceRequests.length > 0;
     const buttonStyle = {
         bg: hasServiceRequests ? 'system.warningYellow' : 'system.successGreen',

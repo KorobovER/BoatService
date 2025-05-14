@@ -733,7 +733,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
                         {service.services.map((subService, i) => (
                             <Flex gap="8px" key={i} alignItems="center">
                                 <Flex bg="basic.grey200" borderRadius='8px' alignItems="center" justifyContent="center" w="46px" h="46px">
-                                    <Image w='24px' h='auto' src={getServiceIcon(subService.name)} alt={subService.name} filter="brightness(0) invert(1)" />
+                                    <Image w='24px' h='auto' src={getServiceIcon(subService.name)} filter="brightness(0) invert(1)" />
                                 </Flex>
                                 <Flex flex="1" justify="space-between" flexDirection="column">
                                     <Text fontSize="14px" fontWeight="700" color='basic.grey700' noOfLines={1} textOverflow="ellipsis">

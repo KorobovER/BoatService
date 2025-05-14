@@ -613,7 +613,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                         </Button>
                     </Flex>
                     {/* Content*/}
-                    <Flex flexDirection="column" w="100%" gap="xl" minWidth="400px">
+                    <Flex flexDirection="column" w="100%" gap="xl">
                         <ServicesList
                             reservation={localReservation || reservation}
                             rowId={rowId}

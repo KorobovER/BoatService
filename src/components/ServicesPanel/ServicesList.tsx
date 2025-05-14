@@ -608,10 +608,10 @@ const ServicesList: React.FC<ServicesListProps> = ({
                             <Image w='24px' h='auto' src={getServiceIcon(subService.name)} alt={subService.name} filter="brightness(0) invert(1)" />
                         </Flex>
                         <Flex flex="1" justify="space-between" flexDirection="column">
-                            <Text fontSize="14px" fontWeight="700" color='basic.grey700'>
+                            <Text fontSize="14px" fontWeight="700" color='basic.grey700' noOfLines={1} textOverflow="ellipsis">
                                 {subService.quantity}x {subService.name}
                             </Text>
-                            <Text fontSize="14px" fontWeight="400" color='basic.grey900'>${subService.price} / {subService.unit}</Text>
+                            <Text fontSize="14px" fontWeight="400" color='basic.grey900' noOfLines={1} textOverflow="ellipsis">${subService.price} / {subService.unit}</Text>
                         </Flex>
                         <Button
                             w={buttonConfig.styles.w}
@@ -736,10 +736,10 @@ const ServicesList: React.FC<ServicesListProps> = ({
                                     <Image w='24px' h='auto' src={getServiceIcon(subService.name)} alt={subService.name} filter="brightness(0) invert(1)" />
                                 </Flex>
                                 <Flex flex="1" justify="space-between" flexDirection="column">
-                                    <Text fontSize="14px" fontWeight="700" color='basic.grey700'>
+                                    <Text fontSize="14px" fontWeight="700" color='basic.grey700' noOfLines={1} textOverflow="ellipsis">
                                         {service.service_reservation_id}
                                     </Text>
-                                    <Text fontSize="14px" fontWeight="400" color='basic.grey900'>{formatRequestedDate(service.requested_date)}</Text>
+                                    <Text fontSize="14px" fontWeight="400" color='basic.grey900' noOfLines={1} textOverflow="ellipsis">{formatRequestedDate(service.requested_date)}</Text>
                                 </Flex>
                                 <Button
                                     variant="unstyled"

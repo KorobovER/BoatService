@@ -527,12 +527,7 @@ const TableDay: React.FC<TableDayProps> = ({
                                 }
                                 console.log(`reservations ${reservations}`);
                                 // Find boats for this hour and row
-                                const boatsForHour = reservations.filter(boat => {
-                                    console.log(`Comparing mooring ball IDs:`, {
-                                        boatMooringBallId: boat.mooring_ball_id,
-                                        rowId: row.id,
-                                        mooring_ball: boat.mooring_ball
-                                    });
+                                const boatsForHour = reservations.filter(boat => {;
 
                                     // First check if the mooring ball IDs match
                                     let mooringBallMatches = false;

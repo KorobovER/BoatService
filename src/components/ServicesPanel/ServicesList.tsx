@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Text, Image, Flex, Button, Menu, MenuButton, MenuItem, MenuList, useToast} from '@chakra-ui/react';
 import NoService from './NoService';
 import { ReservationExtenstion } from '../ReservationExtenstion';
-import { ServiceOnReservationPublic, ServiceRequestStatus } from '../../client/models';
+import { ServiceOnReservationPublic, ServiceRequestStatus, PaymentReceiptPublic } from '../../client/models';
 import { getServiceIcon } from './Services';
 import { ReservationsService } from '../../client/services';
 import { useQueryClient } from '@tanstack/react-query';
@@ -19,12 +19,24 @@ interface ServicesListProps {
     onServiceStatusChange?: (updatedReservation: ReservationExtenstion) => void;
 }
 
-interface ServiceCategory {
+type RenderableItem = ServiceOnReservationPublic | PaymentReceiptPublic;
+
+interface BaseCategory<T extends RenderableItem> {
     title: string;
+    renderItem: (item: T, index: number) => React.ReactNode;
+}
+
+interface ServiceCategoryType extends BaseCategory<ServiceOnReservationPublic> {
     status: ServiceRequestStatus;
     filter: (service: ServiceOnReservationPublic) => boolean;
-    renderItem: (service: ServiceOnReservationPublic, index: number) => React.ReactNode;
 }
+
+interface PaymentCategoryType extends BaseCategory<PaymentReceiptPublic> {
+    status: 'paid';
+    filter: (paymentReceipt: PaymentReceiptPublic) => boolean;
+}
+
+type CategoryType = ServiceCategoryType | PaymentCategoryType;
 
 const ServicesList: React.FC<ServicesListProps> = ({
     reservation,
@@ -697,32 +709,32 @@ const ServicesList: React.FC<ServicesListProps> = ({
     };
 
     // Define categories and their properties
-    const serviceCategories: ServiceCategory[] = [
+    const serviceCategories: CategoryType[] = [
         {
             title: 'Pending services',
             status: 'pending',
-            filter: (service) => service.status === 'pending',
+            filter: (service: ServiceOnReservationPublic) => service.status === 'pending',
             renderItem: renderServiceItem
         },
         {
             title: 'In progress services',
             status: 'en_route',
-            filter: (service) => service.status === 'en_route',
+            filter: (service: ServiceOnReservationPublic) => service.status === 'en_route',
             renderItem: renderServiceItem
         },
         {
             title: 'Completed services',
             status: 'completed',
-            filter: (service) => service.status === 'completed',
+            filter: (service: ServiceOnReservationPublic) => service.status === 'completed',
             renderItem: renderServiceItem
         },
         {
             title: 'Paid services',
             status: 'paid',
-            filter: (service) => service.status === 'paid',
-            renderItem: (service, index) => {
-                // Calculate total for this service
-                const totalPrice = calculateTotalPrice(service);
+            filter: () => true,
+            renderItem: (paymentReceipt: PaymentReceiptPublic, index: number) => {
+                // Calculate total for this payment receipt
+                const totalPrice = paymentReceipt.subtotal + paymentReceipt.service_fee + paymentReceipt.taxes;
 
                 return (
                     <Flex
@@ -731,14 +743,14 @@ const ServicesList: React.FC<ServicesListProps> = ({
                         flexDirection="column"
                         gap="xs"
                     >
-                        {service.services.map((subService, i) => (
+                        {paymentReceipt.service_requests.map((service, i) => (
                             <Flex gap="8px" key={i} alignItems="center">
                                 <Flex bg="basic.grey200" borderRadius='8px' alignItems="center" justifyContent="center" w="46px" h="46px">
-                                    <Image w='24px' h='auto' src={getServiceIcon(subService.name)} filter="brightness(0) invert(1)" />
+                                    <Image w='24px' h='auto' src={getServiceIcon(service.services[0].name)} filter="brightness(0) invert(1)" />
                                 </Flex>
                                 <Flex flex="1" justify="space-between" flexDirection="column">
                                     <Text fontSize="14px" fontWeight="700" color='basic.grey700' noOfLines={1} textOverflow="ellipsis">
-                                        {service.service_reservation_id}
+                                        {paymentReceipt.payment_receipt_id}
                                     </Text>
                                     <Text fontSize="14px" fontWeight="400" color='basic.grey900' noOfLines={1} textOverflow="ellipsis">{formatRequestedDate(service.requested_date)}</Text>
                                 </Flex>
@@ -805,11 +817,18 @@ const ServicesList: React.FC<ServicesListProps> = ({
         <>
             <Flex flexDirection="column" w="100%" gap="2xl">
                 {serviceCategories.map((category, idx) => {
-                    // Filter services that match this category
-                    const categoryServices = localReservation.service_requests.filter(category.filter);
+                    // Filter items that match this category
+                    let categoryItems: RenderableItem[] = [];
+                    if (category.status === 'paid') {
+                        categoryItems = localReservation.payment_receipts || [];
+                    } else {
+                        categoryItems = localReservation.service_requests.filter(
+                            (service) => service.status === category.status
+                        );
+                    }
 
                     // Only render this category if it has services
-                    if (categoryServices.length === 0) return null;
+                    if (categoryItems.length === 0) return null;
 
                     return (
                         <Flex gap="lg" flexDirection="column" key={idx}>
@@ -841,9 +860,10 @@ const ServicesList: React.FC<ServicesListProps> = ({
                                 )}
                             </Flex>
                             <Flex flexDirection="column" gap="sm">
-                                {categoryServices.map((service, serviceIdx) =>
-                                    category.renderItem(service, serviceIdx)
-                                )}
+                                {categoryItems.map((item, itemIdx) => {
+                                    // Type assertion to bypass type checking
+                                    return category.renderItem(item as any, itemIdx);
+                                })}
                             </Flex>
                         </Flex>
                     );

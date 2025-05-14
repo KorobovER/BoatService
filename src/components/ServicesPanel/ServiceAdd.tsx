@@ -215,10 +215,16 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
         setAmount(value);
     };
 
-    // Функция добавления нового сервиса Open Charge
-    const addOpenCharge = () => {
+    // Add a new state for loading
+    const [isOpenChargeLoading, setIsOpenChargeLoading] = useState(false);
+
+    // Modify the addOpenCharge function to handle loading state
+    const addOpenCharge = async () => {
         try {
-            // Валидация полей
+            // Set loading state to true at the start
+            setIsOpenChargeLoading(true);
+
+            // Existing validation logic
             if (!itemName.trim()) {
                 toast({
                     title: "Error",
@@ -245,16 +251,15 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                 return;
             }
 
-            // Создаем новый элемент сервиса СТРОГО в соответствии с требуемым форматом API
+            // Existing logic for creating and adding service
             const newService: SubServiceRequest = {
                 title: "Open Charge",
-                name: itemName.trim(), // из поля product/service/fee
-                price: priceValue,     // из поля amount
-                unit: description.trim() || "item", // из поля description
+                name: itemName.trim(),
+                price: priceValue,
+                unit: description.trim() || "item",
                 quantity: 1
             };
 
-            // Создаем новый сервис с правильной структурой для отображения в списке
             const newServiceForDisplay = {
                 name: newService.name,
                 price: newService.price,
@@ -263,20 +268,16 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                 parentServiceTitle: newService.title
             };
 
-            // Добавляем элемент в список пользовательских сервисов
             const newCustomServices = [...customServices, newServiceForDisplay];
             setCustomServices(newCustomServices);
 
-            // Находим индекс нового элемента в объединенном массиве
             const newItemIndex = allServiceItems.length + newCustomServices.length - 1;
 
-            // Устанавливаем количество = 1 для нового элемента
             setQuantities(prev => ({
                 ...prev,
                 [newItemIndex]: 1
             }));
 
-            // Показываем уведомление об успехе
             toast({
                 title: "Service created",
                 description: `"${itemName}" has been added to the list. Click "Add services" to save.`,
@@ -285,7 +286,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                 isClosable: true,
             });
 
-            // Сбрасываем форму и возвращаемся к списку сервисов
+            // Reset form and return to services list
             setItemName('');
             setDescription('');
             setAmount('');
@@ -300,6 +301,9 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                 duration: 3000,
                 isClosable: true,
             });
+        } finally {
+            // Always set loading state back to false
+            setIsOpenChargeLoading(false);
         }
     };
 
@@ -928,6 +932,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                                 fontSize="16px"
                                 fontWeight="400"
                                 onClick={addOpenCharge}
+                                isLoading={isOpenChargeLoading}
                             >
                                 Add fee
                             </Button>

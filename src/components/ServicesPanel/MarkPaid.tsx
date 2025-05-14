@@ -15,9 +15,9 @@ import {
     Textarea,
     useToast
 } from '@chakra-ui/react';
-import { PaymentReceiptPublic, SubServiceRequest, ServiceRequestStatus } from '../../client/models';
+import { PaymentReceiptPublic, SubServiceRequest} from '../../client/models';
 import { ReservationsService } from '../../client/services';
-import { useQueryClient, InvalidateQueryFilters } from '@tanstack/react-query';
+import { useQueryClient} from '@tanstack/react-query';
 
 interface MarkPaidProps {
     isOpen: boolean;

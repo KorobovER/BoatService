@@ -455,22 +455,6 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
         };
     }, [localReservation, reservation, serviceFee, taxes]);
 
-    // Handle mark as paid button
-    const handleMarkAsPaid = () => {
-        // Reset payment error
-        setPaymentError(false);
-        // Implement mark as paid logic here
-        toast({
-            title: "Marked as paid",
-            description: "The payment has been marked as paid.",
-            status: "success",
-            duration: 3000,
-            isClosable: true,
-        });
-        
-        // Close the modal
-        setIsMarkPaidModalOpen(false);
-    };
 
     return (
         <>
@@ -813,7 +797,6 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 reservationId={reservation.reservation_id}
                 onServiceStatusChange={(updatedReservation) => {
                     setLocalReservation(updatedReservation);
-                    // Invalidate and refetch reservation query to ensure fresh data
                     queryClient.invalidateQueries({ 
                         queryKey: ['reservation', reservation?.reservation_id] 
                     });
@@ -825,8 +808,13 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 isOpen={isMarkPaidModalOpen}
                 onClose={() => setIsMarkPaidModalOpen(false)}
                 payment={paymentReceipt}
-                onMarkPaid={handleMarkAsPaid}
                 reservationId={reservation.reservation_id}
+                onServiceStatusChange={(updatedReservation) => {
+                    setLocalReservation(updatedReservation);
+                    queryClient.invalidateQueries({ 
+                        queryKey: ['reservation', reservation?.reservation_id] 
+                    });
+                }}
             />
             
         </>

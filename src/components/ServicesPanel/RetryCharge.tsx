@@ -92,42 +92,56 @@ const RetryCharge: React.FC<RetryChargeProps> = ({
                     </Flex>
                 </ModalBody>
 
-                <ModalFooter p='0' display='flex' justifyContent='space-between' gap='md'>
+                <ModalFooter p='0' display='flex' flexDirection='column' gap='sm'>
+                    <Flex width="100%" justifyContent='space-between' gap='md'>
+                        <Button
+                            flex='1'
+                            display="flex"
+                            w="100%"
+                            justifyContent="center"
+                            px='md'
+                            py='10px'
+                            leftIcon={<Box bg="system.errorRed" borderRadius="full"><Image width="30px" height="30px" src="/assets/images/alert-icon-red.svg" alt="Retry" /></Box>}
+                            bg="brand.secondaryBlue"
+                            color="white"
+                            size="lg"
+                            borderRadius="full"
+                            fontWeight="500"
+                            _hover={{ bg: "teal.400" }}
+                            onClick={handleRetryCharge}
+                        >
+                            <Flex gap="4px" fontSize="16px" fontWeight="400" color="white">RETRY CHARGE</Flex>
+                        </Button>
+                        <Button
+                            flex='1'
+                            h="50px"
+                            variant="outline"
+                            border='1px solid'
+                            borderColor='basic.grey200'
+                            borderRadius="full"
+                            px='md'
+                            py='10px'
+                            onClick={onClose}
+                            fontSize="16px"
+                            fontWeight="400"
+                            color="basic.grey900"
+                            leftIcon={<Image mr='4px' w='17px' h='auto' src='assets/images/goback-icon.svg' />}
+                        >
+                            Cancel
+                        </Button>
+                    </Flex>
                     <Button
-                        flex='1'
-                        display="flex"
-                        w="100%"
-                        justifyContent="center"
-                        px='md'
+                        variant='unstyled'
+                        textDecoration='underline'
                         py='10px'
-                        leftIcon={<Box bg="system.errorRed" borderRadius="full"><Image width="30px" height="30px" src="/assets/images/alert-icon-red.svg" alt="Retry" /></Box>}
-                        bg="brand.secondaryBlue"
-                        color="white"
-                        size="lg"
-                        borderRadius="full"
-                        fontWeight="500"
-                        _hover={{ bg: "teal.400" }}
-                        onClick={handleRetryCharge}
-                    >
-                        <Flex gap="4px" fontSize="16px" fontWeight="400" color="white">RETRY CHARGE</Flex>
-                    </Button>
-                    <Button
-                        flex='1'
-                        h="50px"
-                        variant="outline"
-                        border='1px solid'
-                        borderColor='basic.grey200'
-                        borderRadius="full"
                         px='md'
-                        py='10px'
-                        onClick={onClose}
-                        fontSize="16px"
-                        fontWeight="400"
-                        color="basic.grey900"
-                        leftIcon={<Image mr='4px' w='17px' h='auto' src='assets/images/goback-icon.svg' />}
-                    >
-                        Cancel
-                    </Button>
+                        fontSize='16px'
+                        fontWeight='400'
+                        display='flex'
+                        alignItems='center'
+                        gap='4px'
+                        leftIcon={<Image w='22px' h='22px' src='assets/images/message-boater.svg' />}
+                        color='basic.grey900'>Message boater instead</Button>
                 </ModalFooter>
             </ModalContent>
         </Modal>

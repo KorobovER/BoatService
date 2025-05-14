@@ -169,39 +169,53 @@ const MarkUncollectible: React.FC<MarkUncollectibleProps> = ({
                     </Flex>
                 </ModalBody>
 
-                <ModalFooter p='0' display='flex' justifyContent='space-between' gap='md'>
+                <ModalFooter p='0' display='flex' flexDirection='column' gap='sm'>
+                    <Flex width="100%" justifyContent='space-between' gap='md'>
+                        <Button
+                            flex='1'
+                            h="50px"
+                            bg='system.errorRedNew'
+                            color='white'
+                            borderRadius='full'
+                            fontSize="16px"
+                            fontWeight="400"
+                            leftIcon={<Image ml='4px' h='auto' src='assets/images/close-red.svg' filter="brightness(0) invert(1)" />}
+                            onClick={handleMarkUncollectible}
+                            isLoading={isLoading}
+                            loadingText="Marking Uncollectible"
+                        >
+                            Mark uncollectible
+                        </Button>
+                        <Button
+                            flex='1'
+                            h="50px"
+                            variant="outline"
+                            border='1px solid'
+                            borderColor='basic.grey200'
+                            borderRadius="full"
+                            px='md'
+                            py='10px'
+                            onClick={onClose}
+                            fontSize="16px"
+                            fontWeight="400"
+                            color="basic.grey900"
+                            leftIcon={<Image mr='4px' w='17px' h='auto' src='assets/images/goback-icon.svg' />}
+                        >
+                            Cancel
+                        </Button>
+                    </Flex>
                     <Button
-                        flex='1'
-                        h="50px"
-                        bg='system.errorRedNew'
-                        color='white'
-                        borderRadius='full'
-                        fontSize="16px"
-                        fontWeight="400"
-                        leftIcon={<Image ml='4px' h='auto' src='assets/images/close-red.svg' filter="brightness(0) invert(1)" />}
-                        onClick={handleMarkUncollectible}
-                        isLoading={isLoading}
-                        loadingText="Marking Uncollectible"
-                    >
-                        Mark uncollectible
-                    </Button>
-                    <Button
-                        flex='1'
-                        h="50px"
-                        variant="outline"
-                        border='1px solid'
-                        borderColor='basic.grey200'
-                        borderRadius="full"
-                        px='md'
+                        variant='unstyled'
+                        textDecoration='underline'
                         py='10px'
-                        onClick={onClose}
-                        fontSize="16px"
-                        fontWeight="400"
-                        color="basic.grey900"
-                        leftIcon={<Image mr='4px' w='17px' h='auto' src='assets/images/goback-icon.svg' />}
-                    >
-                        Cancel
-                    </Button>
+                        px='md'
+                        fontSize='16px'
+                        fontWeight='400'
+                        display='flex'
+                        alignItems='center'
+                        gap='4px'
+                        leftIcon={<Image w='22px' h='22px' src='assets/images/message-boater.svg' />}
+                        color='basic.grey900'>Message boater instead</Button>
                 </ModalFooter>
             </ModalContent>
         </Modal>

@@ -12,7 +12,7 @@ import {
     Button,
     IconButton
 } from '@chakra-ui/react';
-import { SubServiceRequest} from '../../client/models';
+import { SubServiceRequest } from '../../client/models';
 
 interface ServiceEditProps {
     isOpen: boolean;
@@ -52,7 +52,7 @@ const ServiceEdit: React.FC<ServiceEditProps> = ({
                     <Flex direction="column" align="center" gap='3xl'>
                         <Flex flexDirection="column" align="center" gap='sm'>
                             <Box w='90px' h='90px' bg='brand.secondaryBlue' borderRadius='full' display='flex' alignItems='center' justifyContent='center'>
-                                <Image w='90px' h='90px' src='assets/images/alert-icon-blue.svg' alt="alert" />
+                                <Image w='90px' h='90px' src='assets/images/alert-icon-blue.svg'></Image>
                             </Box>
                             <Flex border="1px solid" borderColor="brand.secondaryBlue" bg="bg.info" borderRadius="20px" w="100%" p='10px 20px' direction="row" align="center" gap='md' position="relative">
                                 <Box flex='1'>

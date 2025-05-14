@@ -35,7 +35,11 @@ const colors = {
     mooringField: "#E4E4E4"
   },
   calendar: {
-    todayBg: "#FAE8D9"
+    todayBg: "#FAE8D9",
+    BgRed: "#A85555",
+    BgYellow: "#FEA02F",
+    BgLightGreen: "#E5F2F2",
+    BgGreen: "#007A7B",
   },
   // Градиенты
   gradient: {

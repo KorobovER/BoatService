@@ -780,7 +780,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 <ServiceAdd
                     isOpen={isServiceAddOpen}
                     onClose={handleCloseServiceAdd}
-                    services={servicesData?.data || []}
+                    services={selectedMarina?.active_services || []}
                     reservation={localReservation || reservation}
                     userName={userName}
                     rowId={rowId}

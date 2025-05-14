@@ -17,7 +17,7 @@ import {
     Input,
     Textarea
 } from '@chakra-ui/react';
-import { MarinaServicePublic, ServiceOnReservationCreate, SubServiceRequest, ReservationPublic } from '../../client/models';
+import { MarinaServicePublic, SubServiceRequest, ReservationPublic } from '../../client/models';
 import { ReservationsService } from '../../client/services';
 import { getServiceIcon } from './Services';
 import { useQueryClient } from '@tanstack/react-query';
@@ -51,14 +51,13 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
     const queryClient = useQueryClient();
 
     // Извлекаем все элементы сервисов из всех сервисов с нужными полями
-    const allServiceItems = services.flatMap((service, serviceIndex) =>
+    const allServiceItems = services.flatMap((service) =>
         service.service_items
             ? service.service_items.map(item => ({
                 ...item,
                 // Сохраняем title из родительского сервиса
                 parentServiceTitle: service.title,
                 // Имитация типа для демонстрации - каждый второй элемент будет иметь тип 'measured'
-                type: serviceIndex % 2 === 0 ? 'unit' : 'measured'
             }))
             : []
     );
@@ -105,85 +104,52 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
 
     // Функция для подготовки выбранных сервисов
     const getSelectedServices = (): SubServiceRequest[] => {
+        console.log('Starting getSelectedServices function');
         const selectedServices: SubServiceRequest[] = [];
 
+        // Получаем все активные сервисы (с ненулевым количеством)
+        const validQuantities: Record<string, number> = {};
         for (const [idx, qty] of Object.entries(quantities)) {
-            const index = parseInt(idx, 10);
             if (qty > 0) {
-                let item;
-
-                // Определяем, откуда брать элемент - из основных или пользовательских сервисов
-                if (index < allServiceItems.length) {
-                    item = allServiceItems[index];
-                } else if (index < allServiceItems.length + customServices.length) {
-                    // Это пользовательский сервис
-                    const customIndex = index - allServiceItems.length;
-                    item = customServices[customIndex];
-                } else {
-                    console.warn('Invalid service index:', index);
-                    continue;
-                }
-
-                try {
-                    // Validate title
-                    if (!item.parentServiceTitle || typeof item.parentServiceTitle !== 'string') {
-                        console.warn('Invalid service title:', item.parentServiceTitle);
-                        continue;
-                    }
-
-                    // Validate name
-                    if (!item.name || typeof item.name !== 'string') {
-                        console.warn('Invalid service name:', item.name);
-                        continue;
-                    }
-
-                    // Validate and convert price
-                    let price: number;
-                    if (typeof item.price === 'number') {
-                        price = item.price;
-                    } else if (typeof item.price === 'string') {
-                        price = parseFloat(item.price);
-                        if (isNaN(price)) {
-                            console.warn('Invalid service price (NaN):', item.price);
-                            continue;
-                        }
-                    } else {
-                        console.warn('Invalid service price type:', typeof item.price);
-                        continue;
-                    }
-
-                    // Validate unit
-                    if (!item.unit || typeof item.unit !== 'string') {
-                        console.warn('Invalid service unit:', item.unit);
-                        continue;
-                    }
-
-                    // Validate quantity
-                    if (typeof qty !== 'number' || qty <= 0) {
-                        console.warn('Invalid quantity:', qty);
-                        continue;
-                    }
-
-                    // All validations passed, create the SubServiceRequest object
-                    selectedServices.push({
-                        title: item.parentServiceTitle,
-                        name: item.name,
-                        price: price,
-                        unit: item.unit,
-                        quantity: qty
-                    });
-
-                    console.log('Added valid service:', {
-                        title: item.parentServiceTitle,
-                        name: item.name,
-                        price,
-                        unit: item.unit,
-                        quantity: qty
-                    });
-                } catch (error) {
-                    console.error('Error validating service item:', error, item);
-                }
+                validQuantities[idx] = qty;
             }
+        }
+        console.log('Services with non-zero quantities:', validQuantities);
+
+        // Проходим по всем выбранным сервисам
+        for (const [idx, qty] of Object.entries(validQuantities)) {
+            const index = parseInt(idx, 10);
+            let item;
+
+            // Определяем, откуда брать элемент
+            if (index < allServiceItems.length) {
+                item = allServiceItems[index];
+            } else if (index < allServiceItems.length + customServices.length) {
+                const customIndex = index - allServiceItems.length;
+                item = customServices[customIndex];
+            } else {
+                continue; // Пропускаем некорректные индексы
+            }
+
+            if (!item || !item.name) {
+                continue; // Пропускаем элементы без имени
+            }
+
+            // Создаем новый объект с точными типами данных
+            // ВАЖНО: price, quantity должны быть числами (не строками)
+            const price = typeof item.price === 'number' ? item.price : 
+                        typeof item.price === 'string' ? parseFloat(item.price) : 1;
+                        
+            // Создаем объект в полном соответствии с типом SubServiceRequest
+            const serviceItem: SubServiceRequest = {
+                title: item.parentServiceTitle || "Service",
+                name: item.name,
+                price: isNaN(price) ? 1 : price, // Если NaN, используем 1
+                unit: item.unit || "item",
+                quantity: qty
+            };
+
+            selectedServices.push(serviceItem);
         }
 
         return selectedServices;
@@ -294,7 +260,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                 name: newService.name,
                 price: newService.price,
                 unit: newService.unit,
-                type: 'user_defined', // Отмечаем, что это сервис, добавленный пользователем
+                type: 'open_charge', 
                 parentServiceTitle: newService.title
             };
             
@@ -367,8 +333,10 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
     // Функция для обработки нажатия на кнопку "Add services"
     const addServices = async () => {
         try {
+            console.log('Starting addServices function');
             // Получаем все выбранные сервисы
             const selectedServices = getSelectedServices();
+            console.log('Selected services after getSelectedServices:', JSON.stringify(selectedServices, null, 2));
             
             if (selectedServices.length === 0) {
                 toast({
@@ -383,6 +351,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
             
             // Получаем ID резервации
             const reservationId = getReservationId(reservation);
+            console.log('Reservation ID:', reservationId);
             
             if (!reservationId) {
                 console.error('Missing reservation ID', { reservation });
@@ -396,46 +365,94 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                 return;
             }
             
-            // Создаем запрос для отправки на сервер
-            const serviceRequest: ServiceOnReservationCreate = {
-                requested_date: new Date().toISOString(),
-                services: selectedServices,
-                special_instructions: null
-            };
-            
-            console.log('Sending services to API:', JSON.stringify(serviceRequest, null, 2));
-            
-            // Отправляем запрос
-            const response = await ReservationsService.requestReservationService({
-                reservationId,
-                requestBody: serviceRequest
+            // ВАЖНОЕ ИЗМЕНЕНИЕ: Отправляем отдельный запрос для каждого сервиса
+            // Создаем массив промисов для отправки каждого сервиса
+            const servicePromises = selectedServices.map(async (service) => {
+                // Создаем запрос для одного сервиса
+                const serviceRequest = {
+                    requested_date: new Date().toISOString(),
+                    services: [service], // Массив с одним элементом
+                    special_instructions: null
+                };
+                
+                console.log(`Sending service "${service.name}" to API:`, serviceRequest);
+                
+                try {
+                    // Отправляем запрос для одного сервиса
+                    const response = await ReservationsService.requestReservationService({
+                        reservationId,
+                        requestBody: serviceRequest
+                    });
+                    
+                    console.log(`Service "${service.name}" creation response:`, response);
+                    return { success: true, service, response };
+                } catch (err) {
+                    console.error(`Error adding service "${service.name}":`, err);
+                    return { success: false, service, error: err };
+                }
             });
             
-            console.log('Service creation response:', response);
+            // Ждем завершения всех запросов
+            const results = await Promise.all(servicePromises);
             
-            // Показываем уведомление об успехе
-            toast({
-                title: "Services added",
-                description: `Successfully added ${selectedServices.length} ${selectedServices.length === 1 ? 'service' : 'services'} to reservation`,
-                status: "success",
-                duration: 3000,
-                isClosable: true,
-            });
+            // Подсчитываем успешные и неуспешные запросы
+            const successful = results.filter(r => r.success).length;
+            const failed = results.filter(r => !r.success).length;
+            
+            // Показываем соответствующее уведомление
+            if (successful > 0 && failed === 0) {
+                // Все запросы успешны
+                toast({
+                    title: "Services added",
+                    description: `Successfully added ${successful} ${successful === 1 ? 'service' : 'services'} to reservation`,
+                    status: "success",
+                    duration: 3000,
+                    isClosable: true,
+                });
+            } else if (successful > 0 && failed > 0) {
+                // Частично успешно
+                toast({
+                    title: "Partial success",
+                    description: `Added ${successful} service(s), but ${failed} service(s) failed. Check the console for details.`,
+                    status: "warning",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            } else {
+                // Все запросы неуспешны
+                toast({
+                    title: "Services not added",
+                    description: "Failed to add any services. Check the console for details.",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            }
             
             // Инвалидируем кэш React Query
             queryClient.invalidateQueries();
             
-            // Закрываем модальное окно
-            setTimeout(() => {
-                onClose();
-            }, 500);
+            // Закрываем модальное окно если есть хотя бы 1 успешный запрос
+            if (successful > 0) {
+                setTimeout(() => {
+                    onClose();
+                }, 500);
+            }
         } catch (error: any) {
-            console.error('Error adding services:', error);
+            console.error('Error in addServices function:', error);
+            // Показываем больше информации об ошибке
+            console.error('Error details:', {
+                message: error.message,
+                status: error.status,
+                data: error.data,
+                statusText: error.statusText,
+                stack: error.stack
+            });
             toast({
                 title: "Error adding services",
                 description: error.message || "An error occurred while adding the services",
                 status: "error",
-                duration: 3000,
+                duration: 5000,
                 isClosable: true,
             });
         }
@@ -775,7 +792,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                                         fontSize="16px"
                                         fontWeight="300"
                                         variant="unstyled"
-                                        placeholder="Add a short description so the boater knows what the charge is for. It will be displayed on the boater’s bill."
+                                        placeholder="Add a short description so the boater knows what the charge is for. It will be displayed on the boater's bill."
                                         _placeholder={{ fontSize: "16px", fontWeight: "300", color: "gray.400" }}
                                         value={description}
                                         onChange={handleDescriptionChange}

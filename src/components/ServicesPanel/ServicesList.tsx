@@ -60,7 +60,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
         switch (status) {
             case 'pending':
                 return 'system.errorRedNew';
-            case 'en-route':
+            case 'en_route':
                 return 'brand.primaryOrange';
             case 'completed':
                 return 'system.successGreen';
@@ -235,7 +235,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
             // Determine the new status based on action
             switch (action) {
                 case 'mark-in-progress':
-                    newStatus = 'en-route';
+                    newStatus = 'en_route';
                     break;
                 case 'mark-pending':
                     newStatus = 'pending';
@@ -421,7 +421,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
     // If no services, render the NoService component
     const hasActiveServices = localReservation.service_requests?.some(service =>
         service.status === 'pending' ||
-        service.status === 'en-route' ||
+        service.status === 'en_route' ||
         service.status === 'completed' ||
         service.status === 'paid'
     );
@@ -485,7 +485,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
                         h: '32px',
                     }
                 };
-            case 'en-route':
+            case 'en_route':
                 return {
                     text: isLoading[service.service_reservation_id] ? 'Updating...' : 'Input Quantity',
                     action: 'input-quantity',
@@ -536,7 +536,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
 
         // Generate menu items based on service status
         const renderMenuItems = () => {
-            if (service.status === 'en-route') {
+            if (service.status === 'en_route') {
                 return (
                     <>
                         <MenuItem onClick={() => handleServiceAction('mark-pending', service.service_reservation_id, service.status)}>
@@ -706,8 +706,8 @@ const ServicesList: React.FC<ServicesListProps> = ({
         },
         {
             title: 'In progress services',
-            status: 'en-route',
-            filter: (service) => service.status === 'en-route',
+            status: 'en_route',
+            filter: (service) => service.status === 'en_route',
             renderItem: renderServiceItem
         },
         {

@@ -562,8 +562,8 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                                                 <Image
                                                     src={getServiceIcon('Open Charge')}
                                                     alt="Open Charge"
-                                                    width="40px"
-                                                    height="40px"
+                                                    width="50px"
+                                                    height="50px"
                                                 />
                                                 <Text h="22px" color="gray.900" fontSize="12px" fontWeight="300">
                                                     Other products / services / fees
@@ -629,8 +629,8 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                                             <Image
                                                 src={getServiceIcon(item.name)}
                                                 alt={item.name}
-                                                width="40px"
-                                                height="40px"
+                                                width="50px"
+                                                height="50px"
                                             />
                                             <Flex gap="xs" alignItems="center">
                                                 <Text color="gray.900" fontSize="16px" fontWeight="400">

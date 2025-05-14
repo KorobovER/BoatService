@@ -62,7 +62,7 @@ const MarkUncollectible: React.FC<MarkUncollectibleProps> = ({
                 ...payment,
                 service_requests: payment.service_requests.map(service => ({
                     ...service,
-                    status: 'failed'
+                    status: 'payment_failed'
                 }))
             };
 
@@ -76,7 +76,7 @@ const MarkUncollectible: React.FC<MarkUncollectibleProps> = ({
                 ReservationsService.updateReservationServiceStatus({
                     reservationId: reservationId,
                     serviceId: service.service_reservation_id,
-                    statusIn: 'failed'
+                    statusIn: 'payment_failed'
                 })
             ));
 

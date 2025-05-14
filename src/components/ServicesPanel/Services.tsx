@@ -3,7 +3,7 @@ import { Box, Text, Image, Flex, Button, useDisclosure, Collapse, Icon, useToast
 import ServiceAdd from './ServiceAdd';
 import { useMarina } from '../../context/MarinaContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { MarinasService, ReservationsService } from '../../client/services';
+import { ReservationsService } from '../../client/services';
 import ServicesList from './ServicesList';
 import PaymentModal from './PaymentModal';
 import RetryCharge from './RetryCharge';
@@ -122,13 +122,8 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
         }
     }, [reservation, reservationData]);
 
-    // Fetch marina services
-    const { data: servicesData } = useQuery({
-        queryKey: ['marina-services'],
-        queryFn: () => MarinasService.readServices(),
-        enabled: !!selectedMarina // Only fetch when marina is selected
-    });
 
+  
     // Получить выполненные сервисы
     const completedServices = useMemo(() => {
         const currentReservation = localReservation || reservation;

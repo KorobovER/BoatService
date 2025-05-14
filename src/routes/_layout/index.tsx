@@ -2,11 +2,12 @@ import { createFileRoute } from "@tanstack/react-router"
 import { Box, Flex} from '@chakra-ui/react';
 import TableWeek from '../../components/Calendar/TableWeek';
 import TableSwitch from '../../components/Calendar/TableSwitch';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import TableDay from '../../components/Calendar/TableDay';
 import TableMonth from '../../components/Calendar/TableMonth';
 import { ReservationExtenstion } from "../../components/ReservationExtenstion";
 import PopupReserved from "../../components/ServicesPanel/Services";
+import { useMarina } from "../../context/MarinaContext";
 
 type TableView = 'month' | 'week' | 'day';
 
@@ -33,6 +34,7 @@ function Dashboard() {
     const [currentDay, setCurrentDay] = useState<string>('');
     const [selectedReservation, setSelectedReservation] = useState<{rowId: string; day: string; reservation?: ReservationExtenstion} | null>(null);
     const tableContainerRef = useRef<HTMLDivElement>(null);
+    const { registerMarinaChangeCallback, unregisterMarinaChangeCallback } = useMarina();
 
     // Date utility functions
     const formatDateToYMD = (date: Date): string => {
@@ -75,6 +77,21 @@ function Dashboard() {
         // Ensure we're in week view by default
         setCurrentView('week');
     }, []);
+
+    // Create a callback to handle marina changes
+    const handleMarinaChange = useCallback(() => {
+        // Close the service panel when marina changes
+        setSelectedReservation(null);
+    }, []);
+
+    // Register the callback when the component mounts, unregister when it unmounts
+    useEffect(() => {
+        registerMarinaChangeCallback(handleMarinaChange);
+        
+        return () => {
+            unregisterMarinaChangeCallback(handleMarinaChange);
+        };
+    }, [registerMarinaChangeCallback, unregisterMarinaChangeCallback, handleMarinaChange]);
 
     // Simple function to get date string from month/year
     const getMonthDateString = () => {
@@ -138,6 +155,9 @@ function Dashboard() {
         } else {
             setCurrentWeekStart(getCurrentWeekMonday(today));
         }
+        
+        // Close the service panel when going to today's view
+        setSelectedReservation(null);
     };
 
     // Форматирование отображаемого диапазона дат
@@ -171,6 +191,9 @@ function Dashboard() {
             const today = new Date();
             setCurrentDay(formatDateToYMD(today));
         }
+        
+        // Close the service panel when changing views
+        setSelectedReservation(null);
     };
 
     // Общий обработчик для кнопок переключения
@@ -182,6 +205,9 @@ function Dashboard() {
         } else if (currentView === 'day') {
             direction === 'prev' ? handlePrevDay() : handleNextDay();
         }
+        
+        // Close the service panel when navigating
+        setSelectedReservation(null);
     };
 
     const handleReservationClick = (rowId: string, day: string, reservation?: ReservationExtenstion) => {

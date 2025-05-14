@@ -37,7 +37,9 @@ const MarinasMenu = () => {
     const { selectedMarina, setSelectedMarina } = useMarina();
 
     const handleMarinaSelect = async (marina: MarinaPublicBase) => {
+        // No need to check if marina is changing - the context will handle callbacks
         setSelectedMarina(marina);
+        // Remove the dispatch of custom event - the context will handle notifying other components
     };
 
     useEffect(() => {

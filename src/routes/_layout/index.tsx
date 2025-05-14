@@ -245,7 +245,7 @@ function Dashboard() {
         >
             <Flex direction="row">
                 <Box
-                    width={selectedReservation ? "70%" : "100%"}
+                    width={selectedReservation ? "66%" : "100%"}
                     transition="all 0.3s ease"
                     padding="var(--chakra-space-xl)"
                     bg="white"
@@ -289,7 +289,7 @@ function Dashboard() {
                 </Box>
                 {selectedReservation && (
                     <Box
-                        width="30%"
+                        width="33%"
                         paddingLeft="var(--chakra-space-lg)"
                     >
                         <PopupReserved

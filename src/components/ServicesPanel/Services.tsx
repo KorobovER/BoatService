@@ -644,6 +644,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                             <Flex alignItems="center" flexDirection="column" justifyContent="center" w="100%">
                                 <Button
                                     display="flex"
+                                    my="10px"
                                     height='50px'
                                     justifyContent="center"
                                     leftIcon={<Image p='10px' src="/assets/images/credit-card.svg" alt="Card" />}

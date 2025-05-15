@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Text, Image, Flex, Button, Menu, MenuButton, MenuItem, MenuList, useToast} from '@chakra-ui/react';
+import { Box, Text, Image, Flex, Button, Menu, MenuButton, MenuItem, MenuList, useToast } from '@chakra-ui/react';
 import NoService from './NoService';
 import { ReservationExtenstion } from '../ReservationExtenstion';
 import { ServiceOnReservationPublic, ServiceRequestStatus, PaymentReceiptPublic } from '../../client/models';
@@ -827,8 +827,8 @@ const ServicesList: React.FC<ServicesListProps> = ({
                         );
                     }
 
-                    // Only render this category if it has services
-                    if (categoryItems.length === 0) return null;
+                    // Always render Pending services category
+                    if (category.status !== 'pending' && categoryItems.length === 0) return null;
 
                     return (
                         <Flex gap="lg" flexDirection="column" key={idx}>
@@ -859,12 +859,14 @@ const ServicesList: React.FC<ServicesListProps> = ({
                                     </Box>
                                 )}
                             </Flex>
-                            <Flex flexDirection="column" gap="sm">
-                                {categoryItems.map((item, itemIdx) => {
-                                    // Type assertion to bypass type checking
-                                    return category.renderItem(item as any, itemIdx);
-                                })}
-                            </Flex>
+                            {categoryItems.length > 0 && (
+                                <Flex flexDirection="column" gap="sm">
+                                    {categoryItems.map((item, itemIdx) => {
+                                        // Type assertion to bypass type checking
+                                        return category.renderItem(item as any, itemIdx);
+                                    })}
+                                </Flex>
+                            )}
                         </Flex>
                     );
                 })}

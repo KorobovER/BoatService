@@ -68,6 +68,8 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
     useEffect(() => {
         if (isOpen) {
             setQuantities({});
+            // Reset servicesAdded state when modal opens
+            setServicesAdded(false);
         }
     }, [isOpen]);
 
@@ -218,6 +220,9 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
     // Add a new state for loading
     const [isOpenChargeLoading, setIsOpenChargeLoading] = useState(false);
 
+    // Add a new state to track successful service addition
+    const [servicesAdded, setServicesAdded] = useState(false);
+
     // Modify the addOpenCharge function to handle loading state
     const addOpenCharge = async () => {
         try {
@@ -333,9 +338,15 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
         }
     };
 
-    // Функция для обработки нажатия на кнопку "Add services"
+    // Add a new state for loading
+    const [isAddServicesLoading, setIsAddServicesLoading] = useState(false);
+
+    // Modify the addServices function to handle loading state
     const addServices = async () => {
         try {
+            // Set loading state to true at the start
+            setIsAddServicesLoading(true);
+
             console.log('Starting addServices function');
             // Получаем все выбранные сервисы
             const selectedServices = getSelectedServices();
@@ -412,6 +423,8 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                     duration: 3000,
                     isClosable: true,
                 });
+                // Mark services as added successfully
+                setServicesAdded(true);
             } else if (successful > 0 && failed > 0) {
                 // Частично успешно
                 toast({
@@ -421,6 +434,8 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                     duration: 5000,
                     isClosable: true,
                 });
+                // Mark services as added successfully
+                setServicesAdded(true);
             } else {
                 // Все запросы неуспешны
                 toast({
@@ -458,6 +473,9 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                 duration: 5000,
                 isClosable: true,
             });
+        } finally {
+            // Always set loading state back to false
+            setIsAddServicesLoading(false);
         }
     };
 
@@ -882,6 +900,8 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                                 onClick={addServices}
                                 fontSize="16px"
                                 fontWeight="400"
+                                isLoading={isAddServicesLoading}
+                                isDisabled={isAddServicesLoading || servicesAdded}
                             >
                                 Add services
                             </Button>

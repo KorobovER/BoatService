@@ -266,7 +266,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
                     if (service.service_reservation_id === serviceId) {
                         return {
                             ...service,
-                            status: newStatus
+                            status: newStatus || 'denied'
                         };
                     }
                     return service;

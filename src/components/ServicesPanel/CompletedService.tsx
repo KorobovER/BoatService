@@ -146,4 +146,4 @@ const CompletedService: React.FC<CompletedServiceProps> = ({
     );
 };
 
-export default CompletedService; 
+export default CompletedService;

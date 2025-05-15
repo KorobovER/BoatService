@@ -104,7 +104,7 @@ const MarkPaid: React.FC<MarkPaidProps> = ({
             }
 
             // Update status for each service in the payment
-            await Promise.all(payment.service_requests.map(service => 
+            await Promise.all(payment.service_requests.map(service =>
                 ReservationsService.updateReservationServiceStatus({
                     reservationId: reservationId,
                     serviceId: service.service_reservation_id,
@@ -113,8 +113,8 @@ const MarkPaid: React.FC<MarkPaidProps> = ({
             ));
 
             // Fetch the updated reservation to ensure data consistency
-            const updatedReservationData = await ReservationsService.readReservation({ 
-                id: reservationId 
+            const updatedReservationData = await ReservationsService.readReservation({
+                id: reservationId
             });
 
             // Update local state with the fetched reservation data
@@ -135,10 +135,10 @@ const MarkPaid: React.FC<MarkPaidProps> = ({
             onClose();
 
             // Invalidate queries related to this reservation
-            queryClient.invalidateQueries({ 
+            queryClient.invalidateQueries({
                 predicate: (query) => {
                     const queryKey = query.queryKey as string[];
-                    return queryKey.includes('reservations') && 
+                    return queryKey.includes('reservations') &&
                            queryKey.includes(reservationId);
                 }
             });
@@ -154,10 +154,10 @@ const MarkPaid: React.FC<MarkPaidProps> = ({
             console.error('Error marking payment as manually paid:', error);
 
             // Invalidate queries related to this reservation to ensure fresh data
-            queryClient.invalidateQueries({ 
+            queryClient.invalidateQueries({
                 predicate: (query) => {
                     const queryKey = query.queryKey as string[];
-                    return queryKey.includes('reservations') && 
+                    return queryKey.includes('reservations') &&
                            queryKey.includes(reservationId);
                 }
             });
@@ -307,4 +307,4 @@ const MarkPaid: React.FC<MarkPaidProps> = ({
     );
 };
 
-export default MarkPaid; 
+export default MarkPaid;

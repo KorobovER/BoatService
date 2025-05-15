@@ -254,7 +254,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
                         setIsEditModalOpen(true);
                     }
                     return;
-                // For other actions like 'edit-service', 
+                // For other actions like 'edit-service',
                 // we'd need different API calls or UI components
             }
 
@@ -676,13 +676,13 @@ const ServicesList: React.FC<ServicesListProps> = ({
         try {
             const date = new Date(dateString);
             if (isNaN(date.getTime())) return dateString;
-            
+
             const month = date.toLocaleString('en-US', { month: 'short' });
             const day = date.getDate().toString().padStart(2, '0');
             const year = date.getFullYear().toString().slice(-2);
             const hours = date.getHours().toString().padStart(2, '0');
             const minutes = date.getMinutes().toString().padStart(2, '0');
-            
+
             return `${month} ${day}, ${year} | ${hours}:${minutes}`;
         } catch (error) {
             console.error('Error formatting date:', error);
@@ -892,4 +892,4 @@ const ServicesList: React.FC<ServicesListProps> = ({
     );
 };
 
-export default ServicesList; 
+export default ServicesList;

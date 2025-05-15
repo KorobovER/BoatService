@@ -170,4 +170,4 @@ const ServiceCancel: React.FC<ServiceCancelProps> = ({
     );
 };
 
-export default ServiceCancel; 
+export default ServiceCancel;

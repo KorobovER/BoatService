@@ -87,7 +87,7 @@ function Dashboard() {
     // Register the callback when the component mounts, unregister when it unmounts
     useEffect(() => {
         registerMarinaChangeCallback(handleMarinaChange);
-        
+
         return () => {
             unregisterMarinaChangeCallback(handleMarinaChange);
         };
@@ -155,7 +155,7 @@ function Dashboard() {
         } else {
             setCurrentWeekStart(getCurrentWeekMonday(today));
         }
-        
+
         // Close the service panel when going to today's view
         setSelectedReservation(null);
     };
@@ -191,7 +191,7 @@ function Dashboard() {
             const today = new Date();
             setCurrentDay(formatDateToYMD(today));
         }
-        
+
         // Close the service panel when changing views
         setSelectedReservation(null);
     };
@@ -205,7 +205,7 @@ function Dashboard() {
         } else if (currentView === 'day') {
             direction === 'prev' ? handlePrevDay() : handleNextDay();
         }
-        
+
         // Close the service panel when navigating
         setSelectedReservation(null);
     };

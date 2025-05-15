@@ -111,11 +111,11 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
 
     const renderBoatCell = (boat: ReservationExtenstion, colspan: number, textColor: string) => {
         return (
-            <Flex 
-                position="relative" 
-                width="100%" 
-                height="100%" 
-                alignItems="center" 
+            <Flex
+                position="relative"
+                width="100%"
+                height="100%"
+                alignItems="center"
                 justifyContent="center"
             >
                 <BoatCell reservation={boat} textColor={textColor} colspan={colspan} isMonthView={true} />

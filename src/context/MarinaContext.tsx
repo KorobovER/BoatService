@@ -37,7 +37,7 @@ export const MarinaProvider = ({ children }: { children: ReactNode }) => {
     // Wrapper for setSelectedMarina that calls all registered callbacks
     const setSelectedMarina = useCallback((marina: MarinaPublicBase | null) => {
         setSelectedMarinaState(marina);
-        
+
         // Execute all registered callbacks
         marinaChangeCallbacks.forEach(callback => {
             try {

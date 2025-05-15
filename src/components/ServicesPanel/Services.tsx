@@ -123,7 +123,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     }, [reservation, reservationData]);
 
 
-  
+
     // Получить выполненные сервисы
     const completedServices = useMemo(() => {
         const currentReservation = localReservation || reservation;
@@ -171,25 +171,25 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
         ReservationsService.createPaymentReceipt({ reservationId })
             .then(response => {
                 console.log('Payment receipt created:', response);
-                
+
                 // Close loading toast
                 toast.close(loadingToastId);
-                
+
                 // Close all modals
                 setIsPaymentModalOpen(false);
                 setIsRetryChargeModalOpen(false);
                 setIsMarkPaidModalOpen(false);
-                
+
                 // If we have a payment response with service_requests, update our local data
                 if (response && response.service_requests && response.service_requests.length > 0) {
                     // Create a new local reservation object with updated service statuses
                     const updatedReservation = {...localReservation};
-                    
+
                     // Get the service IDs from the payment receipt
                     const paidServiceIds = response.service_requests.map(
                         service => service.service_reservation_id
                     );
-                    
+
                     // Update the status of paid services in our local data
                     if (updatedReservation.service_requests) {
                         updatedReservation.service_requests = updatedReservation.service_requests.map(service => {
@@ -199,7 +199,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                             }
                             return service;
                         });
-                        
+
                         // Update local state
                         setLocalReservation(updatedReservation as ReservationExtenstion);
                     }
@@ -207,7 +207,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                     // Fallback to refresh data if we don't have service details
                     forceRefresh();
                 }
-                
+
                 // Show success toast
                 toast({
                     title: "Payment processed",
@@ -220,24 +220,24 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
             .catch(error => {
                 // Close loading toast
                 toast.close(loadingToastId);
-                
+
                 console.error('Error creating payment receipt:', error);
-                
+
                 // Set payment error state to true
                 setPaymentError(true);
                 setIsPaymentModalOpen(false);
-                
+
                 // Get more specific error message if available
                 let errorMessage = "There was an error processing the payment.";
-                
+
                 if (error && error.message) {
                     errorMessage += ` Error details: ${error.message}`;
                 }
-                
+
                 if (error && error.status === 500) {
                     errorMessage += " The server encountered an internal error. Please try again later or contact support if the issue persists.";
                 }
-                
+
                 // Show error toast with more details
                 toast({
                     title: "Payment failed",
@@ -246,7 +246,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                     duration: 5000,
                     isClosable: true,
                 });
-                
+
                 // Try to refresh data to ensure we're in sync with server
                 setTimeout(() => {
                     forceRefresh();
@@ -407,8 +407,8 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     if (!isOpen || !reservation) return null;
 
     // Get user name from the boat object if available
-    const userName = reservation?.user 
-        ? `${reservation.user.first_name || ''} ${reservation.user.last_name || ''}`.trim() 
+    const userName = reservation?.user
+        ? `${reservation.user.first_name || ''} ${reservation.user.last_name || ''}`.trim()
         : 'Unknown User'
 
     // Function to handle adding more services to existing reservation
@@ -421,7 +421,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     const handleCloseServiceAdd = () => {
         onServiceAddClose();
 
-        // После закрытия попапа обновляем данные о резервации 
+        // После закрытия попапа обновляем данные о резервации
         forceRefresh();
     };
 
@@ -429,19 +429,19 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     // Create a PaymentReceiptPublic object for the RetryCharge component
     const paymentReceipt: PaymentReceiptPublic = useMemo(() => {
         const currentReservation = localReservation || reservation;
-        
+
         // Get completed service requests
         const completedServiceRequests = currentReservation?.service_requests
             ? currentReservation.service_requests.filter(service => service.status === 'completed')
             : [];
-        
+
         // Calculate subtotal based on completed services
         const subtotal = completedServiceRequests.reduce((total, service) => {
             return total + service.services.reduce((serviceTotal, item) => {
                 return serviceTotal + (item.price * item.quantity);
             }, 0);
         }, 0);
-        
+
         // Create a mock PaymentReceiptPublic object
         return {
             payment_receipt_id: '',
@@ -608,13 +608,13 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 </Flex>
                 {/* Payment details block (Footer) */}
                 {hasCompletedServices && (
-                    <Flex 
-                        px='xl' 
-                        py='lg' 
-                        direction="column" 
-                        w="100%" 
+                    <Flex
+                        px='xl'
+                        py='lg'
+                        direction="column"
+                        w="100%"
                         borderBottomRadius="var(--chakra-space-xl)"
-                        borderTop="1px solid" 
+                        borderTop="1px solid"
                         borderColor="gray.200"
                         position="sticky"
                         bottom="0"
@@ -667,12 +667,12 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                             >
                                 <Flex gap="4px" fontSize="16px" fontWeight="400" color="white">CHARGE<Text fontWeight="700">${calculateTotalForCompleted()}</Text> NOW <Flex align="end" fontSize="12px">(Completed services ONLY)</Flex></Flex>
                             </Button>
-                            
+
                             {/* Тестовая кнопка для симуляции ошибки оплаты */}
                             {/* <Button
                                 display="flex"
-                                w="100%" 
-                                justifyContent="center" 
+                                w="100%"
+                                justifyContent="center"
                                 p='md'
                                 my="10px"
                                 leftIcon={<Box as="span" mr={2}>🚨</Box>}
@@ -680,7 +680,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                                 color="white"
                                 size="lg"
                                 borderRadius="full"
-                                px='md' 
+                                px='md'
                                 py='10px'
                                 fontWeight="500"
                                 _hover={{ bg: "red.500" }}
@@ -788,7 +788,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 onRetryCharge={handleCharge}
                 reservationId={reservation.reservation_id}
             />
-            
+
             {/* Mark Uncollectible Modal */}
             <MarkUncollectible
                 isOpen={isMarkUncollectibleModalOpen}
@@ -797,12 +797,12 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 reservationId={reservation.reservation_id}
                 onServiceStatusChange={(updatedReservation) => {
                     setLocalReservation(updatedReservation);
-                    queryClient.invalidateQueries({ 
-                        queryKey: ['reservation', reservation?.reservation_id] 
+                    queryClient.invalidateQueries({
+                        queryKey: ['reservation', reservation?.reservation_id]
                     });
                 }}
             />
-            
+
             {/* Mark Paid Modal */}
             <MarkPaid
                 isOpen={isMarkPaidModalOpen}
@@ -811,12 +811,12 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 reservationId={reservation.reservation_id}
                 onServiceStatusChange={(updatedReservation) => {
                     setLocalReservation(updatedReservation);
-                    queryClient.invalidateQueries({ 
-                        queryKey: ['reservation', reservation?.reservation_id] 
+                    queryClient.invalidateQueries({
+                        queryKey: ['reservation', reservation?.reservation_id]
                     });
                 }}
             />
-            
+
         </>
     );
 };

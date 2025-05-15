@@ -72,7 +72,7 @@ const MarkUncollectible: React.FC<MarkUncollectibleProps> = ({
             }
 
             // Update status for each service in the payment
-            await Promise.all(payment.service_requests.map(service => 
+            await Promise.all(payment.service_requests.map(service =>
                 ReservationsService.updateReservationServiceStatus({
                     reservationId: reservationId,
                     serviceId: service.service_reservation_id,
@@ -81,8 +81,8 @@ const MarkUncollectible: React.FC<MarkUncollectibleProps> = ({
             ));
 
             // Fetch the updated reservation to ensure data consistency
-            const updatedReservationData = await ReservationsService.readReservation({ 
-                id: reservationId 
+            const updatedReservationData = await ReservationsService.readReservation({
+                id: reservationId
             });
 
             // Update local state with the fetched reservation data
@@ -208,4 +208,4 @@ const MarkUncollectible: React.FC<MarkUncollectibleProps> = ({
     );
 };
 
-export default MarkUncollectible; 
+export default MarkUncollectible;

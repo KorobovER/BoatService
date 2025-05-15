@@ -58,7 +58,7 @@ const QuantityInputModal: React.FC<QuantityInputModalProps> = ({
             });
             return;
         }
-        
+
         // Call the parent component's submit handler with service ID and quantity
         onSubmit(serviceId, quantity);
     };
@@ -69,7 +69,7 @@ const QuantityInputModal: React.FC<QuantityInputModalProps> = ({
         if (unitOfMeasurement.toLowerCase() === 'person') {
             return 'Enter number of Passengers:';
         }
-        
+
         return `Enter number of ${unitOfMeasurement} dispensed:`;
     };
 
@@ -174,4 +174,4 @@ const QuantityInputModal: React.FC<QuantityInputModalProps> = ({
     );
 };
 
-export default QuantityInputModal; 
+export default QuantityInputModal;

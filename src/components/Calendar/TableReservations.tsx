@@ -86,13 +86,13 @@ const renderEdgeIcon = (reservation: ReservationExtenstion, isStart: boolean) =>
     const cellColor = getCellColor(reservation);
 
     return (
-        <svg 
+        <svg
             width="13"
             height="44"
             viewBox="0 0 13 44"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            style={{ 
+            style={{
                 transform: (isStart && reservation.startsBefore)? "rotate(180deg)" : "rotate(0deg)",
                 transformOrigin: "center"
             }}

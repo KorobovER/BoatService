@@ -136,9 +136,9 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
 
             // Создаем новый объект с точными типами данных
             // ВАЖНО: price, quantity должны быть числами (не строками)
-            const price = typeof item.price === 'number' ? item.price : 
+            const price = typeof item.price === 'number' ? item.price :
                         typeof item.price === 'string' ? parseFloat(item.price) : 1;
-                        
+
             // Создаем объект в полном соответствии с типом SubServiceRequest
             const serviceItem: SubServiceRequest = {
                 title: item.parentServiceTitle || "Service",
@@ -169,25 +169,25 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
     const itemNameRef = useRef<HTMLInputElement>(null);
     const descriptionRef = useRef<HTMLTextAreaElement>(null);
     const amountRef = useRef<HTMLInputElement>(null);
-    
+
     // Состояние для описания и имени товара
     const [description, setDescription] = useState('');
     const [itemName, setItemName] = useState('');
     const [amount, setAmount] = useState('');
-    
+
     // Состояние для хранения пользовательских сервисов
     const [customServices, setCustomServices] = useState<any[]>([]);
-    
+
     // Объединяем сервисы из API и пользовательские сервисы
     const combinedServiceItems = useMemo(() => {
         return [...allServiceItems, ...customServices];
     }, [allServiceItems, customServices]);
-    
+
     // Обработчик изменения описания с ограничением в 20 слов
     const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const text = e.target.value;
         const words = text.trim().split(/\s+/);
-        
+
         if (words.length <= 20) {
             setDescription(text);
         } else {
@@ -195,11 +195,11 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
             setDescription(words.slice(0, 20).join(' '));
         }
     };
-    
+
     // Обработчик изменения имени товара с ограничением в 20 символов
     const handleItemNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const text = e.target.value;
-        
+
         if (text.length <= 20) {
             setItemName(text);
         } else {
@@ -214,7 +214,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
         const value = e.target.value.replace(/[^\d.]/g, '');
         setAmount(value);
     };
-    
+
     // Функция добавления нового сервиса Open Charge
     const addOpenCharge = () => {
         try {
@@ -230,7 +230,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                 itemNameRef.current?.focus();
                 return;
             }
-            
+
             // Конвертируем сумму в число
             const priceValue = parseFloat(amount.replace(/[^\d.]/g, ''));
             if (isNaN(priceValue) || priceValue <= 0) {
@@ -244,7 +244,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                 amountRef.current?.focus();
                 return;
             }
-            
+
             // Создаем новый элемент сервиса СТРОГО в соответствии с требуемым форматом API
             const newService: SubServiceRequest = {
                 title: "Open Charge",
@@ -253,29 +253,29 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                 unit: description.trim() || "item", // из поля description
                 quantity: 1
             };
-            
+
             // Создаем новый сервис с правильной структурой для отображения в списке
             const newServiceForDisplay = {
                 name: newService.name,
                 price: newService.price,
                 unit: newService.unit,
-                type: 'open_charge', 
+                type: 'open_charge',
                 parentServiceTitle: newService.title
             };
-            
+
             // Добавляем элемент в список пользовательских сервисов
             const newCustomServices = [...customServices, newServiceForDisplay];
             setCustomServices(newCustomServices);
-            
+
             // Находим индекс нового элемента в объединенном массиве
             const newItemIndex = allServiceItems.length + newCustomServices.length - 1;
-            
+
             // Устанавливаем количество = 1 для нового элемента
             setQuantities(prev => ({
                 ...prev,
                 [newItemIndex]: 1
             }));
-            
+
             // Показываем уведомление об успехе
             toast({
                 title: "Service created",
@@ -284,13 +284,13 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                 duration: 3000,
                 isClosable: true,
             });
-            
+
             // Сбрасываем форму и возвращаемся к списку сервисов
             setItemName('');
             setDescription('');
             setAmount('');
             setMode('list');
-            
+
         } catch (error: any) {
             console.error('Error creating Open Charge service:', error);
             toast({
@@ -312,12 +312,12 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
             const newCustomServices = [...customServices];
             newCustomServices.splice(customIndex, 1);
             setCustomServices(newCustomServices);
-            
+
             // Удаляем из quantities
             const newQuantities = { ...quantities };
             delete newQuantities[idx];
             setQuantities(newQuantities);
-            
+
             // Показываем уведомление
             toast({
                 title: "Service removed",
@@ -336,7 +336,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
             // Получаем все выбранные сервисы
             const selectedServices = getSelectedServices();
             console.log('Selected services after getSelectedServices:', JSON.stringify(selectedServices, null, 2));
-            
+
             if (selectedServices.length === 0) {
                 toast({
                     title: "No services selected",
@@ -347,11 +347,11 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                 });
                 return;
             }
-            
+
             // Получаем ID резервации
             const reservationId = getReservationId(reservation);
             console.log('Reservation ID:', reservationId);
-            
+
             if (!reservationId) {
                 console.error('Missing reservation ID', { reservation });
                 toast({
@@ -363,7 +363,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                 });
                 return;
             }
-            
+
             // ВАЖНОЕ ИЗМЕНЕНИЕ: Отправляем отдельный запрос для каждого сервиса
             // Создаем массив промисов для отправки каждого сервиса
             const servicePromises = selectedServices.map(async (service) => {
@@ -373,16 +373,16 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                     services: [service], // Массив с одним элементом
                     special_instructions: null
                 };
-                
+
                 console.log(`Sending service "${service.name}" to API:`, serviceRequest);
-                
+
                 try {
                     // Отправляем запрос для одного сервиса
                     const response = await ReservationsService.requestReservationService({
                         reservationId,
                         requestBody: serviceRequest
                     });
-                    
+
                     console.log(`Service "${service.name}" creation response:`, response);
                     return { success: true, service, response };
                 } catch (err) {
@@ -390,14 +390,14 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                     return { success: false, service, error: err };
                 }
             });
-            
+
             // Ждем завершения всех запросов
             const results = await Promise.all(servicePromises);
-            
+
             // Подсчитываем успешные и неуспешные запросы
             const successful = results.filter(r => r.success).length;
             const failed = results.filter(r => !r.success).length;
-            
+
             // Показываем соответствующее уведомление
             if (successful > 0 && failed === 0) {
                 // Все запросы успешны
@@ -427,10 +427,10 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                     isClosable: true,
                 });
             }
-            
+
             // Инвалидируем кэш React Query
             queryClient.invalidateQueries();
-            
+
             // Закрываем модальное окно если есть хотя бы 1 успешный запрос
             if (successful > 0) {
                 setTimeout(() => {
@@ -521,9 +521,9 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                         ✕
                     </Button>
                 </ModalHeader>
-                <ModalBody 
-                    pb={6} 
-                    flex="1" 
+                <ModalBody
+                    pb={6}
+                    flex="1"
                     overflowY="auto"
                     sx={{
                         '&::-webkit-scrollbar': {

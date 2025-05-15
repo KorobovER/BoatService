@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { Box, Text, Image, Flex, Button, useDisclosure, Collapse, Icon, useToast } from '@chakra-ui/react';
+import { Box, Text, Image, Flex, Button, useDisclosure, Collapse, useToast } from '@chakra-ui/react';
 import ServiceAdd from './ServiceAdd';
 import { useMarina } from '../../context/MarinaContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';

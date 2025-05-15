@@ -137,7 +137,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
             // Создаем новый объект с точными типами данных
             // ВАЖНО: price, quantity должны быть числами (не строками)
             const price = typeof item.price === 'number' ? item.price :
-                        typeof item.price === 'string' ? parseFloat(item.price) : 1;
+                typeof item.price === 'string' ? parseFloat(item.price) : 1;
 
             // Создаем объект в полном соответствии с типом SubServiceRequest
             const serviceItem: SubServiceRequest = {
@@ -841,19 +841,21 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                         zIndex="1"
                         boxShadow="0 -2px 8px rgba(0,0,0,0.04)"
                         width="100%"
-                        p={4}
+                        p='xl'
                         borderTop="1px solid"
                         borderColor="gray.200"
                         display="flex"
-                        justifyContent="space-between"
                         alignItems="center"
                         mt={4}
                         mb={0}
                         borderBottomRadius="var(--chakra-space-xl)"
                     >
-                        <Text fontWeight="medium">{totalSelectedServices} services added</Text>
-                        <Flex gap={4}>
+                        <Text flex='1' w='100%' fontWeight="medium">{totalSelectedServices} services added</Text>
+                        <Flex flex='1' w='100%' gap="md">
                             <Button
+                                flex='1' 
+                                w='100%'
+                                h='50px'
                                 variant="outline"
                                 onClick={clearAll}
                                 leftIcon={<Box as="span" fontSize="sm">×</Box>}
@@ -868,6 +870,9 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                                 Clear all
                             </Button>
                             <Button
+                                flex='1' 
+                                w='100%'
+                                h='50px'
                                 px="xl"
                                 py="10px"
                                 borderRadius="var(--chakra-space-full)"

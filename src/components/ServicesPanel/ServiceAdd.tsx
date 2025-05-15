@@ -858,7 +858,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                                 h='50px'
                                 variant="outline"
                                 onClick={clearAll}
-                                leftIcon={<Box as="span" fontSize="sm">×</Box>}
+                                leftIcon={<Image mr='10px' w='11px' h='auto' src="/assets/images/close.svg" alt="Close" />}
                                 color="gray.900"
                                 borderColor="gray.200"
                                 borderRadius="var(--chakra-space-full)"

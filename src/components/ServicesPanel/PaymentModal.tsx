@@ -68,11 +68,11 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           ))}
           <Flex justify="space-between">
             <Text fontSize='14px' fontWeight='300' color='basic.grey700'>Service fee (7.5%)</Text>
-            <Text fontSize='14px' fontWeight='400' color='basic.grey300'>${serviceFee.toFixed(2)}</Text>
+            <Text fontSize='14px' fontWeight='400' color='basic.grey700'>${serviceFee.toFixed(2)}</Text>
           </Flex>
           <Flex justify="space-between">
             <Text fontSize='14px' fontWeight='300' color='basic.grey700'>Taxes</Text>
-            <Text fontSize='14px' fontWeight='400' color='basic.grey300'>${taxes.toFixed(2)}</Text>
+            <Text fontSize='14px' fontWeight='400' color='basic.grey700'>${taxes.toFixed(2)}</Text>
           </Flex>
         </Flex>
         <Flex justify="space-between" fontWeight="bold" mt='24px'>

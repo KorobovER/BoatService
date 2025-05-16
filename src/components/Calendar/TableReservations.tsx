@@ -35,12 +35,7 @@ interface TableReservationsProps {
     days: string[];
     cellWidth: string;
     renderHeader: (day: string) => React.ReactNode;
-    renderBoatCell: (
-        reservation: ReservationExtenstion, 
-        colspanValue: number, 
-        textColor: string, 
-        halfDayColspan?: number
-    ) => React.ReactNode;
+    renderBoatCell: (reservation: ReservationExtenstion, colspan: number, textColor: string) => React.ReactNode;
     currentDate: string;
     onReservationClick: (rowId: string, day: string, reservation?: ReservationExtenstion, timeOfDay?: 'AM' | 'PM') => void;
     isMonthView?: boolean;
@@ -90,14 +85,11 @@ function getReservationsQueryOptions(currentDate: string, marinaId: string | und
 const renderEdgeIcon = (reservation: ReservationExtenstion, isStart: boolean) => {
     const cellColor = getCellColor(reservation);
 
-    // Всегда возвращаем 8px для половины дня
-    const iconWidth = 8;
-
     return (
         <svg
-            width={iconWidth}
+            width="13"
             height="44"
-            viewBox="0 0 8 44"
+            viewBox="0 0 13 44"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             style={{
@@ -106,7 +98,7 @@ const renderEdgeIcon = (reservation: ReservationExtenstion, isStart: boolean) =>
             }}
         >
             <path
-                d="M2.5 7.5L7.5 0H0V44H7.5L2.5 36.5L7.5 29.6629L2.5 22L7.5 13.8427L2.5 7.5Z"
+                d="M4.02539 7.5L12.0254 0H0.0253906V44H12.0254L4.02539 36.5L12.0254 29.6629L4.02539 22L12.0254 13.8427L4.02539 7.5Z"
                 fill={cellColor.bg}
             />
         </svg>
@@ -731,7 +723,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                                 data-mooring-ball-id={boatMatch.mooring_ball_id}
                                             >
                                                 {/* Показываем информацию о лодке */}
-                                                {renderBoatCell(boatMatch, halfDayColspan / 2, getCellColor(boatMatch).textColor, halfDayColspan)}
+                                                {renderBoatCell(boatMatch, halfDayColspan / 2, getCellColor(boatMatch).textColor)}
                                             </Flex>
                                         </Td>
                                     );

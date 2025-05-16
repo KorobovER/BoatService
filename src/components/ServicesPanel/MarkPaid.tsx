@@ -94,7 +94,7 @@ const MarkPaid: React.FC<MarkPaidProps> = ({
                 ...payment,
                 service_requests: payment.service_requests.map(service => ({
                     ...service,
-                    status: 'paid'
+                    status: 'manually_paid'
                 }))
             };
 
@@ -108,7 +108,7 @@ const MarkPaid: React.FC<MarkPaidProps> = ({
                 ReservationsService.updateReservationServiceStatus({
                     reservationId: reservationId,
                     serviceId: service.service_reservation_id,
-                    statusIn: 'paid'
+                    statusIn: 'manually_paid'
                 })
             ));
 

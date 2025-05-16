@@ -539,6 +539,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                                 }}
                                                 borderRight={!isAM && dayIndex < days.length - 1 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
                                                 borderTop="1px solid var(--chakra-colors-basic-grey100)"
+                                                borderBottom={row.id === allRows[allRows.length - 1].id ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
                                             >
                                                 <Box height="100%" width="100%" display="flex" alignItems="center" justifyContent="center" />
                                             </Td>
@@ -699,6 +700,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                             className={isSelected ? 'selected-cell' : ''}
                                             borderRight={dayIndex < days.length - 1 && (halfDayIndex + halfDayColspan) % 2 === 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
                                             borderTop="1px solid var(--chakra-colors-basic-grey100)"
+                                            borderBottom={row.id === allRows[allRows.length - 1].id ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
                                             data-boat-id={boatMatch.id}
                                             data-mooring-ball-id={boatMatch.mooring_ball_id}
                                             data-boat-name={boatMatch.name}
@@ -743,6 +745,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                             zIndex={1}
                                             borderRight="1px solid var(--chakra-colors-basic-grey100)"
                                             borderTop="1px solid var(--chakra-colors-basic-grey100)"
+                                            borderBottom={row.id === allRows[allRows.length - 1].id ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
                                         >
                                             <Flex
                                                 height="44px"

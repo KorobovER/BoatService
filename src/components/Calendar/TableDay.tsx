@@ -647,6 +647,7 @@ const TableDay: React.FC<TableDayProps> = ({
                                             borderRight={hourIndex < hours.length - 1 && !isFirstHalf && (hourIndex + 1) % 1 === 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
                                             borderLeft={isFirstHalf && hourIndex > 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
                                             borderTop="1px solid var(--chakra-colors-basic-grey100)"
+                                            borderBottom="1px solid var(--chakra-colors-basic-grey100)"
                                             bg={hourIndex % 2 === 0 ? "white" : "basic.grey50"}
                                         >
                                             <Box height="100%" width="100%" display="flex" alignItems="center" justifyContent="center" />
@@ -791,6 +792,7 @@ const TableDay: React.FC<TableDayProps> = ({
                                         borderRight={hourIndex < hours.length - 1 && (hourIndex + 1) % 1 === 0 && (halfHourIndex + halfHourColspan) % 2 === 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
                                         borderLeft={isFirstHalf && hourIndex > 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
                                         borderTop="1px solid var(--chakra-colors-basic-grey100)"
+                                        borderBottom="1px solid var(--chakra-colors-basic-grey100)"
                                         data-boat-id={boatForHalfHour.id}
                                         data-boat-name={boatForHalfHour.name}
                                         data-boat-code={boatForHalfHour.code}
@@ -849,6 +851,7 @@ const TableDay: React.FC<TableDayProps> = ({
                                         zIndex={1}
                                         borderRight="1px solid var(--chakra-colors-basic-grey100)"
                                         borderTop="1px solid var(--chakra-colors-basic-grey100)"
+                                        borderBottom="1px solid var(--chakra-colors-basic-grey100)"
                                     >
                                         <Flex
                                             height="44px"

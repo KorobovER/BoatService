@@ -135,8 +135,6 @@ const ServicesList: React.FC<ServicesListProps> = ({
             // If quantity changed, we need to update both quantity and status
             if (newQuantity !== initialQuantity) {
                 // Use updateReservationService to update quantity and status
-                console.log(`Updating service with new quantity: ${newQuantity} (was ${initialQuantity})`);
-
                 // Create updated service object that matches ServiceOnReservationUpdate type
                 const updatedService = {
                     requested_date: service.requested_date,
@@ -165,15 +163,12 @@ const ServicesList: React.FC<ServicesListProps> = ({
                         serviceId: serviceId,
                         requestBody: updatedService
                     });
-
-                    console.log('Service quantity updated successfully');
                 } catch (error) {
                     console.error('Error updating service quantity:', error);
                     throw error; // Re-throw to trigger the catch block
                 }
             } else {
                 // If quantity didn't change, just update the status
-                console.log('Quantity unchanged, just updating status to completed');
                 await ReservationsService.updateReservationServiceStatus({
                     reservationId: localReservation.reservation_id,
                     serviceId: serviceId,
@@ -227,8 +222,6 @@ const ServicesList: React.FC<ServicesListProps> = ({
 
     // Handles actions from the dropdown menu
     const handleServiceAction = async (action: string, serviceId: string, serviceStatus: string) => {
-        console.log(`Action: ${action} for service: ${serviceId} with status: ${serviceStatus}`);
-
         // Skip if already loading
         if (isLoading[serviceId]) return;
 
@@ -448,13 +441,11 @@ const ServicesList: React.FC<ServicesListProps> = ({
                     userName={userName}
                     onServicesAdded={() => {
                         // Принудительно запрашиваем актуальные данные перед обновлением UI
-                        console.log('ServicesList: Services added callback triggered');
                         queryClient.invalidateQueries();
 
                         // Добавляем небольшую задержку для гарантии получения обновленных данных
                         setTimeout(() => {
                             if (localReservation?.reservation_id) {
-                                console.log('ServicesList: Refreshing reservation data after services added');
                                 ReservationsService.readReservation({ id: localReservation.reservation_id })
                                     .then(updatedReservation => {
                                         console.log('ServicesList: Got updated reservation data:',

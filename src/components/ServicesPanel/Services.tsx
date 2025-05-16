@@ -169,8 +169,6 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
         // Call createPaymentReceipt endpoint
         ReservationsService.createPaymentReceipt({ reservationId })
             .then(response => {
-                console.log('Payment receipt created:', response);
-
                 // Close loading toast
                 toast.close(loadingToastId);
 
@@ -295,13 +293,9 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
 
             // Определяем, с какой таблицей работаем (Day или Week/Month)
             const isTableDay = document.querySelector('td[data-hour]') !== null;
-            console.log('Table type detected:', isTableDay ? 'TableDay' : 'TableWeek/Month');
-
             // Найдем ячейки с лодками
             const boatContainers = document.querySelectorAll('.boat-cell-container');
             const tableCells = document.querySelectorAll('td[data-boat-id]');
-
-            console.log(`Found: ${boatContainers.length} containers, ${tableCells.length} table cells`);
 
             // Затемняем ВСЕ ячейки и контейнеры
             applyStyles(boatContainers, { opacity: '0.4', transition: 'opacity 0.2s ease-in-out' });
@@ -319,14 +313,12 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                     if (containerInside) {
                         (containerInside as HTMLElement).style.opacity = '1';
                         foundExactCell = true;
-                        console.log('Found exact TableDay cell:', dayBoatSelector);
                     }
                 }
             } else {
                 // Для TableWeek/Month используем rowId, day и ID лодки
                 // 1. Перебираем ячейки таблицы и ищем точное совпадение
                 const currentCellKey = `boat-${rowId}-${day}-${reservation.reservation_id}`;
-                console.log('Looking for cell with key containing:', currentCellKey);
 
                 tableCells.forEach(cell => {
                     const cellKey = cell.getAttribute('key');
@@ -336,7 +328,6 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                         if (containerInside) {
                             (containerInside as HTMLElement).style.opacity = '1';
                             foundExactCell = true;
-                            console.log('Found exact cell by key:', cellKey);
                         }
                     }
                 });
@@ -352,7 +343,6 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                     if (containerInside) {
                         (containerInside as HTMLElement).style.opacity = '1';
                         foundExactCell = true;
-                        console.log('Found by selected-cell class');
                     }
                 }
             }
@@ -363,7 +353,6 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 const allBoatContainers = document.querySelectorAll(`.boat-cell-container[data-boat-id="${reservation.reservation_id}"]`);
                 if (allBoatContainers.length > 0) {
                     (allBoatContainers[0] as HTMLElement).style.opacity = '1';
-                    console.log('Found by boat ID only (fallback)');
                 }
             }
 
@@ -378,7 +367,6 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     // Функция для принудительного обновления данных о резервации
     const forceRefresh = useCallback(() => {
         if (reservation?.reservation_id) {
-            console.log('Forcing reservation data refresh...');
 
             // Инвалидируем все запросы
             queryClient.invalidateQueries();
@@ -386,7 +374,6 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
             // Принудительно запрашиваем актуальные данные с сервера
             ReservationsService.readReservation({ id: reservation.reservation_id })
                 .then(updatedReservation => {
-                    console.log('Received updated reservation data:', updatedReservation);
                     // Обновляем локальное состояние
                     setLocalReservation(updatedReservation as ReservationExtenstion);
                 })

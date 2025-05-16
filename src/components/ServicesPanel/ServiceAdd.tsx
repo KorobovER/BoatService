@@ -105,7 +105,6 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
 
     // Функция для подготовки выбранных сервисов
     const getSelectedServices = (): SubServiceRequest[] => {
-        console.log('Starting getSelectedServices function');
         const selectedServices: SubServiceRequest[] = [];
 
         // Получаем все активные сервисы (с ненулевым количеством)
@@ -115,8 +114,6 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                 validQuantities[idx] = qty;
             }
         }
-        console.log('Services with non-zero quantities:', validQuantities);
-
         // Проходим по всем выбранным сервисам
         for (const [idx, qty] of Object.entries(validQuantities)) {
             const index = parseInt(idx, 10);
@@ -346,12 +343,8 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
         try {
             // Set loading state to true at the start
             setIsAddServicesLoading(true);
-
-            console.log('Starting addServices function');
             // Получаем все выбранные сервисы
             const selectedServices = getSelectedServices();
-            console.log('Selected services after getSelectedServices:', JSON.stringify(selectedServices, null, 2));
-
             if (selectedServices.length === 0) {
                 toast({
                     title: "No services selected",
@@ -365,8 +358,6 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
 
             // Получаем ID резервации
             const reservationId = getReservationId(reservation);
-            console.log('Reservation ID:', reservationId);
-
             if (!reservationId) {
                 console.error('Missing reservation ID', { reservation });
                 toast({
@@ -389,16 +380,12 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                     special_instructions: null
                 };
 
-                console.log(`Sending service "${service.name}" to API:`, serviceRequest);
-
                 try {
                     // Отправляем запрос для одного сервиса
                     const response = await ReservationsService.requestReservationService({
                         reservationId,
                         requestBody: serviceRequest
                     });
-
-                    console.log(`Service "${service.name}" creation response:`, response);
                     return { success: true, service, response };
                 } catch (err) {
                     console.error(`Error adding service "${service.name}":`, err);

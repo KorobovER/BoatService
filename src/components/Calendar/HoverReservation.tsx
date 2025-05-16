@@ -10,7 +10,6 @@ const HoverReservation: React.FC<HoverReservationProps> = ({ reservation }) => {
     const serviceRequests = (reservation.service_requests || []).filter(
         request => !['denied', 'cancelled', 'payment_failed', 'paid'].includes(request.status)
     );
-    console.log(serviceRequests)
     const hasServiceRequests = serviceRequests.length > 0;
     const buttonStyle = {
         bg: hasServiceRequests ? 'system.warningYellow' : 'system.successGreen',

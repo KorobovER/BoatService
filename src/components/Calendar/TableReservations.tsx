@@ -326,13 +326,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         }
     };
 
-    // Добавим отладочное сообщение для контроля временной зоны
-    useEffect(() => {
-        console.log('Current timezone:', currentTimeZone);
-        console.log('Current date format:', new Date().toLocaleString());
-        console.log('Browser timezone offset:', new Date().getTimezoneOffset() / 60);
-    }, [currentTimeZone]);
-
     // Функция-обертка для renderHeader, которая учитывает локальную временную зону
     const localizedRenderHeader = (day: string) => {
         // Если пользовательская функция renderHeader предоставлена, используем ее,
@@ -628,7 +621,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                             // If this is the first day of the month (1st) and the reservation started earlier
                                             if (firstDayOfMonth === 1 && startsBeforeVisiblePeriod) {
                                                 needsLeftRadius = false;
-                                                console.log('Detected reservation starting in previous month:', boatMatch);
                                             }
                                         }
 
@@ -639,22 +631,9 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                             // Correct determination of the last day of the current month
                                             // Months in JavaScript are indexed from 0, so for April we use month=4
                                             const lastDayInMonth = new Date(year, month, 0).getDate();
-
-                                            console.log('Checking last day of month:', {
-                                                year,
-                                                month,
-                                                currentDay: lastDayOfMonth,
-                                                lastDayOfMonth: lastDayInMonth,
-                                                continuesBeyond: endsAfterVisiblePeriod,
-                                                boat: boatMatch.name,
-                                                start: boatMatch.startDay,
-                                                end: boatMatch.endDay
-                                            });
-
                                             // For April (month 4 in our case) the last day is 30
                                             if (lastDayOfMonth === lastDayInMonth && endsAfterVisiblePeriod) {
                                                 needsRightRadius = false;
-                                                console.log('Detected reservation continuing to next month:', boatMatch);
                                             }
                                         }
                                     }
@@ -667,13 +646,11 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                         // If current day is April 30 and the reservation continues into May
                                         if (day.endsWith('-04-30') && endMonth === 5) {
                                             needsRightRadius = false;
-                                            console.log('Applied special rule for April 30:', boatMatch);
                                         }
 
                                         // If current day is May 1 and the reservation started in April
                                         if (day.endsWith('-05-01') && startMonth === 4) {
                                             needsLeftRadius = false;
-                                            console.log('Applied special rule for May 1:', boatMatch);
                                         }
                                     }
 

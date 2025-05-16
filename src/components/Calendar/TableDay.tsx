@@ -145,7 +145,6 @@ const TableDay: React.FC<TableDayProps> = ({
                     label: ball[numberField].toString(),
                 }))
                 .sort((a, b) => parseInt(a.id) - parseInt(b.id));
-            console.log(`ROWS ${rows}`)
             setAllRows(rows);
         }
     }, [mooringBalls]);
@@ -154,19 +153,10 @@ const TableDay: React.FC<TableDayProps> = ({
     useEffect(() => {
         if (reservationsData?.data && currentDate) {
             try {
-                console.log('Raw reservations data:', reservationsData.data);
-
                 // Parse current date for day boundaries
                 const [year, month, day] = currentDate.split('-').map(Number);
                 const currentDayStart = new Date(year, month - 1, day, 0, 0, 0);
                 const currentDayEnd = new Date(year, month - 1, day, 23, 59, 59, 999);
-
-                console.log('Current day boundaries:', {
-                    currentDate,
-                    currentDayStart,
-                    currentDayEnd
-                });
-
                 // Filter reservations that overlap with the current day
                 const apiBoats = reservationsData.data
                     .filter(reservation => {
@@ -174,29 +164,11 @@ const TableDay: React.FC<TableDayProps> = ({
                             // Get reservation start and end dates
                             const startDate = new Date(reservation.start_date.endsWith('Z') ? reservation.start_date : reservation.start_date + 'Z');
                             const endDate = new Date(reservation.end_date.endsWith('Z') ? reservation.end_date : reservation.end_date + 'Z');
-
-                            console.log('Processing reservation:', {
-                                id: reservation.reservation_id,
-                                startDate,
-                                endDate,
-                                mooringBallId: reservation.mooring_ball_id
-                            });
-
                             // Check if reservation overlaps with current day
                             const overlapsWithDay = (
                                 startDate <= currentDayEnd &&
                                 endDate >= currentDayStart
                             );
-
-                            console.log('Reservation overlap check:', {
-                                id: reservation.reservation_id,
-                                overlapsWithDay,
-                                startDate,
-                                endDate,
-                                currentDayStart,
-                                currentDayEnd
-                            });
-
                             return overlapsWithDay;
                         } catch (error) {
                             console.error('Error checking reservation date:', error);
@@ -212,15 +184,6 @@ const TableDay: React.FC<TableDayProps> = ({
                             // For the current day view, determine effective start and end times
                             const effectiveStartTime = startDate < currentDayStart ? currentDayStart : startDate;
                             const effectiveEndTime = endDate > currentDayEnd ? currentDayEnd : endDate;
-
-                            console.log('Processing effective times:', {
-                                id: reservation.reservation_id,
-                                startDate,
-                                endDate,
-                                effectiveStartTime,
-                                effectiveEndTime
-                            });
-
                             // Check if this reservation crosses day boundaries
                             const startsBefore = startDate < currentDayStart;
                             const endsAfter = endDate > currentDayEnd;
@@ -262,8 +225,6 @@ const TableDay: React.FC<TableDayProps> = ({
                                 endsAfter
                             };
 
-                            console.log('Processed reservation:', processedReservation);
-
                             return processedReservation;
                         } catch (error) {
                             console.error('Error processing reservation:', error);
@@ -271,12 +232,6 @@ const TableDay: React.FC<TableDayProps> = ({
                         }
                     })
                     .filter(Boolean) as ReservationExtenstion[];
-
-                console.log('Final processed reservations:', apiBoats);
-
-                if (apiBoats.length === 0) {
-                    console.log("No boats found for the selected date. Check API response and filtering logic.");
-                }
 
                 setReservations(apiBoats);
             } catch (error) {
@@ -505,7 +460,6 @@ const TableDay: React.FC<TableDayProps> = ({
                     </Thead>
                     <Tbody>
                         {allRows.map(row => {
-                            console.log(`row ${row}`);
                             // For each hour, we have two half-hour slots (0-29 min and 30-59 min)
                             const occupiedHalfHours = Array(hours.length * 2).fill(null);
 
@@ -525,7 +479,6 @@ const TableDay: React.FC<TableDayProps> = ({
                                 } else {
                                     realHour = hourIndex; // 1pm-11pm (already in 24-hour format: 13-23)
                                 }
-                                console.log(`reservations ${reservations}`);
                                 // Find boats for this hour and row
                                 const boatsForHour = reservations.filter(boat => {;
 
@@ -678,9 +631,6 @@ const TableDay: React.FC<TableDayProps> = ({
                                     }
                                 }
 
-                                // Add debugging log for cell span
-                                console.log(`Boat: ${boatForHalfHour.name}, Cell colspan: ${halfHourColspan}, Start: ${halfHourIndex}, End: ${halfHourIndex + halfHourColspan}`);
-
                                 // Получаем время начала и конца резервации
                                 const boatStartTime = boatForHalfHour.startDateObj;
                                 const boatEndTime = boatForHalfHour.endDateObj;
@@ -745,20 +695,6 @@ const TableDay: React.FC<TableDayProps> = ({
                                 const isFirstCellOfReservation = Math.abs(boatStartTime.getTime() - boatForHalfHour.startDateObj.getTime()) < 60000;
                                 const isLastCellOfReservation = Math.abs(boatEndTime.getTime() - boatForHalfHour.endDateObj.getTime()) < 60000;
 
-                                console.log("Debug info:", {
-                                    boat: boatForHalfHour.name,
-                                    hourIndex,
-                                    isFirstHalf,
-                                    isStartCell,
-                                    isEndCell,
-                                    isFirstVisibleCell,
-                                    isLastVisibleCell,
-                                    isFullyContainedInDay,
-                                    isFirstCellOfReservation,
-                                    isLastCellOfReservation,
-                                    halfHourColspan
-                                });
-
                                 // Определяем скругление для разных случаев:
                                 let borderRadius = "1000px"; // По умолчанию полное скругление
 
@@ -773,8 +709,6 @@ const TableDay: React.FC<TableDayProps> = ({
                                     // Right edge straight (reservation continues to next day)
                                     borderRadius = "1000px 0px 0px 1000px";
                                 }
-
-                                console.log(`Applied borderRadius for ${boatForHalfHour.name}: ${borderRadius}, startsBefore: ${boatForHalfHour.startsBefore}, endsAfter: ${boatForHalfHour.endsAfter}`);
 
                                 const textColor = getCellColor(boatForHalfHour).textColor;
 

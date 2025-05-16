@@ -628,41 +628,40 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                             justifyContent="center"
                             alignItems="center"
                             cursor="pointer"
-                            onClick={() => setIsPaymentDetailsOpen(!isPaymentDetailsOpen)}
                         >
                             <Text textDecoration="underline" fontSize="14px" fontWeight="400" color="gray.600">
                                 Payment details
                             </Text>
-                            <Box p='10px' transform={isPaymentDetailsOpen ? 'rotate(180deg)' : 'none'} transition="transform 0.2s">
+                            <Box p='10px'>
                                 <svg width="16" height="9" viewBox="0 0 16 9" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M1.06055 7.18555L7.40234 1.10938C7.60156 0.943359 7.80078 0.84375 8 0.84375C8.19922 0.84375 8.36523 0.910156 8.53125 1.04297L14.873 7.11914C15.2051 7.45117 15.2051 7.94922 14.9062 8.24805C14.6074 8.58008 14.1094 8.58008 13.7773 8.28125L8 2.76953L2.15625 8.34766C1.85742 8.64648 1.32617 8.64648 1.02734 8.31445C0.728516 7.98242 0.728516 7.48438 1.06055 7.18555Z" fill="#777777" />
                                 </svg>
                             </Box>
                         </Flex>
+                        {!paymentError && (
+                            <Box>
+                                <Flex alignItems="center" flexDirection="column" justifyContent="center" w="100%">
+                                    <Button
+                                        display="flex"
+                                        my="10px"
+                                        height='50px'
+                                        justifyContent="center"
+                                        leftIcon={<Image p='10px' src="/assets/images/credit-card.svg" alt="Card" />}
+                                        bg="system.successGreen"
+                                        color="white"
+                                        borderRadius="full"
+                                        px='md'
+                                        py='10px'
+                                        fontWeight="500"
+                                        _hover={{ bg: "teal.400" }}
+                                        onClick={() => setIsPaymentModalOpen(true)}
+                                    >
+                                        <Flex gap="4px" fontSize="16px" fontWeight="400" color="white">CHARGE<Text fontWeight="700">${calculateTotalForCompleted()}</Text> NOW <Flex align="end" fontSize="12px">(Completed services ONLY)</Flex></Flex>
+                                    </Button>
+                                </Flex>
 
-                        <Collapse in={isPaymentDetailsOpen && !paymentError} animateOpacity>
-                            <Flex alignItems="center" flexDirection="column" justifyContent="center" w="100%">
-                                <Button
-                                    display="flex"
-                                    my="10px"
-                                    height='50px'
-                                    justifyContent="center"
-                                    leftIcon={<Image p='10px' src="/assets/images/credit-card.svg" alt="Card" />}
-                                    bg="system.successGreen"
-                                    color="white"
-                                    borderRadius="full"
-                                    px='md'
-                                    py='10px'
-                                    fontWeight="500"
-                                    _hover={{ bg: "teal.400" }}
-                                    onClick={() => setIsPaymentModalOpen(true)}
-                                >
-                                    <Flex gap="4px" fontSize="16px" fontWeight="400" color="white">CHARGE<Text fontWeight="700">${calculateTotalForCompleted()}</Text> NOW <Flex align="end" fontSize="12px">(Completed services ONLY)</Flex></Flex>
-                                </Button>
-                            </Flex>
-
-                            {/* Тестовая кнопка для симуляции ошибки оплаты */}
-                            {/* <Button
+                                {/* Тестовая кнопка для симуляции ошибки оплаты */}
+                                {/* <Button
                                 display="flex"
                                 w="100%"
                                 justifyContent="center"
@@ -691,64 +690,66 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                             >
                                 <Flex gap="4px" fontSize="16px" fontWeight="400" color="white">SIMULATE A PAYMENT ERROR (test)</Flex>
                             </Button> */}
-                        </Collapse>
-                        <Collapse in={isPaymentDetailsOpen && paymentError} animateOpacity>
-                            <Flex alignItems="center" flexDirection="column" justifyContent="center" w="100%">
-                                <Button
-                                    height='50px'
-                                    py="10px"
-                                    px='md'
-                                    my="10px"
-                                    display="flex"
-                                    justifyContent="center"
-                                    leftIcon={<Box bg="system.errorRedNew" borderRadius="full"><Image width="30px" height="30px" src="/assets/images/alert-icon-white.svg" alt="Retry" /></Box>}
-                                    bg="brand.secondaryBlue"
-                                    color="white"
-                                    borderRadius="full"
-                                    fontWeight="500"
-                                    _hover={{ bg: "teal.400" }}
-                                    onClick={() => setIsRetryChargeModalOpen(true)}
-                                >
-                                    <Flex gap="4px" fontSize="16px" fontWeight="400" color="white">RETRY CHARGE
-                                        <Text fontWeight="700">${calculateTotalForCompleted()}</Text>
-                                        NOW <Flex align="end" fontSize="12px">(Failed payment)</Flex>
+                            </Box>
+                        )}
+                        {paymentError && (
+                            <Box>
+                                <Flex alignItems="center" flexDirection="column" justifyContent="center" w="100%">
+                                    <Button
+                                        height='50px'
+                                        py="10px"
+                                        px='md'
+                                        my="10px"
+                                        display="flex"
+                                        justifyContent="center"
+                                        leftIcon={<Box bg="system.errorRedNew" borderRadius="full"><Image width="30px" height="30px" src="/assets/images/alert-icon-white.svg" alt="Retry" /></Box>}
+                                        bg="brand.secondaryBlue"
+                                        color="white"
+                                        borderRadius="full"
+                                        fontWeight="500"
+                                        _hover={{ bg: "teal.400" }}
+                                        onClick={() => setIsRetryChargeModalOpen(true)}
+                                    >
+                                        <Flex gap="4px" fontSize="16px" fontWeight="400" color="white">RETRY CHARGE
+                                            <Text fontWeight="700">${calculateTotalForCompleted()}</Text>
+                                            NOW <Flex align="end" fontSize="12px">(Failed payment)</Flex>
+                                        </Flex>
+                                    </Button>
+                                    <Flex justifyContent="space-between">
+                                        <Button
+                                            leftIcon={<Image ml='4px' h='auto' src='assets/images/close-red.svg' />}
+                                            fontSize="16px"
+                                            fontWeight="400"
+                                            textDecoration='underline'
+                                            w="100%"
+                                            flex="1"
+                                            px='md'
+                                            py='10px'
+                                            variant="unstyled"
+                                            color="system.errorRedNew"
+                                            onClick={() => setIsMarkUncollectibleModalOpen(true)}
+                                        >
+                                            Mark uncollectible
+                                        </Button>
+                                        <Button
+                                            leftIcon={<Image ml='4px' h='auto' src='assets/images/check-icon-green.svg' />}
+                                            fontSize="16px"
+                                            fontWeight="400"
+                                            textDecoration='underline'
+                                            w="100%"
+                                            flex="1"
+                                            px='md'
+                                            py='10px'
+                                            variant="unstyled"
+                                            color="system.successGreen"
+                                            onClick={() => setIsMarkPaidModalOpen(true)}
+                                        >
+                                            Mark as paid
+                                        </Button>
                                     </Flex>
-                                </Button>
-                                <Flex justifyContent="space-between">
-                                    <Button
-                                        leftIcon={<Image ml='4px' h='auto' src='assets/images/close-red.svg' />}
-                                        fontSize="16px"
-                                        fontWeight="400"
-                                        textDecoration='underline'
-                                        w="100%"
-                                        flex="1"
-                                        px='md'
-                                        py='10px'
-                                        variant="unstyled"
-                                        color="system.errorRedNew"
-                                        onClick={() => setIsMarkUncollectibleModalOpen(true)}
-                                    >
-                                        Mark uncollectible
-                                    </Button>
-                                    <Button
-                                        leftIcon={<Image ml='4px' h='auto' src='assets/images/check-icon-green.svg' />}
-                                        fontSize="16px"
-                                        fontWeight="400"
-                                        textDecoration='underline'
-                                        w="100%"
-                                        flex="1"
-                                        px='md'
-                                        py='10px'
-                                        variant="unstyled"
-                                        color="system.successGreen"
-                                        onClick={() => setIsMarkPaidModalOpen(true)}
-                                    >
-                                        Mark as paid
-                                    </Button>
                                 </Flex>
-                            </Flex>
+                            </Box>)}
 
-                        </Collapse>
                     </Flex>
                 )}
 

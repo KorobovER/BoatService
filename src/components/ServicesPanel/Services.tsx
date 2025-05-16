@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { Box, Text, Image, Flex, Button, useDisclosure, Collapse, useToast } from '@chakra-ui/react';
+import { Box, Text, Image, Flex, Button, useDisclosure, useToast } from '@chakra-ui/react';
 import ServiceAdd from './ServiceAdd';
 import { useMarina } from '../../context/MarinaContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -96,7 +96,6 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     // Add these state hooks and service data fetching
     const { selectedMarina } = useMarina();
     const { isOpen: isServiceAddOpen, onOpen: onServiceAddOpen, onClose: onServiceAddClose } = useDisclosure();
-    const [isPaymentDetailsOpen, setIsPaymentDetailsOpen] = useState(false);
     const [localReservation, setLocalReservation] = useState(reservation);
     const queryClient = useQueryClient();
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -263,13 +262,6 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
 
         return currentReservation.service_requests.some(service => service.status === 'completed');
     }, [localReservation, reservation]);
-
-    // Effect to automatically open payment details when completed services appear
-    useEffect(() => {
-        if (hasCompletedServices) {
-            setIsPaymentDetailsOpen(true);
-        }
-    }, [hasCompletedServices]);
 
     // Calculate total price for completed services
     const calculateTotalForCompleted = () => {

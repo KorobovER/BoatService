@@ -631,13 +631,6 @@ const TableDay: React.FC<TableDayProps> = ({
                                     }
                                 }
 
-                                // Получаем время начала и конца резервации
-                                const boatStartTime = boatForHalfHour.startDateObj;
-                                const boatEndTime = boatForHalfHour.endDateObj;
-
-                                // Получаем дату и время, соответствующие текущей ячейке
-                                const [year, month, day] = currentDate.split('-').map(Number);
-
                                 // Преобразуем индекс часа в реальный час (0 = 12am, 1 = 1am, ..., 12 = 12pm, ...)
                                 let currentHourStart;
                                 if (hourIndex === 0) {
@@ -650,17 +643,9 @@ const TableDay: React.FC<TableDayProps> = ({
                                     currentHourStart = hourIndex; // 1pm-11pm
                                 }
 
-                                // Создаем даты для начала и конца текущего часового блока
-                                const cellStart = new Date(year, month - 1, day, currentHourStart, isFirstHalf ? 0 : 30);
-                                const cellEnd = new Date(year, month - 1, day, currentHourStart, isFirstHalf ? 30 : 59);
-
-                                // Проверяем, начинается ли резервация в этой ячейке
-                                const isStartCell = boatStartTime >= cellStart && boatStartTime <= cellEnd;
-
                                 // Проверяем, заканчивается ли резервация в этой ячейке (с учетом последующих ячеек)
                                 const lastCellIndex = halfHourIndex + halfHourColspan - 1;
                                 const lastHourIndex = Math.floor(lastCellIndex / 2);
-                                const isLastHalfHour = lastCellIndex % 2 === 1; // 1 = second half, 0 = first half
 
                                 // Преобразуем индекс последнего часа в реальный час
                                 let lastCellHour;
@@ -674,26 +659,7 @@ const TableDay: React.FC<TableDayProps> = ({
                                     lastCellHour = lastHourIndex; // 1pm-11pm
                                 }
 
-                                const lastCellStart = new Date(year, month - 1, day, lastCellHour, isLastHalfHour ? 30 : 0);
-                                const lastCellEnd = new Date(year, month - 1, day, lastCellHour, isLastHalfHour ? 59 : 29);
-
-                                const isEndCell = boatEndTime >= lastCellStart && boatEndTime <= lastCellEnd;
-
-                                // Проверяем, является ли эта ячейка первой или последней в видимой области
-                                const isFirstVisibleCell = halfHourIndex === 0;
-                                const isLastVisibleCell = nextIndex >= occupiedHalfHours.length;
-
-                                // Учитываем особые случаи - полностью внутридневные резервации
-                                // Получаем начало и конец дня для сравнения
-                                const dayStart = new Date(year, month - 1, day, 0, 0, 0);
-                                const dayEnd = new Date(year, month - 1, day, 23, 59, 59);
-
-                                // Проверяем, находится ли вся резервация внутри текущего дня
-                                const isFullyContainedInDay = boatStartTime >= dayStart && boatEndTime <= dayEnd;
-
-                                // Проверяем, является ли лодка началом или концом резервации в принципе (не только в этой ячейке)
-                                const isFirstCellOfReservation = Math.abs(boatStartTime.getTime() - boatForHalfHour.startDateObj.getTime()) < 60000;
-                                const isLastCellOfReservation = Math.abs(boatEndTime.getTime() - boatForHalfHour.endDateObj.getTime()) < 60000;
+    
 
                                 // Определяем скругление для разных случаев:
                                 let borderRadius = "1000px"; // По умолчанию полное скругление

@@ -221,7 +221,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
     };
 
     // Handles actions from the dropdown menu
-    const handleServiceAction = async (action: string, serviceId: string, serviceStatus: string) => {
+    const handleServiceAction = async (action: string, serviceId: string) => {
         // Skip if already loading
         if (isLoading[serviceId]) return;
 
@@ -543,7 +543,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
             if (service.status === 'en_route') {
                 return (
                     <>
-                        <MenuItem gap='10px' display="flex" alignItems="center" p='10px' borderTopRadius="8px" h='42px' onClick={() => handleServiceAction('mark-pending', service.service_reservation_id, service.status)}>
+                        <MenuItem gap='10px' display="flex" alignItems="center" p='10px' borderTopRadius="8px" h='42px' onClick={() => handleServiceAction('mark-pending', service.service_reservation_id)}>
                             <Text flex='1' h='100%'>Mark as pending</Text>
                             <Flex alignItems='center' justifyContent='center' h='100%' borderRadius='100%' mt='4px'>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="8px" height="8px" viewBox="0 0 8 8" fill="none">
@@ -552,11 +552,11 @@ const ServicesList: React.FC<ServicesListProps> = ({
                             </Flex>
                             <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><Image src='/assets/images/hourglass.svg' /></Flex>
                         </MenuItem>
-                        <MenuItem display="flex" alignItems="center" p='10px' h='42px' onClick={() => handleServiceAction('edit-service', service.service_reservation_id, service.status)}>
+                        <MenuItem display="flex" alignItems="center" p='10px' h='42px' onClick={() => handleServiceAction('edit-service', service.service_reservation_id)}>
                             <Text flex='1' >Edit service</Text>
                             <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><Image src='/assets/images/pen.svg' /></Flex>
                         </MenuItem>
-                        <MenuItem display="flex" alignItems="center" p='10px' borderBottomRadius="8px" h='42px' onClick={() => handleServiceAction('cancel-service', service.service_reservation_id, service.status)}>
+                        <MenuItem display="flex" alignItems="center" p='10px' borderBottomRadius="8px" h='42px' onClick={() => handleServiceAction('cancel-service', service.service_reservation_id)}>
                             <Text flex='1' >Cancel service</Text>
                             <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><Image src='/assets/images/close.svg' /></Flex>
                         </MenuItem>
@@ -565,7 +565,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
             } else if (service.status === 'completed') {
                 return (
                     <>
-                        <MenuItem gap='10px' display="flex" alignItems="center" p='10px' borderTopRadius="8px" h='42px' onClick={() => handleServiceAction('mark-pending', service.service_reservation_id, service.status)}>
+                        <MenuItem gap='10px' display="flex" alignItems="center" p='10px' borderTopRadius="8px" h='42px' onClick={() => handleServiceAction('mark-pending', service.service_reservation_id)}>
                             <Text flex='1' h='100%'>Mark as pending</Text>
                             <Flex alignItems='center' justifyContent='center' h='100%' borderRadius='100%' mt='4px'>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="8px" height="8px" viewBox="0 0 8 8" fill="none">
@@ -574,7 +574,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
                             </Flex>
                             <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><Image src='/assets/images/hourglass.svg' /></Flex>
                         </MenuItem>
-                        <MenuItem gap='10px' display="flex" alignItems="center" p='10px' borderBottomRadius="8px" h='42px' onClick={() => handleServiceAction('mark-in-progress', service.service_reservation_id, service.status)}>
+                        <MenuItem gap='10px' display="flex" alignItems="center" p='10px' borderBottomRadius="8px" h='42px' onClick={() => handleServiceAction('mark-in-progress', service.service_reservation_id)}>
                             <Text flex='1' h='100%'>Mark as in progress</Text>
                             <Flex alignItems='center' justifyContent='center' h='100%' borderRadius='100%' mt='4px'>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="8px" height="8px" viewBox="0 0 8 8" fill="none">
@@ -588,7 +588,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
             } else if (service.status === 'pending') {
                 return (
                     <>
-                        <MenuItem gap='10px' display="flex" alignItems="center" p='10px' borderTopRadius="8px" h='42px' onClick={() => handleServiceAction('mark-in-progress', service.service_reservation_id, service.status)}>
+                        <MenuItem gap='10px' display="flex" alignItems="center" p='10px' borderTopRadius="8px" h='42px' onClick={() => handleServiceAction('mark-in-progress', service.service_reservation_id)}>
                             <Text flex='1' h='100%'>Mark as in progress</Text>
                             <Flex alignItems='center' justifyContent='center' h='100%' borderRadius='100%' mt='4px'>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="8px" height="8px" viewBox="0 0 8 8" fill="none">
@@ -597,15 +597,15 @@ const ServicesList: React.FC<ServicesListProps> = ({
                             </Flex>
                             <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><Image src='/assets/images/running-icon.svg' /></Flex>
                         </MenuItem>
-                        <MenuItem display="flex" alignItems="center" p='10px' h='42px' onClick={() => handleServiceAction('input-quantity', service.service_reservation_id, service.status)}>
+                        <MenuItem display="flex" alignItems="center" p='10px' h='42px' onClick={() => handleServiceAction('input-quantity', service.service_reservation_id)}>
                             <Text flex='1' >Input quantity</Text>
                             <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><Image src='/assets/images/hashtag.svg' /></Flex>
                         </MenuItem>
-                        <MenuItem display="flex" alignItems="center" p='10px' h='42px' onClick={() => handleServiceAction('edit-service', service.service_reservation_id, service.status)}>
+                        <MenuItem display="flex" alignItems="center" p='10px' h='42px' onClick={() => handleServiceAction('edit-service', service.service_reservation_id)}>
                             <Text flex='1' >Edit service</Text>
                             <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><Image src='/assets/images/pen.svg' /></Flex>
                         </MenuItem>
-                        <MenuItem display="flex" alignItems="center" p='10px' borderBottomRadius="8px" h='42px' onClick={() => handleServiceAction('cancel-service', service.service_reservation_id, service.status)}>
+                        <MenuItem display="flex" alignItems="center" p='10px' borderBottomRadius="8px" h='42px' onClick={() => handleServiceAction('cancel-service', service.service_reservation_id)}>
                             <Text flex='1' >Cancel service</Text>
                             <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><Image src='/assets/images/close.svg' /></Flex>
                         </MenuItem>
@@ -615,10 +615,10 @@ const ServicesList: React.FC<ServicesListProps> = ({
                 // Default menu items for 'other' status
                 return (
                     <>
-                        <MenuItem p='10px' borderTopRadius="8px" h='42px' onClick={() => handleServiceAction('mark-pending', service.service_reservation_id, service.status)}>
+                        <MenuItem p='10px' borderTopRadius="8px" h='42px' onClick={() => handleServiceAction('mark-pending', service.service_reservation_id)}>
                             Mark as pending
                         </MenuItem>
-                        <MenuItem gap='10px' display="flex" alignItems="center" p='10px' h='42px' onClick={() => handleServiceAction('mark-in-progress', service.service_reservation_id, service.status)}>
+                        <MenuItem gap='10px' display="flex" alignItems="center" p='10px' h='42px' onClick={() => handleServiceAction('mark-in-progress', service.service_reservation_id)}>
                             <Text flex='1' h='100%'>Mark as in progress</Text>
                             <Flex alignItems='center' justifyContent='center' h='100%' borderRadius='100%' mt='4px'>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="8px" height="8px" viewBox="0 0 8 8" fill="none">
@@ -627,7 +627,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
                             </Flex>
                             <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><Image src='/assets/images/running-icon.svg' /></Flex>
                         </MenuItem>
-                        <MenuItem p='10px' borderBottomRadius="8px" h='42px' onClick={() => handleServiceAction('edit-service', service.service_reservation_id, service.status)}>
+                        <MenuItem p='10px' borderBottomRadius="8px" h='42px' onClick={() => handleServiceAction('edit-service', service.service_reservation_id)}>
                             <Text flex='1' >Edit service</Text>
                             <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><Image src='/assets/images/pen.svg' /></Flex>
                         </MenuItem>
@@ -671,7 +671,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
                             alignItems="center"
                             justifyContent="center"
                             isDisabled={isLoading[service.service_reservation_id]}
-                            onClick={() => buttonConfig.action ? handleServiceAction(buttonConfig.action, service.service_reservation_id, service.status) : null}
+                            onClick={() => buttonConfig.action ? handleServiceAction(buttonConfig.action, service.service_reservation_id) : null}
                             _hover={buttonConfig.action ? { opacity: 0.8 } : { cursor: 'default' }}
                         >
                             {buttonConfig.text}

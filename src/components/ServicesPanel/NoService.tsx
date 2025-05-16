@@ -1,9 +1,9 @@
-import { Flex, Text, Button, Image, useDisclosure, useToast } from '@chakra-ui/react';
+import { Flex, Text, Button, Image, useDisclosure } from '@chakra-ui/react';
 import { useMarina } from '../../context/MarinaContext';
 import ServiceAdd from './ServiceAdd';
 import { ReservationExtenstion } from '../ReservationExtenstion';
 import { useMemo } from 'react';
-
+import useCustomToast from '../../hooks/useCustomToast';
 interface NoServiceProps {
     reservation?: ReservationExtenstion;
     userName?: string;
@@ -14,7 +14,7 @@ interface NoServiceProps {
 const NoService: React.FC<NoServiceProps> = ({ reservation, userName, rowId}) => {
     const { isOpen: isServiceAddOpen, onOpen: onServiceAddOpen, onClose: onServiceAddClose } = useDisclosure();
     const { selectedMarina } = useMarina();
-    const toast = useToast();
+    const showToast = useCustomToast();
 
     // Проверка, можно ли добавлять сервисы к данному бронированию
     const canAddServices = useMemo(() => {
@@ -66,13 +66,7 @@ const NoService: React.FC<NoServiceProps> = ({ reservation, userName, rowId}) =>
                 ? "Reservation Completed"
                 : `Reservation ${statusText.charAt(0).toUpperCase() + statusText.slice(1)}`;
 
-            toast({
-                title,
-                description: reservationStatusMessage,
-                status: "warning",
-                duration: 5000,
-                isClosable: true,
-            });
+            showToast(title, reservationStatusMessage, 'warning');
             return;
         }
 

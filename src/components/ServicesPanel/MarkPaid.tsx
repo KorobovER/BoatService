@@ -13,12 +13,11 @@ import {
     Box,
     Input,
     Textarea,
-    useToast
 } from '@chakra-ui/react';
 import { PaymentReceiptPublic, SubServiceRequest} from '../../client/models';
 import { ReservationsService } from '../../client/services';
 import { useQueryClient} from '@tanstack/react-query';
-
+import useCustomToast from '../../hooks/useCustomToast';
 interface MarkPaidProps {
     isOpen: boolean;
     onClose: () => void;
@@ -42,8 +41,7 @@ const MarkPaid: React.FC<MarkPaidProps> = ({
     const [itemName, setItemName] = useState('');
     const [description, setDescription] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-
-    const toast = useToast();
+    const showToast = useCustomToast();
     const queryClient = useQueryClient();
 
     // Handle input changes
@@ -65,25 +63,13 @@ const MarkPaid: React.FC<MarkPaidProps> = ({
     const handleMarkPaid = async () => {
         // Validate input
         if (!itemName.trim()) {
-            toast({
-                title: "Error",
-                description: "Please specify the payment method",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
+            showToast('Error', 'Please specify the payment method', 'error');
             return;
         }
 
         // Ensure we have a reservationId and at least one service
         if (!reservationId || !payment?.service_requests?.length) {
-            toast({
-                title: "Error",
-                description: "No services found to mark as paid",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
+            showToast('Error', 'No services found to mark as paid', 'error');
             return;
         }
 
@@ -122,14 +108,8 @@ const MarkPaid: React.FC<MarkPaidProps> = ({
                 onServiceStatusChange(updatedReservationData);
             }
 
-            // Show success toast
-            toast({
-                title: "Payment Marked Manually Paid",
-                description: `The remaining $${total.toFixed(2)} has been marked as manually paid via ${itemName}${description ? `: ${description}` : ''}.`,
-                status: "success",
-                duration: 3000,
-                isClosable: true,
-            });
+
+            showToast('Payment marked manually paid', 'success');
 
             // Close the modal
             onClose();
@@ -144,15 +124,8 @@ const MarkPaid: React.FC<MarkPaidProps> = ({
             });
         } catch (error) {
             // Revert local state update if API call fails
-            toast({
-                title: "Error",
-                description: "Failed to mark payment as manually paid",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
+            showToast('Error', 'Failed to mark payment as manually paid', 'error');
             console.error('Error marking payment as manually paid:', error);
-
             // Invalidate queries related to this reservation to ensure fresh data
             queryClient.invalidateQueries({
                 predicate: (query) => {

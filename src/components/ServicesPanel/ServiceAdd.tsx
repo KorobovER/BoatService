@@ -13,7 +13,6 @@ import {
     Flex,
     Button,
     Center,
-    useToast,
     Input,
     Textarea
 } from '@chakra-ui/react';
@@ -21,6 +20,8 @@ import { MarinaServicePublic, SubServiceRequest, ReservationPublic } from '../..
 import { ReservationsService } from '../../client/services';
 import { getServiceIcon } from './Services';
 import { useQueryClient } from '@tanstack/react-query';
+import useCustomToast from '../../hooks/useCustomToast';
+
 
 
 interface ServiceAddProps {
@@ -46,7 +47,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
     reservation,
     rowId = ''
 }) => {
-    const toast = useToast();
+    const showToast = useCustomToast();
     const queryClient = useQueryClient();
 
     // Извлекаем все элементы сервисов из всех сервисов с нужными полями
@@ -228,13 +229,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
 
             // Existing validation logic
             if (!itemName.trim()) {
-                toast({
-                    title: "Error",
-                    description: "Please enter item name",
-                    status: "error",
-                    duration: 3000,
-                    isClosable: true,
-                });
+                showToast('Service name not entered', 'Please enter item name', 'error');
                 itemNameRef.current?.focus();
                 return;
             }
@@ -242,13 +237,8 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
             // Конвертируем сумму в число
             const priceValue = parseFloat(amount.replace(/[^\d.]/g, ''));
             if (isNaN(priceValue) || priceValue <= 0) {
-                toast({
-                    title: "Error",
-                    description: "Please enter a valid amount",
-                    status: "error",
-                    duration: 3000,
-                    isClosable: true,
-                });
+
+                showToast('Service amount not entered', 'Please enter amount', 'error');
                 amountRef.current?.focus();
                 return;
             }
@@ -280,13 +270,8 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                 [newItemIndex]: 1
             }));
 
-            toast({
-                title: "Service created",
-                description: `"${itemName}" has been added to the list. Click "Add services" to save.`,
-                status: "success",
-                duration: 3000,
-                isClosable: true,
-            });
+
+            showToast('Service created', 'success');
 
             // Reset form and return to services list
             setItemName('');
@@ -296,13 +281,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
 
         } catch (error: any) {
             console.error('Error creating Open Charge service:', error);
-            toast({
-                title: "Error creating service",
-                description: error.message || "An error occurred while creating the service",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
+            showToast('Error creating service', error.message || "An error occurred while creating the service", 'error');
         } finally {
             // Always set loading state back to false
             setIsOpenChargeLoading(false);
@@ -323,15 +302,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
             const newQuantities = { ...quantities };
             delete newQuantities[idx];
             setQuantities(newQuantities);
-
-            // Показываем уведомление
-            toast({
-                title: "Service removed",
-                description: "The service has been removed from the list",
-                status: "info",
-                duration: 2000,
-                isClosable: true,
-            });
+            showToast('Service removed', 'The service has been removed from the list', 'loading');
         }
     };
 
@@ -346,13 +317,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
             // Получаем все выбранные сервисы
             const selectedServices = getSelectedServices();
             if (selectedServices.length === 0) {
-                toast({
-                    title: "No services selected",
-                    description: "Please select at least one service to add",
-                    status: "warning",
-                    duration: 3000,
-                    isClosable: true,
-                });
+                showToast('No services selected', 'Please select at least one service to add', 'error');
                 return;
             }
 
@@ -360,13 +325,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
             const reservationId = getReservationId(reservation);
             if (!reservationId) {
                 console.error('Missing reservation ID', { reservation });
-                toast({
-                    title: "Error",
-                    description: "No reservation ID found. Please make sure a valid reservation is selected.",
-                    status: "error",
-                    duration: 3000,
-                    isClosable: true,
-                });
+                showToast('No reservation ID found', 'No reservation ID found. Please make sure a valid reservation is selected.', 'error');
                 return;
             }
 
@@ -402,37 +361,16 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
 
             // Показываем соответствующее уведомление
             if (successful > 0 && failed === 0) {
-                // Все запросы успешны
-                toast({
-                    title: "Services added",
-                    description: `Successfully added ${successful} ${successful === 1 ? 'service' : 'services'} to reservation`,
-                    status: "success",
-                    duration: 3000,
-                    isClosable: true,
-                });
+                showToast('Services added', 'success');
                 // Mark services as added successfully
                 setServicesAdded(true);
             } else if (successful > 0 && failed > 0) {
-                // Частично успешно
-                toast({
-                    title: "Partial success",
-                    description: `Added ${successful} service(s), but ${failed} service(s) failed. Check the console for details.`,
-                    status: "warning",
-                    duration: 5000,
-                    isClosable: true,
-                });
-                // Mark services as added successfully
+                showToast('Partial success', 'warning');
                 setServicesAdded(true);
             } else {
-                // Все запросы неуспешны
-                toast({
-                    title: "Services not added",
-                    description: "Failed to add any services. Check the console for details.",
-                    status: "error",
-                    duration: 5000,
-                    isClosable: true,
-                });
+                showToast('Services not added', 'Failed to add any services. Something went wrong', 'error');
             }
+
 
             // Инвалидируем кэш React Query
             queryClient.invalidateQueries();
@@ -453,13 +391,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                 statusText: error.statusText,
                 stack: error.stack
             });
-            toast({
-                title: "Error adding services",
-                description: error.message || "An error occurred while adding the services",
-                status: "error",
-                duration: 5000,
-                isClosable: true,
-            });
+            showToast('Error adding services', 'An error occurred while adding the services' ,'error');
         } finally {
             // Always set loading state back to false
             setIsAddServicesLoading(false);
@@ -858,7 +790,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                         <Text flex='1' w='100%' fontWeight="medium">{totalSelectedServices} services added</Text>
                         <Flex flex='1' w='100%' gap="md">
                             <Button
-                                flex='1' 
+                                flex='1'
                                 w='100%'
                                 h='50px'
                                 variant="outline"
@@ -875,7 +807,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                                 Clear all
                             </Button>
                             <Button
-                                flex='1' 
+                                flex='1'
                                 w='100%'
                                 h='50px'
                                 px="xl"

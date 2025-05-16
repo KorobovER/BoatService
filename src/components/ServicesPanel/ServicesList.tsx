@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Text, Image, Flex, Button, Menu, MenuButton, MenuItem, MenuList, useToast } from '@chakra-ui/react';
+import { Box, Text, Image, Flex, Button, Menu, MenuButton, MenuItem, MenuList} from '@chakra-ui/react';
 import NoService from './NoService';
 import { ReservationExtenstion } from '../ReservationExtenstion';
 import { ServiceOnReservationPublic, ServiceRequestStatus, PaymentReceiptPublic } from '../../client/models';
@@ -10,6 +10,9 @@ import QuantityInputModal from './QuantityInputModal';
 import ServiceCancel from './ServiceCancel';
 import ServiceEdit from './ServiceEdit';
 import CompletedServiceDetails from './CompletedService';
+import useCustomToast from '../../hooks/useCustomToast';
+
+
 
 interface ServicesListProps {
     reservation: ReservationExtenstion;
@@ -38,6 +41,7 @@ interface PaymentCategoryType extends BaseCategory<PaymentReceiptPublic> {
 
 type CategoryType = ServiceCategoryType | PaymentCategoryType;
 
+
 const ServicesList: React.FC<ServicesListProps> = ({
     reservation,
     userName,
@@ -59,7 +63,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
     const [editLoading, setEditLoading] = useState(false);
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
     const [selectedPaidService, setSelectedPaidService] = useState<ServiceOnReservationPublic | null>(null);
-    const toast = useToast();
+    const showToast = useCustomToast();
     const queryClient = useQueryClient();
 
     // Обновляем localReservation при изменении пропса reservation
@@ -176,17 +180,8 @@ const ServicesList: React.FC<ServicesListProps> = ({
                 });
             }
 
-            // Show success message
-            const serviceName = service.services[0].name;
-            const unit = service.services[0].unit;
 
-            toast({
-                title: "Service completed",
-                description: `${serviceName} has been marked as completed with ${newQuantity} ${unit}`,
-                status: "success",
-                duration: 3000,
-                isClosable: true,
-            });
+            showToast('Service completed', 'success');
 
             // Notify parent component about the change
             if (onServiceStatusChange) {
@@ -201,13 +196,8 @@ const ServicesList: React.FC<ServicesListProps> = ({
             // Revert to original state on error
             setLocalReservation(reservation);
 
-            toast({
-                title: "Update failed",
-                description: "There was an error updating the service",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
+            showToast('Update failed', 'There was an error updating the service' ,'error');
+            
         } finally {
             setIsSubmittingQuantity(false);
         }
@@ -287,14 +277,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
                     statusIn: newStatus
                 });
 
-                // Show success message
-                toast({
-                    title: "Status updated",
-                    description: `Service status has been changed to ${newStatus}`,
-                    status: "success",
-                    duration: 3000,
-                    isClosable: true,
-                });
+                showToast('Status updated', 'success');
 
                 // Notify parent component about the change
                 if (onServiceStatusChange) {
@@ -307,13 +290,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
             // Revert to original state on error
             setLocalReservation(reservation);
 
-            toast({
-                title: "Update failed",
-                description: "There was an error updating the service status",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
+            showToast('Update failed', 'There was an error updating the service status', 'error');
         } finally {
             // Clear loading state
             setIsLoading(prev => ({ ...prev, [serviceId]: false }));
@@ -341,25 +318,15 @@ const ServicesList: React.FC<ServicesListProps> = ({
                 serviceId: cancelService.service_reservation_id,
                 statusIn: 'cancelled'
             });
-            toast({
-                title: 'Service cancelled',
-                description: 'Service has been cancelled.',
-                status: 'success',
-                duration: 3000,
-                isClosable: true,
-            });
+
+            showToast('Service cancelled', 'success');
+
             if (onServiceStatusChange) {
                 onServiceStatusChange(updatedReservation);
             }
         } catch (error) {
             setLocalReservation(reservation);
-            toast({
-                title: 'Update failed',
-                description: 'There was an error cancelling the service',
-                status: 'error',
-                duration: 3000,
-                isClosable: true,
-            });
+            showToast('Update failed', 'There was an error cancelling the service', 'error');
         } finally {
             setCancelLoading(false);
             setIsCancelModalOpen(false);
@@ -397,25 +364,14 @@ const ServicesList: React.FC<ServicesListProps> = ({
                     )
                 }
             });
-            toast({
-                title: 'Service updated',
-                description: 'Service quantity has been updated.',
-                status: 'success',
-                duration: 3000,
-                isClosable: true,
-            });
+            showToast('Service updated', 'success');
             if (onServiceStatusChange) {
                 onServiceStatusChange(updatedReservation);
             }
         } catch (error) {
             setLocalReservation(reservation);
-            toast({
-                title: 'Update failed',
-                description: 'There was an error updating the service quantity',
-                status: 'error',
-                duration: 3000,
-                isClosable: true,
-            });
+            showToast('Update failed', 'There was an error updating the service quantity', 'error');
+
         } finally {
             setEditLoading(false);
             setIsEditModalOpen(false);

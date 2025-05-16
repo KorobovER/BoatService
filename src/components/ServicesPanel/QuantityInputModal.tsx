@@ -11,8 +11,8 @@ import {
     Flex,
     Button,
     IconButton,
-    useToast
 } from '@chakra-ui/react';
+import useCustomToast from '../../hooks/useCustomToast';
 
 interface QuantityInputModalProps {
     isOpen: boolean;
@@ -38,7 +38,7 @@ const QuantityInputModal: React.FC<QuantityInputModalProps> = ({
     onSubmit
 }) => {
     const [quantity, setQuantity] = useState(initialQuantity);
-    const toast = useToast();
+    const showToast = useCustomToast();
 
     // Reset quantity when modal opens with a new serviceId
     React.useEffect(() => {
@@ -49,13 +49,7 @@ const QuantityInputModal: React.FC<QuantityInputModalProps> = ({
 
     const handleQuantitySubmit = () => {
         if (!serviceId) {
-            toast({
-                title: "Error",
-                description: "Missing service information",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
+            showToast('Error', 'Missing service information', 'error');
             return;
         }
 

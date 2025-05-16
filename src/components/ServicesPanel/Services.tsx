@@ -11,6 +11,7 @@ import MarkUncollectible from './MarkUncollectible';
 import MarkPaid from './MarkPaid';
 import { ReservationExtenstion } from '../ReservationExtenstion';
 import { PaymentReceiptPublic } from '../../client/models';
+import useCustomToast from '../../hooks/useCustomToast'
 
 // Иконки для разных типов услуг
 export const SERVICE_ICONS = {
@@ -102,6 +103,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     const [isRetryChargeModalOpen, setIsRetryChargeModalOpen] = useState(false);
     const [isMarkUncollectibleModalOpen, setIsMarkUncollectibleModalOpen] = useState(false);
     const [isMarkPaidModalOpen, setIsMarkPaidModalOpen] = useState(false);
+    const showToast = useCustomToast();
     const toast = useToast();
     const [paymentError, setPaymentError] = useState(false);
 
@@ -158,32 +160,22 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
         setPaymentError(false);
 
         // Show loading toast
-        const loadingToastId = toast({
-            title: "Processing payment",
-            description: "Please wait while we process your payment...",
-            status: "loading",
-            duration: null,
-            isClosable: false,
-        });
+        showToast("Processing payment", 'loading');
 
         // Call createPaymentReceipt endpoint
         ReservationsService.createPaymentReceipt({ reservationId })
-            .then(response => {
-                // Close loading toast
-                toast.close(loadingToastId);
-
-                // Close all modals
+            .then(() => {
                 setIsPaymentModalOpen(false);
                 setIsRetryChargeModalOpen(false);
                 setIsMarkPaidModalOpen(false);
 
                 // If we have a payment response with service_requests, update our local data
-                if (response && response.service_requests && response.service_requests.length > 0) {
+                if (reservationData && reservationData.service_requests && reservationData.service_requests.length > 0) {
                     // Create a new local reservation object with updated service statuses
                     const updatedReservation = { ...localReservation };
 
                     // Get the service IDs from the payment receipt
-                    const paidServiceIds = response.service_requests.map(
+                    const paidServiceIds = reservationData.service_requests.map(
                         service => service.service_reservation_id
                     );
 
@@ -206,18 +198,9 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 }
 
                 // Show success toast
-                toast({
-                    title: "Payment processed",
-                    description: `Payment for completed services has been processed successfully.`,
-                    status: "success",
-                    duration: 3000,
-                    isClosable: true,
-                });
+                showToast('Payment processed', 'success');
             })
-            .catch(error => {
-                // Close loading toast
-                toast.close(loadingToastId);
-
+            .catch((error) => {
                 console.error('Error creating payment receipt:', error);
 
                 // Set payment error state to true
@@ -236,13 +219,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                 }
 
                 // Show error toast with more details
-                toast({
-                    title: "Payment failed",
-                    description: errorMessage,
-                    status: "error",
-                    duration: 5000,
-                    isClosable: true,
-                });
+                showToast('Failed Payment', errorMessage, 'error');
 
                 // Try to refresh data to ensure we're in sync with server
                 setTimeout(() => {

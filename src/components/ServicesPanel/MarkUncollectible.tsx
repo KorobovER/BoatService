@@ -11,12 +11,11 @@ import {
     Flex,
     Image,
     Box,
-    useToast
 } from '@chakra-ui/react';
 import { PaymentReceiptPublic, SubServiceRequest } from '../../client/models';
 import { ReservationsService } from '../../client/services';
 import { useState } from 'react';
-
+import useCustomToast from '../../hooks/useCustomToast';
 interface MarkUncollectibleProps {
     isOpen: boolean;
     onClose: () => void;
@@ -38,20 +37,13 @@ const MarkUncollectible: React.FC<MarkUncollectibleProps> = ({
     const taxes = payment?.taxes || 0;
     const total = subtotal + serviceFee + taxes;
     const services = payment?.service_requests?.flatMap(service => service.services) || [];
-
-    const toast = useToast();
+    const showToast = useCustomToast();
     const [isLoading, setIsLoading] = useState(false);
 
     const handleMarkUncollectible = async () => {
         // Ensure we have a reservationId and at least one service
         if (!reservationId || !payment?.service_requests?.length) {
-            toast({
-                title: "Error",
-                description: "No services found to mark uncollectible",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
+            showToast('Error', 'No services found to mark uncollectible', 'error');
             return;
         }
 
@@ -91,25 +83,13 @@ const MarkUncollectible: React.FC<MarkUncollectibleProps> = ({
             }
 
             // Show success toast
-            toast({
-                title: "Services Marked Uncollectible",
-                description: `The remaining $${total.toFixed(2)} due has been marked as uncollectible.`,
-                status: "success",
-                duration: 3000,
-                isClosable: true,
-            });
+            showToast('Services marked uncollectible', 'success');
 
             // Close the modal
             onClose();
         } catch (error) {
             // Revert local state update if API call fails
-            toast({
-                title: "Error",
-                description: "Failed to mark services as uncollectible",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
+            showToast('Error', 'Failed to mark services as uncollectible', 'error');
             console.error('Error marking services uncollectible:', error);
 
             // If onServiceStatusChange is provided, revert to original state

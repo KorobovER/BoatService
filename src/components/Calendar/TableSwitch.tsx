@@ -65,10 +65,10 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
                     borderColor="basic.grey100"
                     borderRadius="full"
                 >
-                    <FiChevronLeft size={16} color="basic.grey600"/>
+                    <FiChevronLeft size={16} color="#777777"/>
                 </Button>
 
-                <Text>{weekRange}</Text>
+                <Text color="basic.grey700">{weekRange}</Text>
 
                 <Button
                     width='34px'
@@ -84,7 +84,7 @@ const TableSwitch: React.FC<TableSwitchProps> = ({
                     borderColor="basic.grey100"
                     borderRadius="full"
                 >
-                    <FiChevronRight size={16} color="basic.grey600"/>
+                    <FiChevronRight size={16} color="#777777"/>
                 </Button>
             </Flex>
 

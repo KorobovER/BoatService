@@ -1,4 +1,4 @@
-import { Flex, Text, Button, Image, useDisclosure} from '@chakra-ui/react';
+import { Flex, Text, Button, useDisclosure} from '@chakra-ui/react';
 import Icon from '../Icon';
 import { useMarina } from '../../context/MarinaContext';
 import ServiceAdd from './ServiceAdd';

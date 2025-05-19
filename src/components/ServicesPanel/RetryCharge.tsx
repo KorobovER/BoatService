@@ -9,7 +9,6 @@ import {
     Button,
     Text,
     Flex,
-    Image,
     Box
 } from '@chakra-ui/react';
 import { PaymentReceiptPublic } from '../../client/models';

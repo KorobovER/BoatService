@@ -16,6 +16,7 @@ import {
 } from '@chakra-ui/react';
 import { FiDownload } from 'react-icons/fi';
 import { ServiceOnReservationPublic } from '../../client/models';
+import { SERVICE_FEE_PERCENTAGE } from '../../utilsBola';
 
 interface CompletedServiceProps {
     isOpen: boolean;
@@ -30,7 +31,7 @@ const CompletedService: React.FC<CompletedServiceProps> = ({
 }) => {
     // Calculate service details
     const subtotal = service.total_price || 0;
-    const serviceFee = subtotal * 0.075; // 7.5% service fee
+    const serviceFee = subtotal * SERVICE_FEE_PERCENTAGE; // 7.5% service fee
     const taxes = 0; // Taxes (currently 0)
     const total = subtotal + serviceFee + taxes;
 

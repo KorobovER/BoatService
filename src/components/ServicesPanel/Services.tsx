@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { Box, Text, Image, Flex, Button, useDisclosure, useToast } from '@chakra-ui/react';
+import { Box, Text, Image, Flex, Button, useDisclosure } from '@chakra-ui/react';
 import ServiceAdd from './ServiceAdd';
 import { useMarina } from '../../context/MarinaContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -12,6 +12,7 @@ import MarkPaid from './MarkPaid';
 import { ReservationExtenstion } from '../ReservationExtenstion';
 import { PaymentReceiptPublic } from '../../client/models';
 import useCustomToast from '../../hooks/useCustomToast'
+import { SERVICE_FEE_PERCENTAGE } from '../../utilsBola';
 
 // Иконки для разных типов услуг
 export const SERVICE_ICONS = {
@@ -104,7 +105,6 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     const [isMarkUncollectibleModalOpen, setIsMarkUncollectibleModalOpen] = useState(false);
     const [isMarkPaidModalOpen, setIsMarkPaidModalOpen] = useState(false);
     const showToast = useCustomToast();
-    const toast = useToast();
     const [paymentError, setPaymentError] = useState(false);
 
     // Add query to fetch reservation data
@@ -146,7 +146,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     }, [completedServices]);
 
     // Комиссия 7.5%
-    const serviceFee = useMemo(() => Number((completedServicesTotal * 0.075).toFixed(2)), [completedServicesTotal]);
+    const serviceFee = useMemo(() => Number((completedServicesTotal * SERVICE_FEE_PERCENTAGE).toFixed(2)), [completedServicesTotal]);
     // Налоги (пока 0)
     const taxes = 0;
     // Итоговая сумма

@@ -1,3 +1,5 @@
+export const SERVICE_FEE_PERCENTAGE = 0.075; // 7.5% service fee
+
 import { ReservationPublic } from "./client";
 
 export const getCellColor = (reservation: ReservationPublic): { bg: string; textColor: string } => {

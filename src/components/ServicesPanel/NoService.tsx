@@ -1,4 +1,5 @@
-import { Flex, Text, Button, Image, useDisclosure } from '@chakra-ui/react';
+import { Flex, Text, Button, Image, useDisclosure} from '@chakra-ui/react';
+import Icon from '../Icon';
 import { useMarina } from '../../context/MarinaContext';
 import ServiceAdd from './ServiceAdd';
 import { ReservationExtenstion } from '../ReservationExtenstion';
@@ -81,7 +82,7 @@ const NoService: React.FC<NoServiceProps> = ({ reservation, userName, rowId}) =>
     return (
         <Flex alignSelf="stretch" gap='sm' justifyContent="center" alignItems="center" flexDirection="column" border="1px dashed" borderColor="brand.primaryOrange" borderRadius="var(--chakra-space-sm)" w="100%">
             <Flex flexDirection="column" alignItems="center" gap='20px' py='3xl' px='md' w="100%">
-                <Image width="52px" height="52px" src="/assets/images/service.svg" alt="service" />
+                <Icon name="service" size={52} />
                 <Flex flexDirection="column" alignItems="center">
                     <Text textAlign="center" fontSize="20px" fontWeight="500" color="brand.primaryOrange">No service requests</Text>
                     <Text textAlign="center" fontSize="14px" fontWeight="300" color="brand.primaryOrange">
@@ -98,7 +99,7 @@ const NoService: React.FC<NoServiceProps> = ({ reservation, userName, rowId}) =>
                     cursor={canAddServices ? "pointer" : "not-allowed"}
                     opacity={canAddServices ? 1 : 0.6}
                 >
-                    <Image src="/assets/images/button-plus.svg" alt="Add service" />
+                    <Icon name="add-plus" size={51} />
                 </Button>
             </Flex>
 

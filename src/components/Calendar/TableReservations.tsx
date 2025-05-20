@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState} from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
     Box,
@@ -128,6 +128,13 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         reservation?: ReservationExtenstion;
         timeOfDay?: 'AM' | 'PM';
     } | null>(null);
+    // Add state for cell selection
+    const [isMouseDown, setIsMouseDown] = useState<boolean>(false);
+    const [selectedEmptyCells, setSelectedEmptyCells] = useState<{
+        rowId: string;
+        day: string;
+        timeOfDay: 'AM' | 'PM';
+    }[]>([]);
     // Добавляем состояние для отслеживания текущей временной зоны
     const [currentTimeZone, setCurrentTimeZone] = useState<string>(
         Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -380,6 +387,55 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         </Center>
     );
 
+    // Add handlers for mouse events
+    const handleMouseDown = (rowId: string, day: string, timeOfDay: 'AM' | 'PM', hasReservation: boolean) => {
+        if (hasReservation) return; // Only allow selecting empty cells
+        
+        setIsMouseDown(true);
+        // Add the cell to selected cells
+        setSelectedEmptyCells([{ rowId, day, timeOfDay }]);
+    };
+
+    const handleMouseEnter = (rowId: string, day: string, timeOfDay: 'AM' | 'PM', hasReservation: boolean) => {
+        if (!isMouseDown || hasReservation) return; // Only proceed if mouse is down and cell is empty
+        
+        // Check if cell is already selected
+        const isAlreadySelected = selectedEmptyCells.some(
+            cell => cell.rowId === rowId && cell.day === day && cell.timeOfDay === timeOfDay
+        );
+        
+        if (!isAlreadySelected) {
+            setSelectedEmptyCells(prev => [...prev, { rowId, day, timeOfDay }]);
+        }
+    };
+
+    const handleMouseUp = () => {
+        setIsMouseDown(false);
+        // Here you can add logic to process the selected cells if needed
+        // For example, trigger a bulk action or show a selection summary
+    };
+
+    // Add event listener to handle mouse up outside the table
+    useEffect(() => {
+        const handleGlobalMouseUp = () => {
+            if (isMouseDown) {
+                setIsMouseDown(false);
+            }
+        };
+
+        window.addEventListener('mouseup', handleGlobalMouseUp);
+        return () => {
+            window.removeEventListener('mouseup', handleGlobalMouseUp);
+        };
+    }, [isMouseDown]);
+
+    // Function to check if a cell is selected
+    const isCellSelected = (rowId: string, day: string, timeOfDay: 'AM' | 'PM') => {
+        return selectedEmptyCells.some(
+            cell => cell.rowId === rowId && cell.day === day && cell.timeOfDay === timeOfDay
+        );
+    };
+
     return (
         <Box display="flex" alignItems="flex-start" width="100%" position="relative" minHeight="100vh" bg="white">
             {/* Показываем оверлей при обновлении данных */}
@@ -516,6 +572,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
 
                                     // Если половина дня не занята, добавляем пустую ячейку
                                     if (boatMatch === null) {
+                                        const isSelected = isCellSelected(row.id, day, timeOfDay);
                                         cells.push(
                                             <Td
                                                 key={`empty-${row.id}-${day}-${timeOfDay}`}
@@ -526,6 +583,12 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                                     bg: 'brand.primaryOrange26'
                                                 }}
                                                 cursor="pointer"
+                                                onMouseDown={(e) => {
+                                                    e.preventDefault(); // Prevent text selection
+                                                    handleMouseDown(row.id, day, timeOfDay, false);
+                                                }}
+                                                onMouseEnter={() => handleMouseEnter(row.id, day, timeOfDay, false)}
+                                                onMouseUp={handleMouseUp}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     handleCellClick(row.id, day, undefined, timeOfDay);
@@ -533,6 +596,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                                 borderRight={!isAM && dayIndex < days.length - 1 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
                                                 borderTop="1px solid var(--chakra-colors-basic-grey100)"
                                                 borderBottom={row.id === allRows[allRows.length - 1].id ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
+                                                bg={isSelected ? 'basic.grey200' : 'white'}
                                             >
                                                 <Box height="100%" width="100%" display="flex" alignItems="center" justifyContent="center" />
                                             </Td>
@@ -673,6 +737,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                             p={0}
                                             textAlign="center"
                                             onClick={() => handleCellClick(row.id, day, boatMatch, timeOfDay)}
+                                            onMouseDown={(e) => e.preventDefault()} // Just prevent selection for reserved cells
                                             cursor="pointer"
                                             className={isSelected ? 'selected-cell' : ''}
                                             borderRight={dayIndex < days.length - 1 && (halfDayIndex + halfDayColspan) % 2 === 0 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}

@@ -13,6 +13,7 @@ import { ReservationExtenstion } from '../ReservationExtenstion';
 import { PaymentReceiptPublic } from '../../client/models';
 import useCustomToast from '../../hooks/useCustomToast'
 import { SERVICE_FEE_PERCENTAGE } from '../../utilsBola';
+import Icon from '../Icon';
 
 // Иконки для разных типов услуг
 export const SERVICE_ICONS = {
@@ -490,9 +491,11 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                         >
                             <Flex gap="lg">
                                 <Flex align="center" gap="xs">
-                                    <Image
-                                        src="/assets/images/bola-cell-secondary.svg"
-                                        alt={rowId}
+                                     <Icon
+                                        name="bola-cell-white"
+                                        size={30}
+                                        viewBox="0 0 30 30"
+                                        color="white"
                                     />
                                     <Text fontSize="20px" fontWeight="400" color="gray.900">{rowId}</Text>
                                 </Flex>
@@ -546,7 +549,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                             minHeight="0"
                             _hover={{ opacity: 0.8 }}
                         >
-                            <Image src="/assets/images/chat-icon.svg" alt="Chat" />
+                            <Icon name="chat" size={55} color="white" viewBox="0 0 44 44" />
                         </Button>
                     </Flex>
                     {/* Content*/}
@@ -599,10 +602,11 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                                 <Flex alignItems="center" flexDirection="column" justifyContent="center" w="100%">
                                     <Button
                                         display="flex"
+                                        alignItems="center"
+                                        justifyContent="center"
                                         my="10px"
                                         height='50px'
-                                        justifyContent="center"
-                                        leftIcon={<Image p='10px' src="/assets/images/credit-card.svg" alt="Card" />}
+                                        leftIcon={<Image src="/assets/images/credit-card.svg" alt="Credit Card" width="20px" height="20px" />}
                                         bg="system.successGreen"
                                         color="white"
                                         borderRadius="full"
@@ -658,7 +662,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                                         my="10px"
                                         display="flex"
                                         justifyContent="center"
-                                        leftIcon={<Box bg="system.errorRedNew" borderRadius="full"><Image width="30px" height="30px" src="/assets/images/alert-icon-white.svg" alt="Retry" /></Box>}
+                                        leftIcon={<Icon name="alert-icon" size={30} color="white" viewBox="0 0 30 30" />}
                                         bg="brand.secondaryBlue"
                                         color="white"
                                         borderRadius="full"
@@ -673,7 +677,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                                     </Button>
                                     <Flex justifyContent="space-between">
                                         <Button
-                                            leftIcon={<Image ml='4px' h='auto' src='assets/images/close-red.svg' />}
+                                            leftIcon={<Box><Icon name="close" size={12} stroke="var(--chakra-colors-system-errorRedNew)" viewBox="0 0 12 12" /></Box>}
                                             fontSize="16px"
                                             fontWeight="400"
                                             textDecoration='underline'

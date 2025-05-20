@@ -589,35 +589,144 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                     // Если половина дня не занята, добавляем пустую ячейку
                                     if (boatMatch === null) {
                                         const isSelected = isCellSelected(row.id, day, timeOfDay);
-                                        cells.push(
-                                            <Td
-                                                key={`empty-${row.id}-${day}-${timeOfDay}`}
-                                                height="52px"
-                                                padding={0}
-                                                position="relative"
-                                                _hover={{
-                                                    bg: 'brand.primaryOrange26'
-                                                }}
-                                                cursor="pointer"
-                                                onMouseDown={(e) => {
-                                                    e.preventDefault(); // Prevent text selection
-                                                    handleMouseDown(row.id, day, timeOfDay, false);
-                                                }}
-                                                onMouseEnter={() => handleMouseEnter(row.id, day, timeOfDay, false)}
-                                                onMouseUp={handleMouseUp}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleCellClick(row.id, day, undefined, timeOfDay);
-                                                }}
-                                                borderRight={!isAM && dayIndex < days.length - 1 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
-                                                borderTop="1px solid var(--chakra-colors-basic-grey100)"
-                                                borderBottom={row.id === allRows[allRows.length - 1].id ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
-                                                bg={isSelected ? 'basic.grey200' : 'white'}
-                                            >
-                                                <Box height="100%" width="100%" display="flex" alignItems="center" justifyContent="center" />
-                                            </Td>
-                                        );
-                                        halfDayIndex++;
+                                        
+                                        // Check if we can merge adjacent selected cells
+                                        if (isSelected) {
+                                            // Start with one cell and check adjacent cells
+                                            let emptyCellColspan = 1;
+                                            let nextEmptyCellIndex = halfDayIndex + 1;
+
+                                            // Check consecutive empty cells that are also selected
+                                            while (nextEmptyCellIndex < occupiedHalfDays.length) {
+                                                // If the next cell is occupied, stop
+                                                if (occupiedHalfDays[nextEmptyCellIndex] !== null) {
+                                                    break;
+                                                }
+
+                                                // Get the day and timeOfDay for the next cell
+                                                const nextDayIndex = Math.floor(nextEmptyCellIndex / 2);
+                                                const nextDay = days[nextDayIndex];
+                                                const nextIsAM = nextEmptyCellIndex % 2 === 0;
+                                                const nextTimeOfDay = nextIsAM ? 'AM' : 'PM';
+
+                                                // Check if it's selected
+                                                const isNextSelected = isCellSelected(row.id, nextDay, nextTimeOfDay);
+                                                
+                                                if (isNextSelected) {
+                                                    emptyCellColspan++;
+                                                    occupiedHalfDays[nextEmptyCellIndex] = 'processed'; // Mark as processed
+                                                    nextEmptyCellIndex++;
+                                                } else {
+                                                    break;
+                                                }
+                                            }
+
+                                            // Determine border radius for combined cells
+                                            let borderRadius;
+                                            if (emptyCellColspan === 1) {
+                                                borderRadius = "1000px"; // Single cell is fully rounded
+                                            } else {
+                                                const isFirstCell = halfDayIndex === 0;
+                                                const isLastCell = (halfDayIndex + emptyCellColspan) === occupiedHalfDays.length;
+                                                
+                                                if (isFirstCell && isLastCell) {
+                                                    borderRadius = "1000px"; // Both ends rounded
+                                                } else if (isFirstCell) {
+                                                    borderRadius = "1000px 0 0 1000px"; // Left rounded
+                                                } else if (isLastCell) {
+                                                    borderRadius = "0 1000px 1000px 0"; // Right rounded
+                                                } else if (emptyCellColspan > 1) {
+                                                    borderRadius = "1000px"; // Multiple cells in the middle
+                                                } else {
+                                                    borderRadius = "1000px"; // Default
+                                                }
+                                            }
+
+                                            cells.push(
+                                                <Td
+                                                    key={`empty-${row.id}-${day}-${timeOfDay}`}
+                                                    height="52px"
+                                                    padding={0}
+                                                    position="relative"
+                                                    colSpan={emptyCellColspan}
+                                                    cursor="pointer"
+                                                    onMouseDown={(e) => {
+                                                        e.preventDefault(); // Prevent text selection
+                                                        handleMouseDown(row.id, day, timeOfDay, false);
+                                                    }}
+                                                    onMouseEnter={() => handleMouseEnter(row.id, day, timeOfDay, false)}
+                                                    onMouseUp={handleMouseUp}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleCellClick(row.id, day, undefined, timeOfDay);
+                                                    }}
+                                                    borderRight={!isAM && dayIndex < days.length - 1 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
+                                                    borderTop="1px solid var(--chakra-colors-basic-grey100)"
+                                                    borderBottom={row.id === allRows[allRows.length - 1].id ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
+                                                    sx={{
+                                                        overflow: "hidden",
+                                                        '&.selected-cell': {
+                                                            zIndex: 1000,
+                                                        }
+                                                    }}
+                                                >
+                                                    <Flex
+                                                        height="44px"
+                                                        width="calc(100% - 4px)"
+                                                        margin="0 2px"
+                                                        alignItems="center"
+                                                        justifyContent="center"
+                                                        bg={'basic.grey200'}
+                                                        borderRadius={borderRadius}
+                                                        className="empty-cell-container"
+                                                    />
+                                                </Td>
+                                            );
+                                            halfDayIndex += emptyCellColspan;
+                                        } else {
+                                            // Normal unselected empty cell
+                                            cells.push(
+                                                <Td
+                                                    key={`empty-${row.id}-${day}-${timeOfDay}`}
+                                                    height="52px"
+                                                    padding={0}
+                                                    position="relative"
+                                                    cursor="pointer"
+                                                    onMouseDown={(e) => {
+                                                        e.preventDefault(); // Prevent text selection
+                                                        handleMouseDown(row.id, day, timeOfDay, false);
+                                                    }}
+                                                    onMouseEnter={() => handleMouseEnter(row.id, day, timeOfDay, false)}
+                                                    onMouseUp={handleMouseUp}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleCellClick(row.id, day, undefined, timeOfDay);
+                                                    }}
+                                                    borderRight={!isAM && dayIndex < days.length - 1 ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
+                                                    borderTop="1px solid var(--chakra-colors-basic-grey100)"
+                                                    borderBottom={row.id === allRows[allRows.length - 1].id ? "1px solid var(--chakra-colors-basic-grey100)" : "none"}
+                                                    bg={'white'}
+                                                    sx={{
+                                                        overflow: "hidden",
+                                                        '&.selected-cell': {
+                                                            zIndex: 1000,
+                                                        }
+                                                    }}
+                                                >
+                                                    <Flex
+                                                        height="44px"
+                                                        width="calc(100% - 4px)"
+                                                        margin="0 2px"
+                                                        alignItems="center"
+                                                        justifyContent="center"
+                                                        bg={'transparent'}
+                                                        borderRadius="1000px"
+                                                        className="empty-cell-container"
+                                                    />
+                                                </Td>
+                                            );
+                                            halfDayIndex++;
+                                        }
                                         continue;
                                     }
 

@@ -120,8 +120,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     const { selectedMarina } = useMarina();
     const [reservations, setReservations] = useState<ReservationExtenstion[]>([]);
     const [allRows, setAllRows] = useState<Row[]>([]);
-    const { isOpen: isFreeCellOpen, onClose: onFreeCellClose } = useDisclosure();
-    const { isOpen: isReservedOpen, onClose: onReservedClose } = useDisclosure();
+    const freeCellDisclosure = useDisclosure();
+    const reservedDisclosure = useDisclosure();
     const [selectedCell, setSelectedCell] = useState<{
         rowId: string;
         day: string;
@@ -143,6 +143,11 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     // Добавляем queryClient для инвалидации запросов
     const queryClient = useQueryClient();
 
+    // Define loading states
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isError, setIsError] = useState<boolean>(false);
+    const [isFetching, setIsFetching] = useState<boolean>(false);
+
     // Функция для обновления временной зоны
     const updateTimeZone = () => {
         setCurrentTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
@@ -162,20 +167,71 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         }
     }, []);
 
+    // Add event listener to handle mouse up outside the table - moved up to avoid conditional hooks
+    useEffect(() => {
+        const handleGlobalMouseUp = () => {
+            if (isMouseDown) {
+                setIsMouseDown(false);
+            }
+        };
+
+        window.addEventListener('mouseup', handleGlobalMouseUp);
+        return () => {
+            window.removeEventListener('mouseup', handleGlobalMouseUp);
+        };
+    }, [isMouseDown]);
+
+    // Add handlers for mouse events - Moved these up before any hooks
+    const handleMouseDown = (rowId: string, day: string, timeOfDay: 'AM' | 'PM', hasReservation: boolean) => {
+        if (!hasReservation) {
+            setIsMouseDown(true);
+            // Add the cell to selected cells
+            setSelectedEmptyCells([{ rowId, day, timeOfDay }]);
+        }
+    };
+
+    const handleMouseEnter = (rowId: string, day: string, timeOfDay: 'AM' | 'PM', hasReservation: boolean) => {
+        if (isMouseDown && !hasReservation) {
+            // Check if cell is already selected
+            const isAlreadySelected = selectedEmptyCells.some(
+                cell => cell.rowId === rowId && cell.day === day && cell.timeOfDay === timeOfDay
+            );
+            
+            if (!isAlreadySelected) {
+                setSelectedEmptyCells(prev => [...prev, { rowId, day, timeOfDay }]);
+            }
+        }
+    };
+
+    const handleMouseUp = () => {
+        setIsMouseDown(false);
+    };
+
+    // Function to check if a cell is selected
+    const isCellSelected = (rowId: string, day: string, timeOfDay: 'AM' | 'PM') => {
+        return selectedEmptyCells.some(
+            cell => cell.rowId === rowId && cell.day === day && cell.timeOfDay === timeOfDay
+        );
+    };
+
     // Запрос швартовок с использованием TanStack Query и созданных опций
-    const {
-        data: mooringBalls,
-        isLoading: isLoadingMooringBalls,
-        isFetching: isFetchingMooringBalls,
-    } = useQuery(getMooringBallsQueryOptions(selectedMarina?.marina_id, currentTimeZone));
+    const mooringBallsQuery = useQuery(getMooringBallsQueryOptions(selectedMarina?.marina_id, currentTimeZone));
 
     // Запрос резерваций с использованием TanStack Query и созданных опций
-    const {
-        data: dataReservations,
-        isLoading: isLoadingReservations,
-        isFetching: isFetchingReservations,
-        isError,
-    } = useQuery(getReservationsQueryOptions(currentDate, selectedMarina?.marina_id, currentTimeZone));
+    const reservationsQuery = useQuery(getReservationsQueryOptions(currentDate, selectedMarina?.marina_id, currentTimeZone));
+
+    // Update the loading states based on query results
+    useEffect(() => {
+        setIsLoading(mooringBallsQuery.isLoading || reservationsQuery.isLoading);
+        setIsFetching(mooringBallsQuery.isFetching || reservationsQuery.isFetching);
+        setIsError(reservationsQuery.isError);
+    }, [
+        mooringBallsQuery.isLoading, 
+        reservationsQuery.isLoading,
+        mooringBallsQuery.isFetching,
+        reservationsQuery.isFetching,
+        reservationsQuery.isError
+    ]);
 
     // Перезагружаем данные при изменении временной зоны
     useEffect(() => {
@@ -188,8 +244,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
 
     // Обработка швартовок (общая логика)
     useEffect(() => {
-        if (mooringBalls?.mooring_balls) {
-            const apiMooringBalls = mooringBalls.mooring_balls;
+        if (mooringBallsQuery.data?.mooring_balls) {
+            const apiMooringBalls = mooringBallsQuery.data.mooring_balls;
             let numberField = 'ball_number';
             if (apiMooringBalls[0] && !apiMooringBalls[0].ball_number) {
                 if (apiMooringBalls[0].number) numberField = 'number';
@@ -204,11 +260,11 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                 .sort((a, b) => parseInt(a.id) - parseInt(b.id));
             setAllRows(rows);
         }
-    }, [mooringBalls]);
+    }, [mooringBallsQuery.data]);
 
     // Обработка резерваций (общая логика)
     useEffect(() => {
-        if (dataReservations?.data && days.length > 0) {
+        if (reservationsQuery.data?.data && days.length > 0) {
             try {
                 // Создаем диапазон дат в локальной временной зоне
                 const [startYear, startMonth, startDay] = days[0].split('-').map(Number);
@@ -217,7 +273,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                 const [endYear, endMonth, endDay] = days[days.length - 1].split('-').map(Number);
                 const periodEndDate = new Date(endYear, endMonth - 1, endDay, 23, 59, 59);
 
-                const apiBoats = dataReservations.data
+                const apiBoats = reservationsQuery.data.data
                     .filter(reservation => {
                         try {
                             // Создаем даты из строк ISO 8601 (они приходят в UTC из API)
@@ -283,7 +339,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                 console.error('Error processing reservations:', error);
             }
         }
-    }, [dataReservations, days, currentTimeZone]);
+    }, [reservationsQuery.data, days, currentTimeZone]);
 
     const handleCellClick = (rowId: string, day: string, reservation?: ReservationExtenstion, timeOfDay?: 'AM' | 'PM') => {
         // Добавляем timeOfDay в объект лодки, если он передан
@@ -298,6 +354,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
             };
             setSelectedCell({ rowId, day, reservation: enrichedBoat, timeOfDay });
             onReservationClick(rowId, day, enrichedBoat, timeOfDay);
+            reservedDisclosure.onOpen();
         } else {
             setSelectedCell({ rowId, day, reservation, timeOfDay });
             onReservationClick(rowId, day, reservation, timeOfDay);
@@ -350,19 +407,14 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         );
     };
 
-    // Определяем состояние загрузки и ошибки
-    const isLoading = isLoadingMooringBalls || isLoadingReservations;
-    const isFetching = isFetchingMooringBalls || isFetchingReservations;
-
-    // Показываем индикатор загрузки при первоначальной загрузке данных
-    if (isLoading) return (
+    // Prepare loading and error UI components
+    const renderLoadingState = () => (
         <Flex width="98%" m="auto" height="100vh" alignItems="center" justifyContent="center" bg="white" rounded='25px'>
             <Spinner size="xl" color="ui.main" />
         </Flex>
     );
 
-    // Показываем ошибку, если запрос завершился ошибкой
-    if (isError) return (
+    const renderErrorState = () => (
         <Center width="100%" height="100vh" bg="white">
             <Flex direction="column" alignItems="center">
                 <Text color="red.500" fontSize="xl">Error loading data</Text>
@@ -380,62 +432,26 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         </Center>
     );
 
-    // Проверяем наличие необходимых данных
-    if (!currentDate || days.length === 0) return (
+    const renderInitializingState = () => (
         <Center width="100%" height="100vh" bg="white">
             <Text fontSize="xl">Initializing calendar...</Text>
         </Center>
     );
 
-    // Add handlers for mouse events
-    const handleMouseDown = (rowId: string, day: string, timeOfDay: 'AM' | 'PM', hasReservation: boolean) => {
-        if (hasReservation) return; // Only allow selecting empty cells
-        
-        setIsMouseDown(true);
-        // Add the cell to selected cells
-        setSelectedEmptyCells([{ rowId, day, timeOfDay }]);
-    };
+    // Main render
+    if (isLoading) {
+        return renderLoadingState();
+    }
 
-    const handleMouseEnter = (rowId: string, day: string, timeOfDay: 'AM' | 'PM', hasReservation: boolean) => {
-        if (!isMouseDown || hasReservation) return; // Only proceed if mouse is down and cell is empty
-        
-        // Check if cell is already selected
-        const isAlreadySelected = selectedEmptyCells.some(
-            cell => cell.rowId === rowId && cell.day === day && cell.timeOfDay === timeOfDay
-        );
-        
-        if (!isAlreadySelected) {
-            setSelectedEmptyCells(prev => [...prev, { rowId, day, timeOfDay }]);
-        }
-    };
+    if (isError) {
+        return renderErrorState();
+    }
 
-    const handleMouseUp = () => {
-        setIsMouseDown(false);
-        // Here you can add logic to process the selected cells if needed
-        // For example, trigger a bulk action or show a selection summary
-    };
+    if (!currentDate || days.length === 0) {
+        return renderInitializingState();
+    }
 
-    // Add event listener to handle mouse up outside the table
-    useEffect(() => {
-        const handleGlobalMouseUp = () => {
-            if (isMouseDown) {
-                setIsMouseDown(false);
-            }
-        };
-
-        window.addEventListener('mouseup', handleGlobalMouseUp);
-        return () => {
-            window.removeEventListener('mouseup', handleGlobalMouseUp);
-        };
-    }, [isMouseDown]);
-
-    // Function to check if a cell is selected
-    const isCellSelected = (rowId: string, day: string, timeOfDay: 'AM' | 'PM') => {
-        return selectedEmptyCells.some(
-            cell => cell.rowId === rowId && cell.day === day && cell.timeOfDay === timeOfDay
-        );
-    };
-
+    // Main component rendering
     return (
         <Box display="flex" alignItems="flex-start" width="100%" position="relative" minHeight="100vh" bg="white">
             {/* Показываем оверлей при обновлении данных */}
@@ -823,25 +839,21 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                     </Tbody>
                 </Table>
             </Box>
-            {selectedCell && (
-                <>
-                    <PopupFreeCell
-                        isOpen={isFreeCellOpen}
-                        onClose={onFreeCellClose}
-                        rowId={selectedCell.rowId}
-                        day={selectedCell.day}
-                        timeOfDay={selectedCell.timeOfDay}
-                    />
-                    <PopupReserved
-                        isOpen={isReservedOpen}
-                        onClose={onReservedClose}
-                        rowId={selectedCell.rowId}
-                        day={selectedCell.day}
-                        reservation={selectedCell.reservation}
-                        timeOfDay={selectedCell.timeOfDay}
-                    />
-                </>
-            )}
+            <PopupFreeCell
+                isOpen={freeCellDisclosure.isOpen}
+                onClose={freeCellDisclosure.onClose}
+                rowId={selectedCell?.rowId || ''}
+                day={selectedCell?.day || ''}
+                timeOfDay={selectedCell?.timeOfDay}
+            />
+            <PopupReserved
+                isOpen={reservedDisclosure.isOpen}
+                onClose={reservedDisclosure.onClose}
+                rowId={selectedCell?.rowId || ''}
+                day={selectedCell?.day || ''}
+                reservation={selectedCell?.reservation}
+                timeOfDay={selectedCell?.timeOfDay}
+            />
         </Box>
     );
 };

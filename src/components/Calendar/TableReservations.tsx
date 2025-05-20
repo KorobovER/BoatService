@@ -19,9 +19,7 @@ import {
 import BolaCell from "/assets/images/bola-cell.svg";
 import { ReservationsService, MarinasService } from '../../client';
 import { useMarina } from '../../context/MarinaContext';
-import PopupFreeCell from './PopupFreeCell';
 import { ReservationExtenstion } from '../ReservationExtenstion';
-import PopupReserved from '../ServicesPanel/Services';
 import { getCellColor } from '../../utilsBola';
 
 interface Row {
@@ -120,7 +118,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     const { selectedMarina } = useMarina();
     const [reservations, setReservations] = useState<ReservationExtenstion[]>([]);
     const [allRows, setAllRows] = useState<Row[]>([]);
-    const freeCellDisclosure = useDisclosure();
     const reservedDisclosure = useDisclosure();
     const [selectedCell, setSelectedCell] = useState<{
         rowId: string;
@@ -948,21 +945,6 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                     </Tbody>
                 </Table>
             </Box>
-            <PopupFreeCell
-                isOpen={freeCellDisclosure.isOpen}
-                onClose={freeCellDisclosure.onClose}
-                rowId={selectedCell?.rowId || ''}
-                day={selectedCell?.day || ''}
-                timeOfDay={selectedCell?.timeOfDay}
-            />
-            <PopupReserved
-                isOpen={reservedDisclosure.isOpen}
-                onClose={reservedDisclosure.onClose}
-                rowId={selectedCell?.rowId || ''}
-                day={selectedCell?.day || ''}
-                reservation={selectedCell?.reservation}
-                timeOfDay={selectedCell?.timeOfDay}
-            />
         </Box>
     );
 };

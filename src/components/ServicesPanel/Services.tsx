@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Box, Text, Image, Flex, Button, useDisclosure } from '@chakra-ui/react';
+import { getBookingStatusText, getBookingStatusTextColor } from '../../utilsBola';
 import ServiceAdd from './ServiceAdd';
 import { useMarina } from '../../context/MarinaContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -538,7 +539,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                                     </Flex>
                                 </Flex>
                             </Flex>
-                            <Box boxSize="auto" py='xs' px='sm' bg='white' border="1px solid" borderColor="basic.grey200" borderRadius="var(--chakra-space-5xl)" color='brand.secondaryBlue'><Text padding="0" fontSize="12px" fontWeight="400" color='brand.secondaryBlue'>Active booking</Text></Box>
+                            <Box boxSize="auto" py='xs' px='sm' bg='white' border="1px solid" borderColor="basic.grey200" borderRadius="var(--chakra-space-5xl)" color={getBookingStatusTextColor(getBookingStatusText(reservation.admin_status))}><Text padding="0" fontSize="12px" fontWeight="400" color={getBookingStatusTextColor(getBookingStatusText(reservation.admin_status))}>{getBookingStatusText(reservation.admin_status)}</Text></Box>
                         </Flex>
                         <Button
                             variant="unstyled"

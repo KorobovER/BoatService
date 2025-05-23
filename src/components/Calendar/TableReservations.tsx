@@ -132,6 +132,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         day: string;
         timeOfDay: 'AM' | 'PM';
     }[]>([]);
+    // Добавляем состояние для отслеживания строки, в которой началось выделение
+    const [activeRowId, setActiveRowId] = useState<string | null>(null);
     // Добавляем состояние для отслеживания текущей временной зоны
     const [currentTimeZone, setCurrentTimeZone] = useState<string>(
         Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -169,6 +171,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         const handleGlobalMouseUp = () => {
             if (isMouseDown) {
                 setIsMouseDown(false);
+                // Сбрасываем активную строку при глобальном отпускании мыши
+                setActiveRowId(null);
             }
         };
 
@@ -182,13 +186,16 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     const handleMouseDown = (rowId: string, day: string, timeOfDay: 'AM' | 'PM', hasReservation: boolean) => {
         if (!hasReservation) {
             setIsMouseDown(true);
+            // Запоминаем строку, в которой началось выделение
+            setActiveRowId(rowId);
             // Add the cell to selected cells
             setSelectedEmptyCells([{ rowId, day, timeOfDay }]);
         }
     };
 
     const handleMouseEnter = (rowId: string, day: string, timeOfDay: 'AM' | 'PM', hasReservation: boolean) => {
-        if (isMouseDown && !hasReservation) {
+        // Проверяем, что мышь нажата, ячейка не занята и находится в той же строке, где началось выделение
+        if (isMouseDown && !hasReservation && rowId === activeRowId) {
             // Check if cell is already selected
             const isAlreadySelected = selectedEmptyCells.some(
                 cell => cell.rowId === rowId && cell.day === day && cell.timeOfDay === timeOfDay
@@ -202,6 +209,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
 
     const handleMouseUp = () => {
         setIsMouseDown(false);
+        // Сбрасываем активную строку при завершении выделения
+        setActiveRowId(null);
     };
 
     // Function to check if a cell is selected

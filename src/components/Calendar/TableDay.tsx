@@ -14,6 +14,10 @@ import {
     Tr,
     Th,
     Td,
+    Popover,
+    PopoverTrigger,
+    PopoverContent,
+    PopoverBody
 } from '@chakra-ui/react';
 import BolaCell from "/assets/images/bola-cell.svg";
 import { ReservationsService, MarinasService } from '../../client';
@@ -23,6 +27,7 @@ import BoatCell from './BoatCell';
 import { getCellColor } from '../../utilsBola';
 import { ReservationExtenstion } from '../ReservationExtenstion';
 import PopupReserved from '../ServicesPanel/Services';
+import HoverReservation from './HoverReservation';
 
 interface Row {
     id: string;
@@ -247,7 +252,11 @@ const TableDay: React.FC<TableDayProps> = ({
 
     // Компонент для отображения содержимого ячейки с резервацией
     const renderBoatCell = (reservation: ReservationExtenstion, textColor: string) => {
-        return <BoatCell reservation={reservation as unknown as ReservationExtenstion} textColor={textColor} />;
+        return (
+            <Box width="100%" height="100%" display="flex" alignItems="center" justifyContent="center">
+                <BoatCell reservation={reservation as ReservationExtenstion} textColor={textColor} />
+            </Box>
+        );
     };
 
     const handleCellClick = (rowId: string, hour: string, halfHour?: 'first' | 'second', reservation?: ReservationExtenstion) => {
@@ -480,7 +489,8 @@ const TableDay: React.FC<TableDayProps> = ({
                                     realHour = hourIndex; // 1pm-11pm (already in 24-hour format: 13-23)
                                 }
                                 // Find boats for this hour and row
-                                const boatsForHour = reservations.filter(boat => {;
+                                const boatsForHour = reservations.filter(boat => {
+                                    ;
 
                                     // First check if the mooring ball IDs match
                                     let mooringBallMatches = false;
@@ -659,7 +669,7 @@ const TableDay: React.FC<TableDayProps> = ({
                                     lastCellHour = lastHourIndex; // 1pm-11pm
                                 }
 
-    
+
 
                                 // Определяем скругление для разных случаев:
                                 let borderRadius = "1000px"; // По умолчанию полное скругление

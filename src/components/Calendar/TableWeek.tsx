@@ -159,67 +159,44 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
 
     const renderBoatCell = (reservation: ReservationExtenstion, colspan: number, textColor: string) => {
         return (
-            <Popover trigger="hover" placement="bottom" strategy="fixed">
-                <PopoverTrigger>
-                    <Flex
-                        display="flex"
-                        position="relative"
-                        width="100%"
-                        height="100%"
-                        alignItems="center"
-                        justifyContent="center" 
-                    >
-                        <BoatCell reservation={reservation} textColor={textColor} colspan={colspan} />
-                        {(reservation.startsBefore || reservation.endsAfter) && (
-                            <>
-                                {reservation.startsBefore && (
-                                    <Box
-                                        position="absolute"
-                                        top="0"
-                                        left="0"
-                                        height="100%"
-                                        width="8px"
-                                        bg="white"
-                                    >
-                                        {renderEdgeIcon(reservation, true)}
-                                    </Box>
-                                )}
-                                {reservation.endsAfter && (
-                                    <Box
-                                        position="absolute"
-                                        top="0"
-                                        right="0"
-                                        height="100%"
-                                        width="8px"
-                                        bg="white"
-                                    >
-                                        {renderEdgeIcon(reservation, false)}
-                                    </Box>
-                                )}
-                            </>
+            <Flex
+                display="flex"
+                position="relative"
+                width="100%"
+                height="100%"
+                alignItems="center"
+                justifyContent="center"
+            >
+                <BoatCell reservation={reservation} textColor={textColor} colspan={colspan} />
+                {(reservation.startsBefore || reservation.endsAfter) && (
+                    <>
+                        {reservation.startsBefore && (
+                            <Box
+                                position="absolute"
+                                top="0"
+                                left="0"
+                                height="100%"
+                                width="8px"
+                                bg="white"
+                            >
+                                {renderEdgeIcon(reservation, true)}
+                            </Box>
                         )}
-                    </Flex>
-                </PopoverTrigger>
-                <PopoverContent
-                    width='fit-content'
-                    border="1px solid var(--chakra-colors-basic-grey200)"
-                    borderRadius="var(--chakra-radii-md)"
-                    bg="basic.grey100"
-                    _focus={{ outline: 'none' }}
-                    zIndex={9999}
-                    style={{
-                        opacity: '1 !important',
-                        filter: 'none !important',
-                        pointerEvents: 'auto',
-                        visibility: 'visible',
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
-                    }}
-                >
-                    <PopoverBody>
-                        <HoverReservation reservation={reservation} />
-                    </PopoverBody>
-                </PopoverContent>
-            </Popover>
+                        {reservation.endsAfter && (
+                            <Box
+                                position="absolute"
+                                top="0"
+                                right="0"
+                                height="100%"
+                                width="8px"
+                                bg="white"
+                            >
+                                {renderEdgeIcon(reservation, false)}
+                            </Box>
+                        )}
+                    </>
+                )}
+            </Flex>
         );
     };
 

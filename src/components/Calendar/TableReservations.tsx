@@ -16,6 +16,7 @@ import {
     Td,
     Button
 } from '@chakra-ui/react';
+import AddReservation from '../Reservations/AddReservation';
 import BolaCell from "/assets/images/bola-cell.svg";
 import { ReservationsService, MarinasService } from '../../client';
 import { useMarina } from '../../context/MarinaContext';
@@ -134,6 +135,8 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     }[]>([]);
     // Добавляем состояние для отслеживания строки, в которой началось выделение
     const [activeRowId, setActiveRowId] = useState<string | null>(null);
+    // Добавляем состояние для управления модальным окном добавления резервации
+    const [isAddReservationOpen, setIsAddReservationOpen] = useState<boolean>(false);
     // Добавляем состояние для отслеживания текущей временной зоны
     const [currentTimeZone, setCurrentTimeZone] = useState<string>(
         Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -171,6 +174,11 @@ const TableReservations: React.FC<TableReservationsProps> = ({
         const handleGlobalMouseUp = () => {
             if (isMouseDown) {
                 setIsMouseDown(false);
+                // Проверяем, были ли выбраны ячейки
+                if (selectedEmptyCells.length > 0) {
+                    // Открываем модальное окно добавления резервации
+                    setIsAddReservationOpen(true);
+                }
                 // Сбрасываем активную строку при глобальном отпускании мыши
                 setActiveRowId(null);
             }
@@ -209,8 +217,20 @@ const TableReservations: React.FC<TableReservationsProps> = ({
 
     const handleMouseUp = () => {
         setIsMouseDown(false);
+        // Проверяем, были ли выбраны ячейки
+        if (selectedEmptyCells.length > 0) {
+            // Открываем модальное окно добавления резервации
+            setIsAddReservationOpen(true);
+        }
         // Сбрасываем активную строку при завершении выделения
         setActiveRowId(null);
+    };
+    
+    // Обработчик закрытия модального окна добавления резервации
+    const handleAddReservationClose = () => {
+        setIsAddReservationOpen(false);
+        // Очищаем выбранные ячейки после закрытия модального окна
+        setSelectedEmptyCells([]);
     };
 
     // Function to check if a cell is selected
@@ -460,6 +480,11 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     // Main component rendering
     return (
         <Box display="flex" alignItems="flex-start" width="100%" position="relative" minHeight="100vh" bg="white">
+            {/* Модальное окно добавления резервации */}
+            <AddReservation 
+                isOpen={isAddReservationOpen} 
+                onClose={handleAddReservationClose} 
+            />
             {/* Показываем оверлей при обновлении данных */}
             {isFetching && !isLoading && (
                 <Box

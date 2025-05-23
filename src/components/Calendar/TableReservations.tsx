@@ -885,6 +885,13 @@ const TableReservations: React.FC<TableReservationsProps> = ({
                                                 bg={getCellColor(boatMatch).bg}
                                                 borderRadius={borderRadius}
                                                 className="boat-cell-container"
+                                                sx={{
+                                                    '&:hover': {
+                                                        opacity: '1 !important',
+                                                        filter: 'none !important',
+                                                        transition: 'opacity 0.2s ease, filter 0.2s ease'
+                                                    }
+                                                }}
                                                 data-boat-id={boatMatch.id}
                                                 data-mooring-ball-id={boatMatch.mooring_ball_id}
                                             >

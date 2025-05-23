@@ -1,6 +1,6 @@
 // TableWeek.tsx
 import React, { useMemo } from 'react';
-import { Box, Text, Spinner, Center, Flex, Popover, PopoverTrigger, PopoverContent, PopoverBody } from '@chakra-ui/react';
+import { Box, Text, Spinner, Center, Flex } from '@chakra-ui/react';
 import TableReservations from './TableReservations';
 import BoatCell from './BoatCell';
 import { ReservationExtenstion } from '../ReservationExtenstion';
@@ -10,9 +10,10 @@ import { renderEdgeIcon } from './TableReservations';
 interface TableWeekProps {
     currentWeekStart: string;
     onReservationClick: (rowId: string, day: string, reservation?: ReservationExtenstion) => void;
+    isServiceOpen?: boolean; // Добавляем проп для отслеживания состояния компонента Service
 }
 
-const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationClick }) => {
+const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationClick, isServiceOpen = false }) => {
     // Функция для получения текущего понедельника как запасного варианта
     const getCurrentMonday = (): string => {
         const today = new Date();
@@ -208,6 +209,7 @@ const TableWeek: React.FC<TableWeekProps> = ({ currentWeekStart, onReservationCl
             renderBoatCell={renderBoatCell}
             currentDate={currentWeekStart}
             onReservationClick={onReservationClick}
+            isServiceOpen={isServiceOpen}
         />
     );
 };

@@ -10,9 +10,10 @@ import HoverReservation from './HoverReservation';
 interface TableMonthProps {
     currentMonthDate: string;
     onReservationClick: (rowId: string, day: string, boat?: ReservationExtenstion) => void;
+    isServiceOpen?: boolean; // Добавляем проп для отслеживания состояния компонента Service
 }
 
-const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservationClick }) => {
+const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservationClick, isServiceOpen = false }) => {
     // Simple function to generate month dates
     const getMonthDates = () => {
         try {
@@ -166,6 +167,7 @@ const TableMonth: React.FC<TableMonthProps> = ({ currentMonthDate, onReservation
             currentDate={currentMonthDate}
             onReservationClick={onReservationClick}
             isMonthView={true}
+            isServiceOpen={isServiceOpen}
         />
     );
 };

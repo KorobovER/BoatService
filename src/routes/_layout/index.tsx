@@ -6,7 +6,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import TableDay from '../../components/Calendar/TableDay';
 import TableMonth from '../../components/Calendar/TableMonth';
 import { ReservationExtenstion } from "../../components/ReservationExtenstion";
-import PopupReserved from "../../components/ServicesPanel/Services";
+import Services from "../../components/ServicesPanel/Services";
 import { useMarina } from "../../context/MarinaContext";
 
 type TableView = 'month' | 'week' | 'day';
@@ -270,6 +270,7 @@ function Dashboard() {
                             <TableWeek
                                 currentWeekStart={currentWeekStart}
                                 onReservationClick={handleReservationClick}
+                                isServiceOpen={!!selectedReservation}
                             />
                         )}
                         {currentView === 'month' && currentMonth > 0 && (
@@ -277,12 +278,14 @@ function Dashboard() {
                                 key={`month-${currentYear}-${currentMonth}`}
                                 currentMonthDate={getMonthDateString()}
                                 onReservationClick={handleReservationClick}
+                                isServiceOpen={!!selectedReservation}
                             />
                         )}
                         {currentView === 'day' && (
                             <TableDay
                                 currentDate={currentDay}
                                 onReservationClick={handleTableDayReservationClick}
+                                isServiceOpen={!!selectedReservation}
                             />
                         )}
                     </Box>
@@ -291,7 +294,7 @@ function Dashboard() {
                     <Box
                         width="33%"
                     >
-                        <PopupReserved
+                        <Services
                             isOpen={!!selectedReservation}
                             onClose={handleClosePopup}
                             rowId={selectedReservation.rowId}

@@ -38,6 +38,7 @@ interface TableReservationsProps {
     currentDate: string;
     onReservationClick: (rowId: string, day: string, reservation?: ReservationExtenstion, timeOfDay?: 'AM' | 'PM') => void;
     isMonthView?: boolean;
+    isServiceOpen?: boolean; // Добавляем проп для отслеживания состояния компонента Service
 }
 
 // Функция для создания опций запроса на получение швартовок
@@ -115,6 +116,7 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     currentDate,
     onReservationClick,
     isMonthView,
+    isServiceOpen = false, // По умолчанию компонент Service не открыт
 }) => {
     const { selectedMarina } = useMarina();
     const [reservations, setReservations] = useState<ReservationExtenstion[]>([]);
@@ -172,6 +174,9 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     // Add event listener to handle mouse up outside the table - moved up to avoid conditional hooks
     useEffect(() => {
         const handleGlobalMouseUp = () => {
+            // Если компонент Service открыт, не обрабатываем события мыши
+            if (isServiceOpen) return;
+            
             if (isMouseDown) {
                 setIsMouseDown(false);
                 // Проверяем, были ли выбраны ячейки
@@ -192,6 +197,9 @@ const TableReservations: React.FC<TableReservationsProps> = ({
 
     // Add handlers for mouse events - Moved these up before any hooks
     const handleMouseDown = (rowId: string, day: string, timeOfDay: 'AM' | 'PM', hasReservation: boolean) => {
+        // Если компонент Service открыт, не обрабатываем события мыши
+        if (isServiceOpen) return;
+        
         if (!hasReservation) {
             setIsMouseDown(true);
             // Запоминаем строку, в которой началось выделение
@@ -202,6 +210,9 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     };
 
     const handleMouseEnter = (rowId: string, day: string, timeOfDay: 'AM' | 'PM', hasReservation: boolean) => {
+        // Если компонент Service открыт, не обрабатываем события мыши
+        if (isServiceOpen) return;
+        
         // Проверяем, что мышь нажата, ячейка не занята и находится в той же строке, где началось выделение
         if (isMouseDown && !hasReservation && rowId === activeRowId) {
             // Check if cell is already selected
@@ -216,6 +227,9 @@ const TableReservations: React.FC<TableReservationsProps> = ({
     };
 
     const handleMouseUp = () => {
+        // Если компонент Service открыт, не обрабатываем события мыши
+        if (isServiceOpen) return;
+        
         setIsMouseDown(false);
         // Проверяем, были ли выбраны ячейки
         if (selectedEmptyCells.length > 0) {

@@ -37,11 +37,13 @@ interface Row {
 interface TableDayProps {
     currentDate: string;
     onReservationClick: (rowId: string, hour: string, boat?: ReservationExtenstion) => void;
+    isServiceOpen?: boolean; // Добавляем проп для отслеживания состояния компонента Service
 }
 
 const TableDay: React.FC<TableDayProps> = ({
     currentDate,
     onReservationClick,
+    isServiceOpen = false,
 }) => {
     const { selectedMarina } = useMarina();
     const [reservations, setReservations] = useState<ReservationExtenstion[]>([]);

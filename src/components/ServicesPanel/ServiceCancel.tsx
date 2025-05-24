@@ -13,6 +13,7 @@ import {
     Textarea,
 } from '@chakra-ui/react';
 import { SubServiceRequest} from '../../client/models';
+import CustomIcon from '../Icon';
 
 interface ServiceCancelProps {
     isOpen: boolean;
@@ -54,7 +55,7 @@ const ServiceCancel: React.FC<ServiceCancelProps> = ({
                     <Flex direction="column" align="center" gap='2xl'>
                         <Flex direction="column" align="center" gap='sm' w="100%">
                             <Box bg='system.errorRedNew' w='90px' h='90px' borderRadius='full' display='flex' alignItems='center' justifyContent='center'>
-                                <Image w='90px' h='90px' src='assets/images/alert-icon-red.svg'></Image>
+                                <CustomIcon name="alert-icon-red" category="alerts" size={90} />
                             </Box>
                             <Flex border="1px solid" borderColor="system.errorRedNew" bg="bg.error" borderRadius="20px" w="100%" p='10px 20px' direction="column" justifyContent="center" gap='xs'>
                                 <Text fontSize="16px" color="system.errorRedNew" fontWeight="400" textAlign="start">
@@ -68,6 +69,8 @@ const ServiceCancel: React.FC<ServiceCancelProps> = ({
 
                         <Flex gap='13px' align="center" bg="basic.grey100" borderRadius="20px" p='xl'>
                             <Box bg='system.errorRedNew' w='80px' h='80px' borderRadius='20px' display='flex' alignItems='center' justifyContent='center'>
+                                {/* Для иконки сервиса используем CustomIcon, но так как путь динамический, 
+                                   сохраняем использование Image с фильтром */}
                                 <Image
                                     w='80px'
                                     h='80px'
@@ -141,7 +144,7 @@ const ServiceCancel: React.FC<ServiceCancelProps> = ({
                                 fontWeight="400"
                                 isLoading={loading}
                                 loadingText="Cancelling..."
-                                leftIcon={<Image mr='4px' h='auto' src='assets/images/alert-icon.svg' />}
+                                leftIcon={<CustomIcon name="alert-icon" category="alerts" size={24} style={{ marginRight: '4px' }} />}
                             >
                                 Yes, cancel service
                             </Button>
@@ -158,7 +161,7 @@ const ServiceCancel: React.FC<ServiceCancelProps> = ({
                                 fontWeight="400"
                                 color="basic.grey900"
                                 isDisabled={loading}
-                                leftIcon={<Image mr='4px' w='17px' h='auto' src='assets/images/goback-icon.svg' />}
+                                leftIcon={<CustomIcon name="goback-icon" category="ui" size={17} style={{ marginRight: '4px' }} />}
                             >
                                 Go back
                             </Button>

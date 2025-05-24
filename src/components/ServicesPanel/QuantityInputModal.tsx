@@ -13,6 +13,7 @@ import {
     IconButton,
 } from '@chakra-ui/react';
 import useCustomToast from '../../hooks/useCustomToast';
+import CustomIcon from '../../components/Icon';
 
 interface QuantityInputModalProps {
     isOpen: boolean;
@@ -137,7 +138,7 @@ const QuantityInputModal: React.FC<QuantityInputModalProps> = ({
                                 fontWeight="400"
                                 color="basic.grey900"
                                 isDisabled={isSubmitting}
-                                leftIcon={<Image mr='4px' w='17px' h='auto' src='assets/images/goback-icon.svg' />}
+                                leftIcon={<CustomIcon size={17} name='goback-icon' category='ui' style={{ marginRight: '4px'}} />}
 
                             >
                                 Go back
@@ -156,7 +157,7 @@ const QuantityInputModal: React.FC<QuantityInputModalProps> = ({
                                 fontWeight="400"
                                 isLoading={isSubmitting}
                                 loadingText="Updating..."
-                                leftIcon={<Image ml='4px' h='auto' src='assets/images/check-icon.svg' />}
+                                leftIcon={<CustomIcon size={17} name='check-icon' category='ui' style={{ marginRight: '4px'}} />}
                             >
                                 Mark as done
                             </Button>

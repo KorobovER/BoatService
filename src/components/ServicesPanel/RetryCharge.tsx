@@ -9,10 +9,11 @@ import {
     Button,
     Text,
     Flex,
-    Box
+    Box,
+    Icon
 } from '@chakra-ui/react';
 import { PaymentReceiptPublic } from '../../client/models';
-import Icon from '../Icon';
+import CustomIcon from '../Icon';
 
 interface RetryChargeProps {
     isOpen: boolean;
@@ -51,7 +52,7 @@ const RetryCharge: React.FC<RetryChargeProps> = ({
                 <ModalHeader display='flex' flexDirection='column' p='0'>
                     <Flex flexDirection="column" align="center" gap='sm'>
                         <Box w='80px' h='80px' bg='brand.secondaryBlue' borderRadius='full' display='flex' alignItems='center' justifyContent='center'>
-                            <Icon size={80} color='#EFF4FB' name='infotmation-exclamation' />
+                            <CustomIcon size={80} color='#EFF4FB' name='alert-icon-blue' category='alerts' />
                         </Box>
                         <Flex border="1px solid" borderColor="brand.secondaryBlue" bg="bg.info" borderRadius="20px" w="100%" p='10px 20px' direction="row" align="center" gap='md' position="relative">
                             <Box flex='1'>
@@ -101,7 +102,7 @@ const RetryCharge: React.FC<RetryChargeProps> = ({
                             justifyContent="center"
                             px='md'
                             py='10px'
-                            leftIcon={<Icon name="alert-icon" size={30} />}
+                            leftIcon={<CustomIcon name="alert-icon" category='alerts' size={30} />}
                             bg="brand.secondaryBlue"
                             color="white"
                             size="lg"
@@ -128,7 +129,7 @@ const RetryCharge: React.FC<RetryChargeProps> = ({
                             display='flex'
                             alignItems='center'
                             gap='4px'
-                            leftIcon={<Icon size={17} name='goback' />}
+                            leftIcon={<CustomIcon size={17} name='goback-icon' category='ui' />}
                         >
                             Cancel
                         </Button>
@@ -143,7 +144,7 @@ const RetryCharge: React.FC<RetryChargeProps> = ({
                         display='flex'
                         alignItems='center'
                         gap='4px'
-                        leftIcon={<Icon size={22} name='message-boater' />}
+                        leftIcon={<CustomIcon size={22} name='message-boater' category='ui' />}
                         color='basic.grey900'>Message boater instead</Button>
                 </ModalFooter>
             </ModalContent>

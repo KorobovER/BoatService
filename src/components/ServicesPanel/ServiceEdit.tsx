@@ -12,6 +12,7 @@ import {
     Button,
     IconButton
 } from '@chakra-ui/react';
+import CustomIcon from '../../components/Icon';
 import { SubServiceRequest } from '../../client/models';
 
 interface ServiceEditProps {
@@ -52,7 +53,7 @@ const ServiceEdit: React.FC<ServiceEditProps> = ({
                     <Flex direction="column" align="center" gap='3xl'>
                         <Flex flexDirection="column" align="center" gap='sm'>
                             <Box w='90px' h='90px' bg='brand.secondaryBlue' borderRadius='full' display='flex' alignItems='center' justifyContent='center'>
-                                <Image w='90px' h='90px' src='assets/images/alert-icon-blue.svg'></Image>
+                                <CustomIcon name="alert-icon-blue" category="alerts" size={90} />
                             </Box>
                             <Flex border="1px solid" borderColor="brand.secondaryBlue" bg="bg.info" borderRadius="20px" w="100%" p='10px 20px' direction="row" align="center" gap='md' position="relative">
                                 <Box flex='1'>
@@ -122,7 +123,7 @@ const ServiceEdit: React.FC<ServiceEditProps> = ({
                                 fontWeight="400"
                                 color="basic.grey900"
                                 isDisabled={loading}
-                                leftIcon={<Image mr='4px' w='17px' h='auto' src='assets/images/goback-icon.svg' />}
+                                leftIcon={<CustomIcon name="goback-icon" category="ui" size={17} style={{ marginRight: '4px' }} />}
                             >
                                 Go back
                             </Button>
@@ -140,7 +141,7 @@ const ServiceEdit: React.FC<ServiceEditProps> = ({
                                 fontWeight="400"
                                 isLoading={loading}
                                 loadingText="Updating..."
-                                leftIcon={<Image ml='4px' h='auto' src='assets/images/check-icon.svg' />}
+                                leftIcon={<CustomIcon name="check-icon" category="ui" size={17} style={{ marginLeft: '4px' }} />}
                             >
                                 Update
                             </Button>

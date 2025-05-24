@@ -16,20 +16,26 @@ import useCustomToast from '../../hooks/useCustomToast'
 import { SERVICE_FEE_PERCENTAGE } from '../../utilsBola';
 import Icon from '../Icon';
 
+// Структура для иконок сервисов с указанием категории и имени
+export interface ServiceIconInfo {
+    name: string;
+    category: 'services' | 'ui' | 'alerts' | 'boats' | 'logos';
+}
+
 // Иконки для разных типов услуг
-export const SERVICE_ICONS = {
-    TRASH: '/assets/icons/trash_service.svg',
-    LAUNCH: '/assets/images/launch_service.svg',
-    LAUNDRY: '/assets/images/laundry_service.svg',
-    ICE: '/assets/images/ice_service.svg',
-    FUEL: '/assets/images/fuel_service.svg',
-    PUMP_OUT: '/assets/images/pump_out_service.svg',
-    WATER: '/assets/images/water_service.svg',
-    DEFAULT: '/assets/images/all_services.svg'
+export const SERVICE_ICONS: Record<string, ServiceIconInfo> = {
+    TRASH: { name: 'trash_service', category: 'services' },
+    LAUNCH: { name: 'launch_service', category: 'services' },
+    LAUNDRY: { name: 'laundry_service', category: 'services' },
+    ICE: { name: 'ice_service', category: 'services' },
+    FUEL: { name: 'fuel_service', category: 'services' },
+    PUMP_OUT: { name: 'pump_out_service', category: 'services' },
+    WATER: { name: 'water_service', category: 'services' },
+    DEFAULT: { name: 'all_services', category: 'services' }
 };
 
 // Функция для определения иконки по имени услуги
-export const getServiceIcon = (name: string): string => {
+export const getServiceIconInfo = (name: string): ServiceIconInfo => {
     const nameLower = name.toLowerCase();
 
     if (nameLower.includes('trash') || nameLower.includes('waste') || nameLower.includes('garbage')) {
@@ -49,6 +55,12 @@ export const getServiceIcon = (name: string): string => {
     } else {
         return SERVICE_ICONS.DEFAULT;
     }
+};
+
+// Для обратной совместимости - возвращает путь к файлу иконки
+export const getServiceIcon = (name: string): string => {
+    const iconInfo = getServiceIconInfo(name);
+    return `/assets/images/icons/${iconInfo.category}/${iconInfo.name}.svg`;
 };
 
 interface PopupReservedProps {
@@ -492,11 +504,11 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                         >
                             <Flex gap="lg">
                                 <Flex align="center" gap="xs">
-                                     <Icon
-                                        name="bola-cell-white"
-                                        size={30}
-                                        viewBox="0 0 30 30"
-                                        color="white"
+                                     <Image
+                                        src="/assets/images/bola-cell-white.svg"
+                                        alt="Bola Cell"
+                                        width="30px"
+                                        height="30px"
                                     />
                                     <Text fontSize="20px" fontWeight="400" color="gray.900">{rowId}</Text>
                                 </Flex>
@@ -550,7 +562,12 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                             minHeight="0"
                             _hover={{ opacity: 0.8 }}
                         >
-                            <Icon name="chat" size={55} color="white" viewBox="0 0 44 44" />
+                            <Image
+                                src="/assets/images/chat-icon.svg"
+                                alt="Chat"
+                                width="44px"
+                                height="44px"
+                            />
                         </Button>
                     </Flex>
                     {/* Content*/}

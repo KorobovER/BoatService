@@ -1,11 +1,10 @@
 // TableMonth.tsx
 import React from 'react';
-import { Box, Text, Flex, Popover, PopoverTrigger, PopoverContent, PopoverBody } from '@chakra-ui/react';
+import { Box, Text, Flex} from '@chakra-ui/react';
 import TableReservations from '../Calendar/TableReservations';
 import BoatCell from './BoatCell';
 import { ReservationExtenstion } from '../ReservationExtenstion';
 import { renderEdgeIcon } from './TableReservations';
-import HoverReservation from './HoverReservation';
 
 interface TableMonthProps {
     currentMonthDate: string;

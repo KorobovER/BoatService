@@ -9,11 +9,11 @@ import {
     Button,
     Text,
     Flex,
-    Image,
     Box,
     Input,
     Textarea,
 } from '@chakra-ui/react';
+import CustomIcon from '../../components/Icon';
 import { PaymentReceiptPublic, SubServiceRequest} from '../../client/models';
 import { ReservationsService } from '../../client/services';
 import { useQueryClient} from '@tanstack/react-query';
@@ -151,7 +151,7 @@ const MarkPaid: React.FC<MarkPaidProps> = ({
                 <ModalHeader display='flex' flexDirection='column' p='0'>
                     <Flex flexDirection="column" align="center" gap='sm'>
                         <Box w='90px' h='90px' bg='system.successGreen' borderRadius='full' display='flex' alignItems='center' justifyContent='center'>
-                            <Image w='90px' h='90px' src='assets/images/alert-icon-blue.svg' alt="alert" />
+                            <CustomIcon name='alert-icon-green' category='alerts' size={90} />
                         </Box>
                         <Flex border="1px solid" borderColor="system.successGreen" bg="bg.success" borderRadius="20px" w="100%" p='10px 20px' direction="row" align="center" gap='md' position="relative">
                             <Box flex='1'>
@@ -253,7 +253,7 @@ const MarkPaid: React.FC<MarkPaidProps> = ({
                         onClick={handleMarkPaid}
                         isLoading={isLoading}
                         loadingText="Marking as Paid"
-                        leftIcon={<Image ml='4px' h='auto' src='assets/images/check-icon-green.svg' filter="brightness(0) invert(1)" />}
+                        leftIcon={<CustomIcon size={17} name='check-icon-green' category='ui' style={{ marginLeft: '4px', filter: "brightness(0) invert(1)" }} />}
                     >
                         Mark as paid
                     </Button>
@@ -270,7 +270,7 @@ const MarkPaid: React.FC<MarkPaidProps> = ({
                         fontSize="16px"
                         fontWeight="400"
                         color="basic.grey900"
-                        leftIcon={<Image mr='4px' w='17px' h='auto' src='assets/images/goback-icon.svg' />}
+                        leftIcon={<CustomIcon size={17} name='goback-icon' category='ui' style={{ marginRight: '4px'}} />}
                     >
                         Cancel
                     </Button>

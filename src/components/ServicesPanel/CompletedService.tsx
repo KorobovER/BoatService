@@ -17,6 +17,7 @@ import {
 import { FiDownload } from 'react-icons/fi';
 import { ServiceOnReservationPublic } from '../../client/models';
 import { SERVICE_FEE_PERCENTAGE } from '../../utilsBola';
+import CustomIcon from '../Icon';
 
 interface CompletedServiceProps {
     isOpen: boolean;

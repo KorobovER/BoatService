@@ -1,24 +1,9 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import {
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    Text,
-    SimpleGrid,
-    Box,
-    Image,
-    Flex,
-    Button,
-    Center,
-    Input,
-    Textarea
-} from '@chakra-ui/react';
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, Text, SimpleGrid, Box, Flex, Button, Center, Input, Textarea } from '@chakra-ui/react';
+import CustomIcon from '../../components/Icon';
 import { MarinaServicePublic, SubServiceRequest, ReservationPublic } from '../../client/models';
 import { ReservationsService } from '../../client/services';
-import { getServiceIcon } from './Services';
+import { getServiceIconInfo } from './Services';
 import { useQueryClient } from '@tanstack/react-query';
 import useCustomToast from '../../hooks/useCustomToast';
 
@@ -418,17 +403,18 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                         </Text>
                         {reservation && (
                             <>
-                                <Image
-                                    src={reservation?.boat?.vessel_type === 'power'
-                                        ? "/assets/images/power-boat.svg"
+                                <CustomIcon
+                                    name={reservation?.boat?.vessel_type === 'power'
+                                        ? "power-boat"
                                         : reservation?.boat?.vessel_type === 'catamaran'
-                                            ? "/assets/images/catamaran-boat.svg"
-                                            : "/assets/images/monohul-boat.svg"}
-                                    alt={reservation?.boat?.boatname || 'Boat'}
-                                    width="32px"
-                                    height="32px"
-                                    filter="invert(40%) sepia(90%) saturate(2259%) hue-rotate(352deg) brightness(98%) contrast(97%)"
-                                    marginLeft="lg"
+                                            ? "catamaran-boat"
+                                            : "monohul-boat"}
+                                    category="boats"
+                                    size={32}
+                                    style={{
+                                        filter: "invert(40%) sepia(90%) saturate(2259%) hue-rotate(352deg) brightness(98%) contrast(97%)",
+                                        marginLeft: "var(--chakra-space-lg)"
+                                    }}
                                 />
                                 <Text fontSize="14px" fontWeight="500" color="gray.600" pl="lg" pr="4px">
                                     {reservation?.boat?.boatname || 'Unknown Boat'}
@@ -441,9 +427,10 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                         )}
                     </Flex>
                     <Flex bg="basic.grey100" border='1px solid' borderColor='basic.grey200' borderRadius='var(--chakra-space-sm)' py="xs" px="sm" align="center" gap="xs">
-                        <Image
-                            src="/assets/images/bola-cell-secondary.svg"
-                            alt={rowId}
+                        <CustomIcon
+                            name="bola-cell-white"
+                            category="ui"
+                            size={24}
                         />
                         <Text fontSize="20px" fontWeight="400" color="gray.900">{rowId}</Text>
                     </Flex>
@@ -500,11 +487,9 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                                                 position="relative"
                                             >
                                                 <Text color="brand.secondaryBlue" fontSize="16px" fontWeight="500">Open Charge</Text>
-                                                <Image
-                                                    src={getServiceIcon('Open Charge')}
-                                                    alt="Open Charge"
-                                                    width="50px"
-                                                    height="50px"
+                                                <CustomIcon
+                                                    {...getServiceIconInfo('Open Charge')}
+                                                    size={50}
                                                 />
                                                 <Text h="22px" color="gray.900" fontSize="12px" fontWeight="300">
                                                     Other products / services / fees
@@ -556,22 +541,21 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                                         >
                                             <Text color="brand.secondaryBlue" fontSize="16px" fontWeight="500">{item.name}</Text>
                                             {(quantities[idx] || 0) > 0 && (
-                                                <Image
-                                                    src="/assets/images/AddButton.svg"
-                                                    alt="Selected"
-                                                    position="absolute"
-                                                    top="8px"
-                                                    right="4px"
-                                                    width="24px"
-                                                    height="24px"
+                                                <CustomIcon
+                                                    name="check-green"
+                                                    category="ui"
+                                                    size={24}
+                                                    style={{
+                                                        position: "absolute",
+                                                        top: "8px",
+                                                        right: "4px"
+                                                    }}
                                                 />
                                             )}
 
-                                            <Image
-                                                src={getServiceIcon(item.name)}
-                                                alt={item.name}
-                                                width="50px"
-                                                height="50px"
+                                            <CustomIcon
+                                                {...getServiceIconInfo(item.name)}
+                                                size={50}
                                             />
                                             <Flex gap="xs" alignItems="center">
                                                 <Text color="gray.900" fontSize="16px" fontWeight="400">
@@ -795,7 +779,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                                 h='50px'
                                 variant="outline"
                                 onClick={clearAll}
-                                leftIcon={<Image mr='10px' w='11px' h='auto' src="/assets/images/close.svg" alt="Close" />}
+                                leftIcon={<CustomIcon name="close" category="ui" size={11} style={{ marginRight: '10px' }} />}
                                 color="gray.900"
                                 borderColor="gray.200"
                                 borderRadius="var(--chakra-space-full)"
@@ -859,7 +843,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({
                                 fontSize="16px"
                                 fontWeight="400"
                                 color="basic.grey900"
-                                leftIcon={<Image mr='4px' w='17px' h='auto' src='assets/images/goback-icon.svg' />}
+                                leftIcon={<CustomIcon name="goback-icon" category="ui" size={17} style={{ marginRight: '4px' }} />}
                             >
                                 Go back
                             </Button>

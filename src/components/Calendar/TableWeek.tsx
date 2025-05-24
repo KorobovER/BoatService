@@ -4,7 +4,6 @@ import { Box, Text, Spinner, Center, Flex } from '@chakra-ui/react';
 import TableReservations from './TableReservations';
 import BoatCell from './BoatCell';
 import { ReservationExtenstion } from '../ReservationExtenstion';
-import HoverReservation from './HoverReservation';
 import { renderEdgeIcon } from './TableReservations';
 
 interface TableWeekProps {

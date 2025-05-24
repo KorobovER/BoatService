@@ -9,13 +9,13 @@ import {
     Button,
     Text,
     Flex,
-    Image,
     Box,
 } from '@chakra-ui/react';
 import { PaymentReceiptPublic, SubServiceRequest } from '../../client/models';
 import { ReservationsService } from '../../client/services';
 import { useState } from 'react';
 import useCustomToast from '../../hooks/useCustomToast';
+import CustomIcon from '../../components/Icon';
 interface MarkUncollectibleProps {
     isOpen: boolean;
     onClose: () => void;
@@ -108,7 +108,7 @@ const MarkUncollectible: React.FC<MarkUncollectibleProps> = ({
                 <ModalHeader display='flex' flexDirection='column' p='0'>
                     <Flex flexDirection="column" align="center" gap='sm'>
                         <Box w='90px' h='90px' bg='system.errorRedNew' borderRadius='full' display='flex' alignItems='center' justifyContent='center'>
-                            <Image w='90px' h='90px' src='assets/images/alert-icon-red.svg' alt="alert" />
+                            <CustomIcon size={90} name='alert-icon-red' category='ui' />
                         </Box>
                         <Flex border="1px solid" borderColor="system.errorRedNew" bg="bg.error" borderRadius="20px" w="100%" p='10px 20px' direction="row" align="center" gap='md' position="relative">
                             <Box flex='1'>
@@ -159,7 +159,7 @@ const MarkUncollectible: React.FC<MarkUncollectibleProps> = ({
                             borderRadius='full'
                             fontSize="16px"
                             fontWeight="400"
-                            leftIcon={<Image ml='4px' h='auto' src='assets/images/close-red.svg' filter="brightness(0) invert(1)" />}
+                            leftIcon={<CustomIcon size={17} name='close-red' category='ui' style={{ marginRight: '4px', filter:"brightness(0) invert(1)" }} />}
                             onClick={handleMarkUncollectible}
                             isLoading={isLoading}
                             loadingText="Marking Uncollectible"
@@ -179,7 +179,7 @@ const MarkUncollectible: React.FC<MarkUncollectibleProps> = ({
                             fontSize="16px"
                             fontWeight="400"
                             color="basic.grey900"
-                            leftIcon={<Image mr='4px' w='17px' h='auto' src='assets/images/goback-icon.svg' />}
+                            leftIcon={<CustomIcon size={17} name='goback-icon' category='ui' style={{ marginRight: '4px'}} />}
                         >
                             Cancel
                         </Button>
@@ -194,7 +194,7 @@ const MarkUncollectible: React.FC<MarkUncollectibleProps> = ({
                         display='flex'
                         alignItems='center'
                         gap='4px'
-                        leftIcon={<Image w='22px' h='22px' src='assets/images/message-boater.svg' />}
+                        leftIcon={<CustomIcon size={22} name='message-boater' category='ui' />}
                         color='basic.grey900'>Message boater instead</Button>
                 </ModalFooter>
             </ModalContent>

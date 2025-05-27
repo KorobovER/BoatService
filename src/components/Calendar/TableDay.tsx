@@ -13,11 +13,7 @@ import {
     Tbody,
     Tr,
     Th,
-    Td,
-    Popover,
-    PopoverTrigger,
-    PopoverContent,
-    PopoverBody
+    Td
 } from '@chakra-ui/react';
 import BolaCell from "/assets/images/bola-cell.svg";
 import { ReservationsService, MarinasService } from '../../client';
@@ -27,7 +23,6 @@ import BoatCell from './BoatCell';
 import { getCellColor } from '../../utilsBola';
 import { ReservationExtenstion } from '../ReservationExtenstion';
 import PopupReserved from '../ServicesPanel/Services';
-import HoverReservation from './HoverReservation';
 
 interface Row {
     id: string;
@@ -43,7 +38,6 @@ interface TableDayProps {
 const TableDay: React.FC<TableDayProps> = ({
     currentDate,
     onReservationClick,
-    isServiceOpen = false,
 }) => {
     const { selectedMarina } = useMarina();
     const [reservations, setReservations] = useState<ReservationExtenstion[]>([]);
@@ -641,18 +635,6 @@ const TableDay: React.FC<TableDayProps> = ({
                                     } else {
                                         break;
                                     }
-                                }
-
-                                // Преобразуем индекс часа в реальный час (0 = 12am, 1 = 1am, ..., 12 = 12pm, ...)
-                                let currentHourStart;
-                                if (hourIndex === 0) {
-                                    currentHourStart = 0; // 12 AM (полночь)
-                                } else if (hourIndex === 12) {
-                                    currentHourStart = 12; // 12 PM (полдень)
-                                } else if (hourIndex < 12) {
-                                    currentHourStart = hourIndex; // 1am-11am
-                                } else {
-                                    currentHourStart = hourIndex; // 1pm-11pm
                                 }
 
                                 // Проверяем, заканчивается ли резервация в этой ячейке (с учетом последующих ячеек)

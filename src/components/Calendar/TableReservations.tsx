@@ -498,6 +498,11 @@ const TableReservations: React.FC<TableReservationsProps> = ({
             <AddReservation 
                 isOpen={isAddReservationOpen} 
                 onClose={handleAddReservationClose} 
+                selectedCell={selectedEmptyCells.length > 0 ? {
+                    rowId: selectedEmptyCells[0].rowId,
+                    day: selectedEmptyCells[0].day,
+                    endDay: selectedEmptyCells.length > 1 ? selectedEmptyCells[selectedEmptyCells.length - 1].day : selectedEmptyCells[0].day
+                } : undefined}
             />
             {/* Показываем оверлей при обновлении данных */}
             {isFetching && !isLoading && (

@@ -12,7 +12,8 @@ import {
   Flex,
   Text,
   Box,
-  ModalOverlay
+  ModalOverlay,
+  Textarea
 } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { type SubmitHandler, useForm } from "react-hook-form"
@@ -40,17 +41,21 @@ interface AddReservationProps {
   };
 }
 
+
 const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) => {
   const queryClient = useQueryClient()
   const showToast = useCustomToast()
   const [bookingType, setBookingType] = useState<'daily' | 'hourly'>('daily')
   const [displayStartDate, setDisplayStartDate] = useState<string>('')
   const [displayEndDate, setDisplayEndDate] = useState<string>('')
+  const [bookingTitle, setBookingTitle] = useState<string>('')
+  const [bookingDescription, setBookingDescription] = useState<string>('')
   const {
     register,
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<ReservationCreate>({
     mode: "onBlur",
@@ -63,7 +68,7 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
       boat_id: "",
     },
   })
-  
+
   // Update form values when selectedCell changes
   useEffect(() => {
     if (selectedCell) {
@@ -71,7 +76,7 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
       if (selectedCell.rowId) {
         setValue('mooring_ball_id', selectedCell.rowId);
       }
-      
+
       // Set start_date from the day property if available
       if (selectedCell.day) {
         try {
@@ -81,13 +86,13 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
             // Format for form submission (YYYY-MM-DD)
             const formattedStartDate = startDate.toISOString().split('T')[0];
             setValue('start_date', formattedStartDate);
-            
+
             // Format for display (MM/DD/YYYY) with leading zeros
             const month = String(startDate.getMonth() + 1).padStart(2, '0');
             const day = String(startDate.getDate()).padStart(2, '0');
             const formattedDisplayDate = `${month}/${day}/${startDate.getFullYear()}`;
             setDisplayStartDate(formattedDisplayDate);
-            
+
             // Directly update the input value as a fallback
             setTimeout(() => {
               const startDateInput = document.getElementById('start_date') as HTMLInputElement;
@@ -100,7 +105,7 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
           console.error("Error setting start date from selectedCell:", error);
         }
       }
-      
+
       // Set end_date from the endDay property if available, otherwise use day as fallback
       if (selectedCell.endDay || selectedCell.day) {
         try {
@@ -110,13 +115,13 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
             // Format for form submission (YYYY-MM-DD)
             const formattedEndDate = endDate.toISOString().split('T')[0];
             setValue('end_date', formattedEndDate);
-            
+
             // Format for display (MM/DD/YYYY) with leading zeros
             const month = String(endDate.getMonth() + 1).padStart(2, '0');
             const day = String(endDate.getDate()).padStart(2, '0');
             const formattedDisplayDate = `${month}/${day}/${endDate.getFullYear()}`;
             setDisplayEndDate(formattedDisplayDate);
-            
+
             // Directly update the input value as a fallback
             setTimeout(() => {
               const endDateInput = document.getElementById('end_date') as HTMLInputElement;
@@ -129,7 +134,7 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
           console.error("Error setting end date from selectedCell:", error);
         }
       }
-      
+
       // If there's an existing reservation, populate its data
       if (selectedCell.reservation) {
         if (selectedCell.reservation.start_date) {
@@ -138,7 +143,7 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
             if (!isNaN(date.getTime())) {
               const formattedDate = date.toISOString().split('T')[0];
               setValue('start_date', formattedDate);
-              
+
               // Directly update the input value as a fallback
               setTimeout(() => {
                 const startDateInput = document.getElementById('start_date') as HTMLInputElement;
@@ -149,14 +154,14 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
             console.error("Error setting start_date from reservation:", error);
           }
         }
-        
+
         if (selectedCell.reservation.end_date) {
           try {
             const date = new Date(selectedCell.reservation.end_date);
             if (!isNaN(date.getTime())) {
               const formattedDate = date.toISOString().split('T')[0];
               setValue('end_date', formattedDate);
-              
+
               // Directly update the input value as a fallback
               setTimeout(() => {
                 const endDateInput = document.getElementById('end_date') as HTMLInputElement;
@@ -167,18 +172,18 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
             console.error("Error setting end_date from reservation:", error);
           }
         }
-        
+
         if (selectedCell.reservation.user_id) {
           setValue('user_id', selectedCell.reservation.user_id);
         }
-        
+
         if (selectedCell.reservation.boat_id) {
           setValue('boat_id', selectedCell.reservation.boat_id);
         }
       }
     }
   }, [selectedCell, setValue])
-  
+
   // Reset form when modal closes
   useEffect(() => {
     if (!isOpen) {
@@ -278,22 +283,42 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
             </Flex>
             <Flex direction="column" gap="12px">
               {!selectedCell && (
-                <FormControl isRequired isInvalid={!!errors.mooring_ball_id}>
-                  <FormLabel htmlFor="mooring_ball_id">Mooring Ball ID</FormLabel>
-                  <Input
-                    id="mooring_ball_id"
-                    {...register("mooring_ball_id", {
-                      required: "Mooring Ball ID is required.",
-                    })}
-                    placeholder="Mooring Ball ID"
-                    type="text"
-                  />
-                  {errors.mooring_ball_id && (
-                    <FormErrorMessage>
-                      {errors.mooring_ball_id.message}
-                    </FormErrorMessage>
-                  )}
-                </FormControl>
+                <>
+                  <FormControl>
+                    <FormLabel htmlFor="mooring_ball_id">Mooring Ball ID</FormLabel>
+                    <Input
+                      id="mooring_ball_id"
+                      {...register("mooring_ball_id", {
+                        required: "Mooring Ball ID is required.",
+                      })}
+                      placeholder="Mooring Ball ID"
+                      type="text"
+                    />
+                    {errors.mooring_ball_id && (
+                      <FormErrorMessage>
+                        {errors.mooring_ball_id.message}
+                      </FormErrorMessage>
+                    )}
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel htmlFor="user_id">User ID</FormLabel>
+                    <Input
+                      id="user_id"
+                      {...register("user_id")}
+                      placeholder="User ID"
+                      type="text"
+                    />
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel htmlFor="boat_id">Boat ID</FormLabel>
+                    <Input
+                      id="boat_id"
+                      {...register("boat_id")}
+                      placeholder="Boat ID"
+                      type="Boat"
+                    />
+                  </FormControl>
+                </>
               )}
               <Flex
                 width="100%"
@@ -302,6 +327,7 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
                 border="1px solid"
                 borderColor="gray.200"
                 height="40px"
+                bg="basic.grey100"
               >
                 <Button
                   variant="unstyled"
@@ -310,8 +336,8 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
                   fontWeight="500"
                   flex="1"
                   borderRadius="full"
-                  bg={bookingType === 'daily' ? "gradient.orange" : "basic.grey100"}
-                  color={bookingType === 'daily' ? "white" : "gray.600"}
+                  bg={bookingType === 'daily' ? "gradient.orange" : "transparent"}
+                  color={bookingType === 'daily' ? "white" : "gray.900"}
                   height="100%"
                   onClick={() => setBookingType('daily')}
                 >
@@ -324,7 +350,7 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
                   p="10px"
                   flex="1"
                   borderRadius="full"
-                  bg={bookingType === 'hourly' ? "gradient.orange" : "basic.grey100"}
+                  bg={bookingType === 'hourly' ? "gradient.orange" : "transparent"}
                   color={bookingType === 'hourly' ? "white" : "gray.600"}
                   height="100%"
                   onClick={() => setBookingType('hourly')}
@@ -332,185 +358,269 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
                   Hourly booking
                 </Button>
               </Flex>
-              <Flex gap="sm">
-                <FormControl
-                  flex="1"
-                  height="50px"
-                  borderRadius="full"
-                  borderColor="gray.200"
-                  borderWidth="1px"
-                  fontSize="18px"
-                  p='4px 10px 4px 24px'
-                  position="relative"
-                  cursor="text" 
-                  isRequired
-                >
-                  <Text fontSize="12px" color="gray.900" fontWeight="300">Start Date</Text>
-                  <Flex alignItems="center" justifyContent="space-between">
-                    <Box 
-                      position="relative" 
-                      width="100%" 
-                      onClick={() => {
+              <FormControl
+                isRequired
+                borderRadius="full"
+                borderColor="gray.200"
+                borderWidth="1px"
+                fontSize="18px"
+                p='4px 10px 4px 24px'
+                position="relative"
+                cursor="text"
+                onClick={() => {
+                  const boaterEmailInput = document.getElementById('boater-email') as HTMLInputElement;
+                  if (boaterEmailInput) boaterEmailInput.focus();
+                }}
+              >
+                <Text fontSize="12px" color="gray.900" fontWeight="300">
+                  Boater email
+                </Text>
+                <Input
+                  id='boater-email'
+                  {...register("user_id", {
+                    required: "Boater email is required."
+                  })}
+                  fontSize="16px"
+                  fontWeight="300"
+                  variant="unstyled"
+                  placeholder="Boater email"
+                  _placeholder={{ fontSize: "16px", fontWeight: "300", color: "gray.400" }}
+                  maxLength={20}
+                />
+              </FormControl>
+              {bookingType !== 'hourly' && (
+                <Flex gap="sm">
+                  <FormControl
+                    isRequired
+                    flex="1"
+                    height="50px"
+                    borderRadius="full"
+                    borderColor="gray.200"
+                    borderWidth="1px"
+                    fontSize="18px"
+                    p='4px 10px 4px 24px'
+                    position="relative"
+                    cursor="text"
+                  >
+                    <Text fontSize="12px" color="gray.900" fontWeight="300">Start Date</Text>
+                    <Flex alignItems="center" justifyContent="space-between">
+                      <Box
+                        position="relative"
+                        width="100%"
+                        onClick={() => {
+                          const startDateInput = document.getElementById('start_date') as HTMLInputElement;
+                          if (startDateInput && startDateInput.showPicker) {
+                            startDateInput.showPicker();
+                          } else if (startDateInput) {
+                            startDateInput.click();
+                          }
+                        }}
+                        cursor="pointer"
+                      >
+                        <Input
+                          id="start_date"
+                          {...register("start_date", {
+                            required: "Start date is required.",
+                            onChange: (e) => {
+                              // Update the display date when input changes manually
+                              const date = new Date(e.target.value);
+                              if (!isNaN(date.getTime())) {
+                                const month = String(date.getMonth() + 1).padStart(2, '0');
+                                const day = String(date.getDate()).padStart(2, '0');
+                                setDisplayStartDate(`${month}/${day}/${date.getFullYear()}`);
+                              }
+                            }
+                          })}
+                          fontSize="16px"
+                          fontWeight="300"
+                          variant="unstyled"
+                          type="date"
+                          sx={{
+                            '&::-webkit-calendar-picker-indicator': {
+                              display: 'none',
+                            },
+                            opacity: 0,
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            pointerEvents: 'none'
+                          }}
+                        />
+                        <Text fontSize="16px" fontWeight="300">
+                          {displayStartDate}
+                        </Text>
+                      </Box>
+                      <Box position='absolute' right='10px' top='50%' p='10px' transform='translateY(-50%)' cursor="pointer" onClick={() => {
                         const startDateInput = document.getElementById('start_date') as HTMLInputElement;
                         if (startDateInput && startDateInput.showPicker) {
                           startDateInput.showPicker();
                         } else if (startDateInput) {
                           startDateInput.click();
                         }
-                      }}
-                      cursor="pointer"
-                    >
-                      <Input
-                        id="start_date"
-                        {...register("start_date", {
-                          required: "Start date is required.",
-                          onChange: (e) => {
-                            // Update the display date when input changes manually
-                            const date = new Date(e.target.value);
-                            if (!isNaN(date.getTime())) {
-                              const month = String(date.getMonth() + 1).padStart(2, '0');
-                              const day = String(date.getDate()).padStart(2, '0');
-                              setDisplayStartDate(`${month}/${day}/${date.getFullYear()}`);
-                            }
+                      }}>
+                        <FiCalendar color='#B7B7B7' size={20} />
+                      </Box>
+                    </Flex>
+                  </FormControl>
+                  <FormControl
+                    flex="1"
+                    height="50px"
+                    borderRadius="full"
+                    borderColor="gray.200"
+                    borderWidth="1px"
+                    fontSize="18px"
+                    p='4px 10px 4px 24px'
+                    position="relative"
+                    cursor="text"
+                    isRequired
+                  >
+                    <Text fontSize="12px" color="gray.900" fontWeight="300">End Date</Text>
+                    <Flex alignItems="center" justifyContent="space-between">
+                      <Box
+                        position="relative"
+                        width="100%"
+                        onClick={() => {
+                          const endDateInput = document.getElementById('end_date') as HTMLInputElement;
+                          if (endDateInput && endDateInput.showPicker) {
+                            endDateInput.showPicker();
+                          } else if (endDateInput) {
+                            endDateInput.click();
                           }
-                        })}
-                        fontSize="16px"
-                        fontWeight="300"
-                        variant="unstyled"
-                        type="date"
-                        sx={{
-                          '&::-webkit-calendar-picker-indicator': {
-                            display: 'none',
-                          },
-                          opacity: 0,
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          height: '100%',
-                          pointerEvents: 'none'
                         }}
-                      />
-                      <Text fontSize="16px" fontWeight="300">
-                        {displayStartDate}
-                      </Text>
-                    </Box>
-                    <Box position='absolute' right='10px' top='50%' p='10px' transform='translateY(-50%)' cursor="pointer" onClick={() => {
-                      const startDateInput = document.getElementById('start_date') as HTMLInputElement;
-                      if (startDateInput && startDateInput.showPicker) {
-                        startDateInput.showPicker();
-                      } else if (startDateInput) {
-                        startDateInput.click();
-                      }
-                    }}>
-                      <FiCalendar color='#B7B7B7' size={20}/>
-                    </Box>
-                  </Flex>
-                </FormControl>
-                <FormControl
-                  flex="1"
-                  height="50px"
-                  borderRadius="full"
-                  borderColor="gray.200"
-                  borderWidth="1px"
-                  fontSize="18px"
-                  p='4px 10px 4px 24px'
-                  position="relative"
-                  cursor="text"
-                  isRequired
-                >
-                  <Text fontSize="12px" color="gray.900" fontWeight="300">End Date</Text>
-                  <Flex alignItems="center" justifyContent="space-between">
-                    <Box 
-                      position="relative" 
-                      width="100%" 
-                      onClick={() => {
+                        cursor="pointer"
+                      >
+                        <Input
+                          id="end_date"
+                          {...register("end_date", {
+                            required: "End date is required.",
+                            onChange: (e) => {
+                              // Update the display date when input changes manually
+                              const date = new Date(e.target.value);
+                              if (!isNaN(date.getTime())) {
+                                const month = String(date.getMonth() + 1).padStart(2, '0');
+                                const day = String(date.getDate()).padStart(2, '0');
+                                setDisplayEndDate(`${month}/${day}/${date.getFullYear()}`);
+                              }
+                            }
+                          })}
+                          fontSize="16px"
+                          fontWeight="300"
+                          variant="unstyled"
+                          type="date"
+                          sx={{
+                            '&::-webkit-calendar-picker-indicator': {
+                              display: 'none',
+                            },
+                            opacity: 0,
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            pointerEvents: 'none'
+                          }}
+                        />
+                        <Text fontSize="16px" fontWeight="300">
+                          {displayEndDate}
+                        </Text>
+                      </Box>
+                      <Box position='absolute' right='10px' top='50%' p='10px' transform='translateY(-50%)' cursor="pointer" onClick={() => {
                         const endDateInput = document.getElementById('end_date') as HTMLInputElement;
                         if (endDateInput && endDateInput.showPicker) {
                           endDateInput.showPicker();
                         } else if (endDateInput) {
                           endDateInput.click();
                         }
-                      }}
-                      cursor="pointer"
-                    >
-                      <Input
-                        id="end_date"
-                        {...register("end_date", {
-                          required: "End date is required.",
-                          onChange: (e) => {
-                            // Update the display date when input changes manually
-                            const date = new Date(e.target.value);
-                            if (!isNaN(date.getTime())) {
-                              const month = String(date.getMonth() + 1).padStart(2, '0');
-                              const day = String(date.getDate()).padStart(2, '0');
-                              setDisplayEndDate(`${month}/${day}/${date.getFullYear()}`);
-                            }
-                          }
-                        })}
-                        fontSize="16px"
-                        fontWeight="300"
-                        variant="unstyled"
-                        type="date"
-                        sx={{
-                          '&::-webkit-calendar-picker-indicator': {
-                            display: 'none',
-                          },
-                          opacity: 0,
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          height: '100%',
-                          pointerEvents: 'none'
-                        }}
-                      />
-                      <Text fontSize="16px" fontWeight="300">
-                        {displayEndDate}
-                      </Text>
-                    </Box>
-                    <Box position='absolute' right='10px' top='50%' p='10px' transform='translateY(-50%)' cursor="pointer" onClick={() => {
-                      const endDateInput = document.getElementById('end_date') as HTMLInputElement;
-                      if (endDateInput && endDateInput.showPicker) {
-                        endDateInput.showPicker();
-                      } else if (endDateInput) {
-                        endDateInput.click();
-                      }
-                    }}>
-                      <FiCalendar color='#B7B7B7' size={20}/>
-                    </Box>
-                  </Flex>
-                </FormControl>
-              </Flex>
-              <FormControl isRequired>
-                <FormLabel htmlFor="user_id">User ID</FormLabel>
+                      }}>
+                        <FiCalendar color='#B7B7B7' size={20} />
+                      </Box>
+                    </Flex>
+                  </FormControl>
+                </Flex>
+              )}
+              <Box
+                borderRadius="full"
+                borderColor="gray.200"
+                borderWidth="1px"
+                fontSize="18px"
+                p='4px 10px 4px 24px'
+                position="relative"
+                cursor="text"
+                onClick={() => {
+                  const bookingTitleInput = document.getElementById('booking-title') as HTMLInputElement;
+                  if (bookingTitleInput) bookingTitleInput.focus();
+                }}
+              >
+                <Text fontSize="12px" color="gray.900" fontWeight="300">
+                  Booking title (optional)
+                </Text>
                 <Input
-                  id="user_id"
-                  {...register("user_id")}
-                  placeholder="User ID"
-                  type="text"
+                  id='booking-title'
+                  value={bookingTitle}
+                  onChange={(e) => setBookingTitle(e.target.value)}
+                  fontSize="16px"
+                  fontWeight="300"
+                  variant="unstyled"
+                  placeholder="Enter your booking title here"
+                  _placeholder={{ fontSize: "16px", fontWeight: "300", color: "gray.400" }}
+                  maxLength={20}
                 />
-              </FormControl>
-              <FormControl isRequired>
-                <FormLabel htmlFor="boat_id">Boat ID</FormLabel>
-                <Input
-                  id="boat_id"
-                  {...register("boat_id")}
-                  placeholder="Boat ID"
-                  type="Boat"
-                />
-              </FormControl>
+              </Box>
             </Flex>
+            <Box
+              borderRadius="24px"
+              borderColor="gray.200"
+              borderWidth="1px"
+              fontSize="18px"
+              p='4px 10px 4px 24px'
+              position="relative"
+              cursor="text"
+              onClick={() => {
+                const bookingDescriptionInput = document.getElementById('booking-description') as HTMLInputElement;
+                if (bookingDescriptionInput) bookingDescriptionInput.focus();
+              }}
+            >
+              <Text fontSize="12px" color="gray.900" fontWeight="300">
+                Description (optional)
+              </Text>
+              <Textarea
+                id='booking-description'
+                value={bookingDescription}
+                onChange={(e) => setBookingDescription(e.target.value)}
+                fontSize="16px"
+                fontWeight="300"
+                variant="unstyled"
+                placeholder="Any notes to remember this booking"
+                _placeholder={{ fontSize: "16px", fontWeight: "300", color: "gray.400" }}
+              />
+            </Box>
           </ModalBody>
 
-          <ModalFooter gap={3}>
-            <Button variant="primary" type="submit" isLoading={isSubmitting}>
-              Save
+          <ModalFooter borderTop="1px solid #E5E5E5" p="xl">
+            <Button
+              h='50px'
+              px="xl"
+              py="10px"
+              fontSize="16px"
+              fontWeight="400"
+              borderRadius="var(--chakra-space-full)"
+              bg={!errors.user_id && !errors.start_date && !errors.end_date &&
+                !!watch("user_id") && !!watch("start_date") && !!watch("end_date") ?
+                "gradient.orange" : "#B7B7B7"}
+              color="white"
+              _hover={{
+                bg: !errors.user_id && !errors.start_date && !errors.end_date &&
+                  !!watch("user_id") && !!watch("start_date") && !!watch("end_date") ?
+                  "#E55511" : "#B7B7B7"
+              }}
+              variant="unstyled"
+              type="submit"
+              isLoading={isSubmitting}
+            >
+              Enter details to continue
             </Button>
-            <Button onClick={() => {
-              reset();
-              onClose();
-            }}>Cancel</Button>
           </ModalFooter>
         </ModalContent>
       </Modal >

@@ -15,7 +15,7 @@ import {
     Th,
     Td
 } from '@chakra-ui/react';
-import BolaCell from "/assets/images/bola-cell.svg";
+import BolaCell from "/assets/images/icons/ui/bola-cell.svg";
 import { ReservationsService, MarinasService } from '../../client';
 import { useMarina } from '../../context/MarinaContext';
 import PopupFreeCell from './PopupFreeCell';

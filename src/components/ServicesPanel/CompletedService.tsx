@@ -11,8 +11,7 @@ import {
     Text,
     Flex,
     Box,
-    Icon,
-    Image
+    Icon
 } from '@chakra-ui/react';
 import { FiDownload } from 'react-icons/fi';
 import { ServiceOnReservationPublic } from '../../client/models';
@@ -127,7 +126,7 @@ const CompletedService: React.FC<CompletedServiceProps> = ({
                         fontSize="16px"
                         fontWeight="400"
                         color="basic.grey900"
-                        leftIcon={<Image mr='4px' w='17px' h='auto' src='assets/images/goback-icon.svg' />}
+                        leftIcon={<CustomIcon name="goback-icon" category="ui" size={16} />}
                     >
                         Go back
                     </Button>

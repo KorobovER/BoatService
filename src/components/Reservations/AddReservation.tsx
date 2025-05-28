@@ -48,6 +48,116 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
   const [bookingType, setBookingType] = useState<'daily' | 'hourly'>('daily')
   const [displayStartDate, setDisplayStartDate] = useState<string>('')
   const [displayEndDate, setDisplayEndDate] = useState<string>('')
+  const [startTime, setStartTime] = useState<string>('15:00')
+  const [endTime, setEndTime] = useState<string>('16:00')
+  const [showStartTimeDropdown, setShowStartTimeDropdown] = useState<boolean>(false)
+  const [showEndTimeDropdown, setShowEndTimeDropdown] = useState<boolean>(false)
+
+  // Helper function to format time in AM/PM format
+  const formatTimeAmPm = (timeString: string) => {
+    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })
+  }
+
+  // Reusable TimeDropdown component
+  const TimeDropdown = ({
+    value,
+    onChange,
+    placeholder,
+    isOpen,
+    onToggle
+  }: {
+    value: string,
+    onChange: (value: string) => void,
+    placeholder: string,
+    isOpen: boolean,
+    onToggle: () => void
+  }) => {
+    return (
+      <FormControl>
+        <Flex
+          height="50px"
+          borderRadius="full"
+          borderColor="gray.200"
+          borderWidth="1px"
+          fontSize="18px"
+          p="4px 10px 4px 24px"
+          position="relative"
+          cursor="pointer"
+          alignItems="center"
+          onClick={onToggle}
+        >
+          <Box flex="1">
+            <Text fontSize="16px" fontWeight="300">
+              {value ? formatTimeAmPm(value) : placeholder}
+            </Text>
+          </Box>
+          <Box position="absolute" right="10px" top="50%" p="10px" transform="translateY(-50%)" cursor="pointer">
+            <Box transform={isOpen ? "rotate(0deg)" : "rotate(180deg)"} transition="transform 0.2s">
+              <CustomIcon name="dropdown" category="ui" color="#B7B7B7" size={10} />
+            </Box>
+          </Box>
+          {isOpen && (
+            <Box
+              position="absolute"
+              top="55px"
+              left="-100px"
+              width="234px"
+              h='166px'
+              zIndex="1000"
+              maxHeight="200px"
+              overflowY="auto"
+              borderRadius="4px"
+              boxShadow="md"
+              bg='#F6F6F6'
+              css={{
+                '&::-webkit-scrollbar': {
+                  width: '4px',
+                },
+                '&::-webkit-scrollbar-track': {
+                  width: '6px',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: '#888',
+                  borderRadius: '24px',
+                },
+              }}
+            >
+              {Array.from({ length: 24 }).map((_, hour) => {
+                const formattedHour = `${hour.toString().padStart(2, '0')}:00`;
+                const isSelected = value === formattedHour;
+                const today = new Date();
+                const dateStr = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`;
+
+                return (
+                  <Flex
+                    key={hour}
+                    p='10px'
+                    _hover={{ bg: "gray.100" }}
+                    cursor="pointer"
+                    alignItems="center"
+                    gap="10px"
+                    bg={isSelected ? "gray.100" : "transparent"}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onChange(formattedHour);
+                    }}
+                  >
+                    <Text fontSize="16px" color='basic.grey700' fontWeight="400">{formatTimeAmPm(formattedHour)}</Text>
+                    <Flex flex="1" gap="10px" alignItems="center" justifyContent="flex-end">
+                      <Text fontSize="10px" color="basic.grey600">{dateStr}</Text>
+                      {isSelected && (
+                        <CustomIcon color='#DD6600' name="check-orange" category="ui" size={16} />
+                      )}
+                    </Flex>
+                  </Flex>
+                );
+              })}
+            </Box>
+          )}
+        </Flex>
+      </FormControl>
+    );
+  }
   const [bookingTitle, setBookingTitle] = useState<string>('')
   const [bookingDescription, setBookingDescription] = useState<string>('')
   const {
@@ -135,6 +245,35 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
         }
       }
 
+      // Determine booking type based on date range
+      if (selectedCell.day && selectedCell.endDay) {
+        try {
+          const startDate = new Date(selectedCell.day);
+          const endDate = new Date(selectedCell.endDay);
+          
+          if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+            // Check if the dates are different
+            const sameDay = 
+              startDate.getFullYear() === endDate.getFullYear() &&
+              startDate.getMonth() === endDate.getMonth() &&
+              startDate.getDate() === endDate.getDate();
+            
+            if (sameDay) {
+              // If it's the same day, use Hourly mode
+              setBookingType('hourly');
+            } else {
+              // If different days are selected, use Daily mode
+              setBookingType('daily');
+            }
+          }
+        } catch (error) {
+          console.error("Error determining booking type from date range:", error);
+        }
+      } else if (selectedCell.day) {
+        // If only one day is selected, default to Hourly
+        setBookingType('hourly');
+      }
+      
       // If there's an existing reservation, populate its data
       if (selectedCell.reservation) {
         if (selectedCell.reservation.start_date) {
@@ -388,6 +527,120 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
                   maxLength={20}
                 />
               </FormControl>
+              {bookingType === 'hourly' && (
+                <Flex gap="sm">
+                  <FormControl
+                    isRequired
+                    flex="1"
+                    height="50px"
+                    borderRadius="full"
+                    borderColor="gray.200"
+                    borderWidth="1px"
+                    fontSize="18px"
+                    p='4px 10px 4px 24px'
+                    position="relative"
+                    cursor="text"
+                  >
+                    <Text fontSize="12px" color="gray.900" fontWeight="300">Date</Text>
+                    <Flex alignItems="center" justifyContent="space-between">
+                      <Box
+                        position="relative"
+                        width="100%"
+                        onClick={() => {
+                          const startDateInput = document.getElementById('start_date') as HTMLInputElement;
+                          if (startDateInput && startDateInput.showPicker) {
+                            startDateInput.showPicker();
+                          } else if (startDateInput) {
+                            startDateInput.click();
+                          }
+                        }}
+                        cursor="pointer"
+                      >
+                        <Input
+                          id="start_date"
+                          {...register("start_date", {
+                            required: "Start date is required.",
+                            onChange: (e) => {
+                              // Update the display date when input changes manually
+                              const date = new Date(e.target.value);
+                              if (!isNaN(date.getTime())) {
+                                const month = String(date.getMonth() + 1).padStart(2, '0');
+                                const day = String(date.getDate()).padStart(2, '0');
+                                setDisplayStartDate(`${month}/${day}/${date.getFullYear()}`);
+                              }
+                            }
+                          })}
+                          fontSize="16px"
+                          fontWeight="300"
+                          variant="unstyled"
+                          type="date"
+                          sx={{
+                            '&::-webkit-calendar-picker-indicator': {
+                              display: 'none',
+                            },
+                            opacity: 0,
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            pointerEvents: 'none'
+                          }}
+                        />
+                        <Text fontSize="16px" fontWeight="300">
+                          {displayStartDate}
+                        </Text>
+                      </Box>
+                      <Box position='absolute' right='10px' top='50%' p='10px' transform='translateY(-50%)' cursor="pointer" onClick={() => {
+                        const startDateInput = document.getElementById('start_date') as HTMLInputElement;
+                        if (startDateInput && startDateInput.showPicker) {
+                          startDateInput.showPicker();
+                        } else if (startDateInput) {
+                          startDateInput.click();
+                        }
+                      }}>
+                        <FiCalendar color='#B7B7B7' size={20} />
+                      </Box>
+                    </Flex>
+                  </FormControl>
+                  <Flex flex="2" gap="2">
+                    <TimeDropdown
+                      value={startTime}
+                      onChange={(value) => {
+                        setStartTime(value);
+                        setShowStartTimeDropdown(false);
+                      }}
+                      placeholder="3:00pm"
+                      isOpen={showStartTimeDropdown}
+                      onToggle={() => {
+                        setShowStartTimeDropdown(!showStartTimeDropdown);
+                        // Close the other dropdown if opening this one
+                        if (!showStartTimeDropdown) {
+                          setShowEndTimeDropdown(false);
+                        }
+                      }}
+                    />
+                    <CustomIcon name="line" category="ui" size={20} />
+                    <TimeDropdown
+                      value={endTime}
+                      onChange={(value) => {
+                        setEndTime(value);
+                        setShowEndTimeDropdown(false);
+                      }}
+                      placeholder="4:00pm"
+                      isOpen={showEndTimeDropdown}
+                      onToggle={() => {
+                        setShowEndTimeDropdown(!showEndTimeDropdown);
+                        // Close the other dropdown if opening this one
+                        if (!showEndTimeDropdown) {
+                          setShowStartTimeDropdown(false);
+                        }
+                      }}
+                    />
+                  </Flex>
+                </Flex>
+              )}
+
               {bookingType !== 'hourly' && (
                 <Flex gap="sm">
                   <FormControl

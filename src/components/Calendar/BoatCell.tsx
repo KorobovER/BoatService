@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Text, Image, Flex, Popover, PopoverTrigger, PopoverContent, PopoverBody } from '@chakra-ui/react';
 import HoverReservation from './HoverReservation';
 import { ReservationExtenstion } from '../ReservationExtenstion';
+import { getBoatImageProps } from '../../utilsBola';
 
 interface BoatCellProps {
     reservation: ReservationExtenstion;
@@ -28,41 +29,33 @@ const BoatCell: React.FC<BoatCellProps> = ({ reservation, textColor, colspan = 0
                     marginLeft={isMonthView ? "2px" : "0"}
                     marginRight={isMonthView ? "2px" : "0"}
                 >
-                    {reservation.boat.vessel_type === 'power' ? (
-                        <Image
-                            src="/assets/images/power-boat.svg"
-                            alt={reservation.boat.boatname}
-                            width="22px"
-                            height="22px"
-                            objectFit="cover"
-                            borderRadius="4px"
-                            filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
-                        />
-                    ) : reservation.boat.vessel_type === 'catamaran' ? (
-                        <Image
-                            src="/assets/images/catamaran-boat.svg"
-                            alt={reservation.boat.boatname}
-                            width="22px"
-                            height="22px"
-                            objectFit="cover"
-                            borderRadius="4px"
-                            filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
-                        />
-                    ) : reservation.boat.vessel_type === 'monohull' ? (
-                        <Image
-                            src="/assets/images/monohul-boat.svg"
-                            alt={reservation.boat.boatname}
-                            width="22px"
-                            height="22px"
-                            objectFit="cover"
-                            borderRadius="4px"
-                            filter={textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"}
-                        />
-                    ) : (
-                        <Text color={textColor} fontSize="14px" fontWeight="400">
-                            {reservation.boat.boatname[0]}
-                        </Text>
-                    )}
+                    {(() => {
+                        const boatProps = getBoatImageProps(
+                            reservation.boat.vessel_type,
+                            reservation.boat.boatname,
+                            textColor
+                        );
+                        
+                        return boatProps.isImage ? (
+                            <Image
+                                src={boatProps.src}
+                                alt={boatProps.alt}
+                                width={boatProps.width}
+                                height={boatProps.height}
+                                objectFit={boatProps.objectFit}
+                                borderRadius={boatProps.borderRadius}
+                                filter={boatProps.filter}
+                            />
+                        ) : (
+                            <Text 
+                                color={boatProps.color} 
+                                fontSize={boatProps.fontSize} 
+                                fontWeight={boatProps.fontWeight}
+                            >
+                                {boatProps.text}
+                            </Text>
+                        );
+                    })()}
 
                     {/* Only show name and code if not a short reservation in month view */}
                     {!isShortReservation && (

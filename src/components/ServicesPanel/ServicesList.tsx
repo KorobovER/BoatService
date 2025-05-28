@@ -11,6 +11,7 @@ import ServiceCancel from './ServiceCancel';
 import ServiceEdit from './ServiceEdit';
 import CompletedServiceDetails from './CompletedService';
 import useCustomToast from '../../hooks/useCustomToast';
+import CustomIcon from '../Icon';
 
 
 
@@ -506,15 +507,15 @@ const ServicesList: React.FC<ServicesListProps> = ({
                                     <circle cx="4" cy="4" r="4" transform="matrix(-1 0 0 1 8 0)" fill="#A85555" />
                                 </svg>
                             </Flex>
-                            <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><Image src='/assets/images/hourglass.svg' /></Flex>
+                            <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><CustomIcon name="hourglass" category="ui" size={16} /></Flex>
                         </MenuItem>
                         <MenuItem display="flex" alignItems="center" p='10px' h='42px' onClick={() => handleServiceAction('edit-service', service.service_reservation_id)}>
                             <Text flex='1' >Edit service</Text>
-                            <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><Image src='/assets/images/pen.svg' /></Flex>
+                            <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><CustomIcon name="pen" category="ui" size={16} /></Flex>
                         </MenuItem>
                         <MenuItem display="flex" alignItems="center" p='10px' borderBottomRadius="8px" h='42px' onClick={() => handleServiceAction('cancel-service', service.service_reservation_id)}>
                             <Text flex='1' >Cancel service</Text>
-                            <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><Image src='/assets/images/close.svg' /></Flex>
+                            <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><CustomIcon name="close" category="ui" size={16} /></Flex>
                         </MenuItem>
                     </>
                 );
@@ -528,7 +529,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
                                     <circle cx="4" cy="4" r="4" transform="matrix(-1 0 0 1 8 0)" fill="#A85555" />
                                 </svg>
                             </Flex>
-                            <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><Image src='/assets/images/hourglass.svg' /></Flex>
+                            <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><CustomIcon name="hourglass" category="ui" size={16} /></Flex>
                         </MenuItem>
                         <MenuItem gap='10px' display="flex" alignItems="center" p='10px' borderBottomRadius="8px" h='42px' onClick={() => handleServiceAction('mark-in-progress', service.service_reservation_id)}>
                             <Text flex='1' h='100%'>Mark as in progress</Text>
@@ -537,7 +538,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
                                     <circle cx="4" cy="4" r="4" transform="matrix(-1 0 0 1 8 0)" fill="#DD6600" />
                                 </svg>
                             </Flex>
-                            <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><Image src='/assets/images/running-icon.svg' /></Flex>
+                            <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><CustomIcon name="running-icon" category="ui" size={16} /></Flex>
                         </MenuItem>
                     </>
                 );
@@ -551,19 +552,19 @@ const ServicesList: React.FC<ServicesListProps> = ({
                                     <circle cx="4" cy="4" r="4" transform="matrix(-1 0 0 1 8 0)" fill="#DD6600" />
                                 </svg>
                             </Flex>
-                            <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><Image src='/assets/images/running-icon.svg' /></Flex>
+                            <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><CustomIcon name="running-icon" category="ui" size={16} /></Flex>
                         </MenuItem>
                         <MenuItem display="flex" alignItems="center" p='10px' h='42px' onClick={() => handleServiceAction('input-quantity', service.service_reservation_id)}>
                             <Text flex='1' >Input quantity</Text>
-                            <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><Image src='/assets/images/hashtag.svg' /></Flex>
+                            <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><CustomIcon name="hashtag" category="ui" size={16} /></Flex>
                         </MenuItem>
                         <MenuItem display="flex" alignItems="center" p='10px' h='42px' onClick={() => handleServiceAction('edit-service', service.service_reservation_id)}>
                             <Text flex='1' >Edit service</Text>
-                            <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><Image src='/assets/images/pen.svg' /></Flex>
+                            <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><CustomIcon name="pen" category="ui" size={16} /></Flex>
                         </MenuItem>
                         <MenuItem display="flex" alignItems="center" p='10px' borderBottomRadius="8px" h='42px' onClick={() => handleServiceAction('cancel-service', service.service_reservation_id)}>
                             <Text flex='1' >Cancel service</Text>
-                            <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><Image src='/assets/images/close.svg' /></Flex>
+                            <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><CustomIcon name="close" category="ui" size={16} /></Flex>
                         </MenuItem>
                     </>
                 );
@@ -581,11 +582,11 @@ const ServicesList: React.FC<ServicesListProps> = ({
                                     <circle cx="4" cy="4" r="4" transform="matrix(-1 0 0 1 8 0)" fill="#DD6600" />
                                 </svg>
                             </Flex>
-                            <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><Image src='/assets/images/running-icon.svg' /></Flex>
+                            <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><CustomIcon name="running-icon" category="ui" size={16} /></Flex>
                         </MenuItem>
                         <MenuItem p='10px' borderBottomRadius="8px" h='42px' onClick={() => handleServiceAction('edit-service', service.service_reservation_id)}>
                             <Text flex='1' >Edit service</Text>
-                            <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><Image src='/assets/images/pen.svg' /></Flex>
+                            <Flex alignItems='center' justifyContent='center' w='26px' h='26px'><CustomIcon name="pen" category="ui" size={16} /></Flex>
                         </MenuItem>
                     </>
                 );

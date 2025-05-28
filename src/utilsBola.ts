@@ -41,3 +41,42 @@ export const getCellColor = (reservation: ReservationPublic): { bg: string; text
             return { bg: "#007A7B", textColor: "white" };
     }
 };
+
+/**
+ * Returns the appropriate boat image properties based on vessel type
+ * @param vesselType - The type of vessel ('power', 'catamaran', 'monohull', etc.)
+ * @param boatName - The name of the boat (used for alt text and fallback)
+ * @param textColor - Optional text color for filter (if 'white', will invert the image)
+ * @returns Object with image properties or text fallback properties
+ */
+export const getBoatImageProps = (vesselType: string, boatName: string, textColor?: string) => {
+    // Map of vessel types to their image paths
+    const vesselImageMap: Record<string, string> = {
+        'power': '/assets/images/icons/boats/power-boat.svg',
+        'catamaran': '/assets/images/icons/boats/catamaran-boat.svg',
+        'monohull': '/assets/images/icons/boats/monohul-boat.svg'
+    };
+
+    // If vessel type has a corresponding image
+    if (vesselType in vesselImageMap) {
+        return {
+            isImage: true,
+            src: vesselImageMap[vesselType],
+            alt: boatName,
+            width: "22px",
+            height: "22px",
+            objectFit: "cover" as const, // Type assertion to match Chakra UI's expected type
+            borderRadius: "4px",
+            filter: textColor === "white" ? "brightness(0) invert(1)" : "brightness(0)"
+        };
+    }
+    
+    // Fallback to text representation
+    return {
+        isImage: false,
+        text: boatName[0], // First letter of boat name
+        color: textColor || "basic.grey900",
+        fontSize: "14px",
+        fontWeight: "400"
+    };
+};

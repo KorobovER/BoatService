@@ -108,7 +108,7 @@ const MarkUncollectible: React.FC<MarkUncollectibleProps> = ({
                 <ModalHeader display='flex' flexDirection='column' p='0'>
                     <Flex flexDirection="column" align="center" gap='sm'>
                         <Box w='90px' h='90px' bg='system.errorRedNew' borderRadius='full' display='flex' alignItems='center' justifyContent='center'>
-                            <CustomIcon size={90} name='alert-icon-red' category='ui' />
+                            <CustomIcon size={90} name='alert-icon-red' category='alerts' />
                         </Box>
                         <Flex border="1px solid" borderColor="system.errorRedNew" bg="bg.error" borderRadius="20px" w="100%" p='10px 20px' direction="row" align="center" gap='md' position="relative">
                             <Box flex='1'>

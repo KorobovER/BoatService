@@ -9,9 +9,9 @@ import {
   Button,
   Text,
   Flex,
-  Image,
   ModalCloseButton
 } from '@chakra-ui/react';
+import CustomIcon from '../Icon';
 
 interface ServiceItem {
   name: string;
@@ -94,7 +94,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           fontSize="16px"
           fontWeight="400"
           color="basic.grey900"
-          leftIcon={<Image mr='4px' w='17px' h='auto' src='assets/images/goback-icon.svg' />}
+          leftIcon={<CustomIcon name="goback-icon" category="ui" size={16} />}
         >
           Cancel
         </Button>
@@ -107,7 +107,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           onClick={() => onCharge(reservationId)}
           fontSize="16px"
           fontWeight="400"
-          leftIcon={<Image ml='4px' h='auto' src='assets/images/check-icon.svg' />}
+          leftIcon={<CustomIcon name="check-icon" category="ui" size={16} />}
         >
           CHARGE NOW
         </Button>

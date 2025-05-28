@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text, Image, Flex, Button, Link } from '@chakra-ui/react';
 import { ReservationExtenstion } from '../ReservationExtenstion';
+import { getBoatImageProps } from '../../utilsBola';
 
 interface HoverReservationProps {
     reservation: ReservationExtenstion;
@@ -46,39 +47,33 @@ const HoverReservation: React.FC<HoverReservationProps> = ({ reservation }) => {
     return (
         <Flex flexDirection='column' gap='8px'>
             <Flex gap='8px' alignItems='center'>
-                {reservation.boat.vessel_type === 'power' ? (
-                    <Image
-                        src="/assets/images/power-boat.svg"
-                        alt={reservation.boat.boatname}
-                        width="22px"
-                        height="22px"
-                        objectFit="cover"
-                        borderRadius="4px"
-                        filter="brightness(0)"
-                    />
-                ) : reservation.boat.vessel_type === 'catamaran' ? (
-                    <Image
-                        src="/assets/images/catamaran-boat.svg"
-                        alt={reservation.boat.boatname}
-                        width="22px"
-                        height="22px"
-                        objectFit="cover"
-                        borderRadius="4px"
-                        filter="brightness(0)"
-                    />
-                ) : reservation.boat.vessel_type === 'monohull' ? (
-                    <Image
-                        src="/assets/images/monohul-boat.svg"
-                        alt={reservation.boat.boatname}
-                        width="22px"
-                        height="22px"
-                        objectFit="cover"
-                        borderRadius="4px"
-                        filter="brightness(0)"
-                    />
-                ) : (
-                    <Text color="white" fontSize="14px" fontWeight="500">{reservation.boat.boatname}</Text>
-                )}
+                {(() => {
+                    const boatProps = getBoatImageProps(
+                        reservation.boat.vessel_type,
+                        reservation.boat.boatname
+                        // No textColor passed, will use default filter
+                    );
+                    
+                    return boatProps.isImage ? (
+                        <Image
+                            src={boatProps.src}
+                            alt={boatProps.alt}
+                            width={boatProps.width}
+                            height={boatProps.height}
+                            objectFit={boatProps.objectFit}
+                            borderRadius={boatProps.borderRadius}
+                            filter={boatProps.filter}
+                        />
+                    ) : (
+                        <Text 
+                            color="white" 
+                            fontSize={boatProps.fontSize} 
+                            fontWeight="500"
+                        >
+                            {boatProps.text}
+                        </Text>
+                    );
+                })()}
                 <Text color='basic.grey900' fontSize="14px" fontWeight="400">{reservation.boat.boatname}</Text>
                 <Text fontSize="14px" fontWeight="400" color='basic.grey600'>|</Text>
                 <Text color='basic.grey600' fontSize="14px" fontWeight="400">

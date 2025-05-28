@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Box, Text, Image, Flex, Button, useDisclosure } from '@chakra-ui/react';
-import { getBookingStatusText, getBookingStatusTextColor } from '../../utilsBola';
+import { getBookingStatusText, getBookingStatusTextColor, getBoatImageProps } from '../../utilsBola';
 import ServiceAdd from './ServiceAdd';
 import { useMarina } from '../../context/MarinaContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -14,7 +14,7 @@ import { ReservationExtenstion } from '../ReservationExtenstion';
 import { PaymentReceiptPublic } from '../../client/models';
 import useCustomToast from '../../hooks/useCustomToast'
 import { SERVICE_FEE_PERCENTAGE } from '../../utilsBola';
-import Icon from '../Icon';
+import CustomIcon from '../Icon';
 
 // Структура для иконок сервисов с указанием категории и имени
 export interface ServiceIconInfo {
@@ -457,12 +457,10 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                         align="center"
                         gap="12px">
                         <Image
-                            src={reservation?.boat?.vessel_type === 'power'
-                                ? "/assets/images/power-boat.svg"
-                                : reservation?.boat?.vessel_type === 'catamaran'
-                                    ? "/assets/images/catamaran-boat.svg"
-                                    : "/assets/images/monohul-boat.svg"}
-                            alt={reservation?.boat?.boatname || 'Boat'}
+                            {...getBoatImageProps(
+                                reservation?.boat?.vessel_type || '',
+                                reservation?.boat?.boatname || 'Boat'
+                            )}
                             width="32px"
                             height="32px"
                             filter="invert(40%) sepia(90%) saturate(2259%) hue-rotate(352deg) brightness(98%) contrast(97%)"
@@ -504,12 +502,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                         >
                             <Flex gap="lg">
                                 <Flex align="center" gap="xs">
-                                     <Image
-                                        src="/assets/images/bola-cell-white.svg"
-                                        alt="Bola Cell"
-                                        width="30px"
-                                        height="30px"
-                                    />
+                                     <CustomIcon name="bola-cell-white" category="ui" size={30} />
                                     <Text fontSize="20px" fontWeight="400" color="gray.900">{rowId}</Text>
                                 </Flex>
                                 <Flex justify="center" flexDirection="column">
@@ -562,11 +555,10 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                             minHeight="0"
                             _hover={{ opacity: 0.8 }}
                         >
-                            <Image
-                                src="/assets/images/chat-icon.svg"
-                                alt="Chat"
-                                width="44px"
-                                height="44px"
+                            <CustomIcon
+                                name="chat-icon"
+                                category="ui"
+                                size={44}
                             />
                         </Button>
                     </Flex>
@@ -624,7 +616,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                                         justifyContent="center"
                                         my="10px"
                                         height='50px'
-                                        leftIcon={<Image src="/assets/images/credit-card.svg" alt="Credit Card" width="20px" height="20px" />}
+                                        leftIcon={<CustomIcon name="credit-card" category="ui" size={20} />}
                                         bg="system.successGreen"
                                         color="white"
                                         borderRadius="full"
@@ -680,7 +672,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                                         my="10px"
                                         display="flex"
                                         justifyContent="center"
-                                        leftIcon={<Icon name="alert-icon" size={30} color="white" viewBox="0 0 30 30" />}
+                                        leftIcon={<CustomIcon name="alert-icon" category="alerts" size={30} color="white" viewBox="0 0 30 30" />}
                                         bg="brand.secondaryBlue"
                                         color="white"
                                         borderRadius="full"
@@ -695,7 +687,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                                     </Button>
                                     <Flex justifyContent="space-between">
                                         <Button
-                                            leftIcon={<Box><Icon name="close" size={12} stroke="var(--chakra-colors-system-errorRedNew)" viewBox="0 0 12 12" /></Box>}
+                                            leftIcon={<Box><CustomIcon name="close" category="ui" size={12} stroke="var(--chakra-colors-system-errorRedNew)" viewBox="0 0 12 12" /></Box>}
                                             fontSize="16px"
                                             fontWeight="400"
                                             textDecoration='underline'
@@ -710,7 +702,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                                             Mark uncollectible
                                         </Button>
                                         <Button
-                                            leftIcon={<Image ml='4px' h='auto' src='assets/images/check-icon-green.svg' />}
+                                            leftIcon={<CustomIcon name="check-icon-green" category="ui" size={12} />}
                                             fontSize="16px"
                                             fontWeight="400"
                                             textDecoration='underline'

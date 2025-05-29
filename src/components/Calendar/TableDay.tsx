@@ -614,24 +614,6 @@ const TableDay: React.FC<TableDayProps> = ({
                                     }
                                 }
 
-                                // Проверяем, заканчивается ли резервация в этой ячейке (с учетом последующих ячеек)
-                                const lastCellIndex = halfHourIndex + halfHourColspan - 1;
-                                const lastHourIndex = Math.floor(lastCellIndex / 2);
-
-                                // Преобразуем индекс последнего часа в реальный час
-                                let lastCellHour;
-                                if (lastHourIndex === 0) {
-                                    lastCellHour = 0; // 12 AM
-                                } else if (lastHourIndex === 12) {
-                                    lastCellHour = 12; // 12 PM
-                                } else if (lastHourIndex < 12) {
-                                    lastCellHour = lastHourIndex; // 1am-11am
-                                } else {
-                                    lastCellHour = lastHourIndex; // 1pm-11pm
-                                }
-
-
-
                                 // Определяем скругление для разных случаев:
                                 let borderRadius = "1000px"; // По умолчанию полное скругление
 

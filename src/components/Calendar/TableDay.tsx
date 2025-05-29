@@ -16,14 +16,13 @@ import {
     Td
 } from '@chakra-ui/react';
 import BolaCell from "/assets/images/icons/ui/bola-cell.svg";
-import { ReservationsService } from '../../client';
 import { useMarina } from '../../context/MarinaContext';
 import PopupFreeCell from './PopupFreeCell';
 import BoatCell from './BoatCell';
 import { getCellColor } from '../../utilsBola';
 import { ReservationExtenstion } from '../ReservationExtenstion';
 import PopupReserved from '../ServicesPanel/Services';
-import { getMooringBallsQueryOptions } from './TableReservations';
+import { getMooringBallsQueryOptions, getReservationsQueryOptions } from './TableReservations';
 
 interface Row {
     id: string;
@@ -102,15 +101,10 @@ const TableDay: React.FC<TableDayProps> = ({
         getMooringBallsQueryOptions(selectedMarina?.marina_id, currentTimeZone)
     );
 
-    // Fetch reservations
-    const { data: reservationsData, isLoading: isLoadingReservations, isError } = useQuery({
-        queryKey: ['reservations', currentDate, selectedMarina?.marina_id, currentTimeZone],
-        queryFn: () => ReservationsService.readReservations({
-            limit: 500,
-            marinaId: selectedMarina?.marina_id || undefined,
-        }),
-        enabled: !!currentDate,
-    });
+    // Fetch reservations using the shared function from TableReservations
+    const { data: reservationsData, isLoading: isLoadingReservations, isError } = useQuery(
+        getReservationsQueryOptions(currentDate, selectedMarina?.marina_id, currentTimeZone)
+    );
 
     // Process mooring balls
     useEffect(() => {

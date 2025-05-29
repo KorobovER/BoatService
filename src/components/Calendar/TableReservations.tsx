@@ -69,7 +69,7 @@ export function getMooringBallsQueryOptions(marinaId: string | undefined, curren
 }
 
 // Функция для создания опций запроса на получение резерваций
-function getReservationsQueryOptions(currentDate: string, marinaId: string | undefined, currentTimeZone: string) {
+export function getReservationsQueryOptions(currentDate: string, marinaId: string | undefined, currentTimeZone: string) {
     return {
         queryKey: ['reservations', currentDate, marinaId, currentTimeZone],
         queryFn: () => ReservationsService.readReservations({

@@ -16,13 +16,14 @@ import {
     Td
 } from '@chakra-ui/react';
 import BolaCell from "/assets/images/icons/ui/bola-cell.svg";
-import { ReservationsService, MarinasService } from '../../client';
+import { ReservationsService } from '../../client';
 import { useMarina } from '../../context/MarinaContext';
 import PopupFreeCell from './PopupFreeCell';
 import BoatCell from './BoatCell';
 import { getCellColor } from '../../utilsBola';
 import { ReservationExtenstion } from '../ReservationExtenstion';
 import PopupReserved from '../ServicesPanel/Services';
+import { getMooringBallsQueryOptions } from './TableReservations';
 
 interface Row {
     id: string;
@@ -96,28 +97,10 @@ const TableDay: React.FC<TableDayProps> = ({
         }
     }, [currentTimeZone, queryClient, reservations.length]);
 
-    // Fetch mooring balls
-    const { data: mooringBalls, isLoading: isLoadingMooringBalls } = useQuery({
-        queryKey: ['mooringBalls', selectedMarina?.marina_id, currentTimeZone],
-        queryFn: async () => {
-            try {
-                let result = { mooring_balls: [] as Array<any> };
-
-                if (selectedMarina?.marina_id) {
-                    const marinaData = await MarinasService.readMarina({ id: selectedMarina.marina_id });
-                    if (marinaData.mooring_balls) result.mooring_balls = marinaData.mooring_balls;
-                } else {
-                    console.warn('No marina selected, skipping mooring balls request.');
-                    return result;
-                }
-                return result;
-            } catch (error) {
-                console.error('Error fetching mooring balls:', error);
-                throw error;
-            }
-        },
-        enabled: !!selectedMarina?.marina_id && !!currentDate,
-    });
+    // Fetch mooring balls using the shared function from TableReservations
+    const { data: mooringBalls, isLoading: isLoadingMooringBalls } = useQuery(
+        getMooringBallsQueryOptions(selectedMarina?.marina_id, currentTimeZone)
+    );
 
     // Fetch reservations
     const { data: reservationsData, isLoading: isLoadingReservations, isError } = useQuery({

@@ -42,7 +42,7 @@ interface TableReservationsProps {
 }
 
 // Функция для создания опций запроса на получение швартовок
-function getMooringBallsQueryOptions(marinaId: string | undefined, currentTimeZone: string) {
+export function getMooringBallsQueryOptions(marinaId: string | undefined, currentTimeZone: string) {
     return {
         queryKey: ['mooringBalls', marinaId, currentTimeZone],
         queryFn: async () => {
@@ -104,7 +104,6 @@ const renderEdgeIcon = (reservation: ReservationExtenstion, isStart: boolean) =>
         </svg>
     );
 };
-
 
 
 export { renderEdgeIcon };

@@ -10,10 +10,10 @@ import {
   ModalFooter,
   ModalHeader,
   Flex,
-  Text,
   Box,
   ModalOverlay,
-  Textarea
+  Textarea,
+  Text
 } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { type SubmitHandler, useForm } from "react-hook-form"
@@ -52,6 +52,7 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
   const [endTime, setEndTime] = useState<string>('16:00')
   const [showStartTimeDropdown, setShowStartTimeDropdown] = useState<boolean>(false)
   const [showEndTimeDropdown, setShowEndTimeDropdown] = useState<boolean>(false)
+  const [showSecondModalBody, setShowSecondModalBody] = useState<boolean>(false)
 
   // Helper function to format time in AM/PM format
   const formatTimeAmPm = (timeString: string) => {
@@ -250,14 +251,14 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
         try {
           const startDate = new Date(selectedCell.day);
           const endDate = new Date(selectedCell.endDay);
-          
+
           if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
             // Check if the dates are different
-            const sameDay = 
+            const sameDay =
               startDate.getFullYear() === endDate.getFullYear() &&
               startDate.getMonth() === endDate.getMonth() &&
               startDate.getDate() === endDate.getDate();
-            
+
             if (sameDay) {
               // If it's the same day, use Hourly mode
               setBookingType('hourly');
@@ -273,7 +274,7 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
         // If only one day is selected, default to Hourly
         setBookingType('hourly');
       }
-      
+
       // If there's an existing reservation, populate its data
       if (selectedCell.reservation) {
         if (selectedCell.reservation.start_date) {
@@ -395,406 +396,436 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
               ✕
             </Button>
           </ModalHeader>
-          <ModalBody
-            px='2xl'
-            py='0'
-            display="flex"
-            flexDirection="column"
-            flex="1"
-            gap='lg'
-            overflowY="auto"
-            sx={{
-              '&::-webkit-scrollbar': {
-                display: 'none',
-              },
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none'
-            }}
-          >
-            <Flex border="1px solid" borderColor="brand.secondaryBlue" bg="bg.info" borderRadius="20px" w="100%" p='10px 20px' direction="row" align="center" position="relative">
-              <Box flex='1'>
-                <Text fontSize="16px" color="brand.secondaryBlue" fontWeight="500" mb="2px">
-                  Payment notice
-                </Text>
-                <Text color="gray.700" fontSize="14px" fontWeight="300">
-                  Please note that the reservation will be created and charged to the boater's primary payment method.                </Text>
-              </Box>
-            </Flex>
-            <Flex direction="column" gap="12px">
-              {!selectedCell && (
-                <>
-                  <FormControl>
-                    <FormLabel htmlFor="mooring_ball_id">Mooring Ball ID</FormLabel>
-                    <Input
-                      id="mooring_ball_id"
-                      {...register("mooring_ball_id", {
-                        required: "Mooring Ball ID is required.",
-                      })}
-                      placeholder="Mooring Ball ID"
-                      type="text"
-                    />
-                    {errors.mooring_ball_id && (
-                      <FormErrorMessage>
-                        {errors.mooring_ball_id.message}
-                      </FormErrorMessage>
-                    )}
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel htmlFor="user_id">User ID</FormLabel>
-                    <Input
-                      id="user_id"
-                      {...register("user_id")}
-                      placeholder="User ID"
-                      type="text"
-                    />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel htmlFor="boat_id">Boat ID</FormLabel>
-                    <Input
-                      id="boat_id"
-                      {...register("boat_id")}
-                      placeholder="Boat ID"
-                      type="Boat"
-                    />
-                  </FormControl>
-                </>
-              )}
-              <Flex
-                width="100%"
-                borderRadius="full"
-                overflow="hidden"
-                border="1px solid"
-                borderColor="gray.200"
-                height="40px"
-                bg="basic.grey100"
-              >
-                <Button
-                  variant="unstyled"
-                  p="10px"
-                  fontSize="12px"
-                  fontWeight="500"
-                  flex="1"
-                  borderRadius="full"
-                  bg={bookingType === 'daily' ? "gradient.orange" : "transparent"}
-                  color={bookingType === 'daily' ? "white" : "gray.900"}
-                  height="100%"
-                  onClick={() => setBookingType('daily')}
-                >
-                  Daily booking
-                </Button>
-                <Button
-                  fontSize="12px"
-                  fontWeight="500"
-                  variant="unstyled"
-                  p="10px"
-                  flex="1"
-                  borderRadius="full"
-                  bg={bookingType === 'hourly' ? "gradient.orange" : "transparent"}
-                  color={bookingType === 'hourly' ? "white" : "gray.600"}
-                  height="100%"
-                  onClick={() => setBookingType('hourly')}
-                >
-                  Hourly booking
-                </Button>
+          {!showSecondModalBody && (
+            <ModalBody
+              px='2xl'
+              py='0'
+              display="flex"
+              flexDirection="column"
+              flex="1"
+              gap='lg'
+              overflowY="auto"
+              sx={{
+                '&::-webkit-scrollbar': {
+                  display: 'none',
+                },
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none'
+              }}
+            >
+              <Flex border="1px solid" borderColor="brand.secondaryBlue" bg="bg.info" borderRadius="20px" w="100%" p='10px 20px' direction="row" align="center" position="relative">
+                <Box flex='1'>
+                  <Text fontSize="16px" color="brand.secondaryBlue" fontWeight="500" mb="2px">
+                    Payment notice
+                  </Text>
+                  <Text color="gray.700" fontSize="14px" fontWeight="300">
+                    Please note that the reservation will be created and charged to the boater's primary payment method.</Text>
+                </Box>
               </Flex>
-              <FormControl
-                isRequired
-                borderRadius="full"
-                borderColor="gray.200"
-                borderWidth="1px"
-                fontSize="18px"
-                p='4px 10px 4px 24px'
-                position="relative"
-                cursor="text"
-                onClick={() => {
-                  const boaterEmailInput = document.getElementById('boater-email') as HTMLInputElement;
-                  if (boaterEmailInput) boaterEmailInput.focus();
-                }}
-              >
-                <Text fontSize="12px" color="gray.900" fontWeight="300">
-                  Boater email
-                </Text>
-                <Input
-                  id='boater-email'
-                  {...register("user_id", {
-                    required: "Boater email is required."
-                  })}
-                  fontSize="16px"
-                  fontWeight="300"
-                  variant="unstyled"
-                  placeholder="Boater email"
-                  _placeholder={{ fontSize: "16px", fontWeight: "300", color: "gray.400" }}
-                  maxLength={20}
-                />
-              </FormControl>
-              {bookingType === 'hourly' && (
-                <Flex gap="sm">
-                  <FormControl
-                    isRequired
+              <Flex direction="column" gap="12px">
+                {!selectedCell && (
+                  <>
+                    <FormControl>
+                      <FormLabel htmlFor="mooring_ball_id">Mooring Ball ID</FormLabel>
+                      <Input
+                        id="mooring_ball_id"
+                        {...register("mooring_ball_id", {
+                          required: "Mooring Ball ID is required.",
+                        })}
+                        placeholder="Mooring Ball ID"
+                        type="text"
+                      />
+                      {errors.mooring_ball_id && (
+                        <FormErrorMessage>
+                          {errors.mooring_ball_id.message}
+                        </FormErrorMessage>
+                      )}
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel htmlFor="user_id">User ID</FormLabel>
+                      <Input
+                        id="user_id"
+                        {...register("user_id")}
+                        placeholder="User ID"
+                        type="text"
+                      />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel htmlFor="boat_id">Boat ID</FormLabel>
+                      <Input
+                        id="boat_id"
+                        {...register("boat_id")}
+                        placeholder="Boat ID"
+                        type="Boat"
+                      />
+                    </FormControl>
+                  </>
+                )}
+                <Flex
+                  width="100%"
+                  borderRadius="full"
+                  overflow="hidden"
+                  border="1px solid"
+                  borderColor="gray.200"
+                  height="40px"
+                  bg="basic.grey100"
+                >
+                  <Button
+                    variant="unstyled"
+                    p="10px"
+                    fontSize="12px"
+                    fontWeight="500"
                     flex="1"
-                    height="50px"
                     borderRadius="full"
-                    borderColor="gray.200"
-                    borderWidth="1px"
-                    fontSize="18px"
-                    p='4px 10px 4px 24px'
-                    position="relative"
-                    cursor="text"
+                    bg={bookingType === 'daily' ? "gradient.orange" : "transparent"}
+                    color={bookingType === 'daily' ? "white" : "gray.900"}
+                    height="100%"
+                    onClick={() => setBookingType('daily')}
                   >
-                    <Text fontSize="12px" color="gray.900" fontWeight="300">Date</Text>
-                    <Flex alignItems="center" justifyContent="space-between">
-                      <Box
-                        position="relative"
-                        width="100%"
-                        onClick={() => {
-                          const startDateInput = document.getElementById('start_date') as HTMLInputElement;
-                          if (startDateInput && startDateInput.showPicker) {
-                            startDateInput.showPicker();
-                          } else if (startDateInput) {
-                            startDateInput.click();
-                          }
-                        }}
-                        cursor="pointer"
-                      >
-                        <Input
-                          id="start_date"
-                          {...register("start_date", {
-                            required: "Start date is required.",
-                            onChange: (e) => {
-                              // Update the display date when input changes manually
-                              const date = new Date(e.target.value);
-                              if (!isNaN(date.getTime())) {
-                                const month = String(date.getMonth() + 1).padStart(2, '0');
-                                const day = String(date.getDate()).padStart(2, '0');
-                                setDisplayStartDate(`${month}/${day}/${date.getFullYear()}`);
-                              }
-                            }
-                          })}
-                          fontSize="16px"
-                          fontWeight="300"
-                          variant="unstyled"
-                          type="date"
-                          sx={{
-                            '&::-webkit-calendar-picker-indicator': {
-                              display: 'none',
-                            },
-                            opacity: 0,
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '100%',
-                            pointerEvents: 'none'
-                          }}
-                        />
-                        <Text fontSize="16px" fontWeight="300">
-                          {displayStartDate}
-                        </Text>
-                      </Box>
-                      <Box position='absolute' right='10px' top='50%' p='10px' transform='translateY(-50%)' cursor="pointer" onClick={() => {
-                        const startDateInput = document.getElementById('start_date') as HTMLInputElement;
-                        if (startDateInput && startDateInput.showPicker) {
-                          startDateInput.showPicker();
-                        } else if (startDateInput) {
-                          startDateInput.click();
-                        }
-                      }}>
-                        <FiCalendar color='#B7B7B7' size={20} />
-                      </Box>
-                    </Flex>
-                  </FormControl>
-                  <Flex flex="2" gap="2">
-                    <TimeDropdown
-                      value={startTime}
-                      onChange={(value) => {
-                        setStartTime(value);
-                        setShowStartTimeDropdown(false);
-                      }}
-                      placeholder="3:00pm"
-                      isOpen={showStartTimeDropdown}
-                      onToggle={() => {
-                        setShowStartTimeDropdown(!showStartTimeDropdown);
-                        // Close the other dropdown if opening this one
-                        if (!showStartTimeDropdown) {
-                          setShowEndTimeDropdown(false);
-                        }
-                      }}
-                    />
-                    <CustomIcon name="line" category="ui" size={20} />
-                    <TimeDropdown
-                      value={endTime}
-                      onChange={(value) => {
-                        setEndTime(value);
-                        setShowEndTimeDropdown(false);
-                      }}
-                      placeholder="4:00pm"
-                      isOpen={showEndTimeDropdown}
-                      onToggle={() => {
-                        setShowEndTimeDropdown(!showEndTimeDropdown);
-                        // Close the other dropdown if opening this one
-                        if (!showEndTimeDropdown) {
-                          setShowStartTimeDropdown(false);
-                        }
-                      }}
-                    />
-                  </Flex>
+                    Daily booking
+                  </Button>
+                  <Button
+                    fontSize="12px"
+                    fontWeight="500"
+                    variant="unstyled"
+                    p="10px"
+                    flex="1"
+                    borderRadius="full"
+                    bg={bookingType === 'hourly' ? "gradient.orange" : "transparent"}
+                    color={bookingType === 'hourly' ? "white" : "gray.600"}
+                    height="100%"
+                    onClick={() => setBookingType('hourly')}
+                  >
+                    Hourly booking
+                  </Button>
                 </Flex>
-              )}
-
-              {bookingType !== 'hourly' && (
-                <Flex gap="sm">
-                  <FormControl
-                    isRequired
-                    flex="1"
-                    height="50px"
-                    borderRadius="full"
-                    borderColor="gray.200"
-                    borderWidth="1px"
-                    fontSize="18px"
-                    p='4px 10px 4px 24px'
-                    position="relative"
-                    cursor="text"
-                  >
-                    <Text fontSize="12px" color="gray.900" fontWeight="300">Start Date</Text>
-                    <Flex alignItems="center" justifyContent="space-between">
-                      <Box
-                        position="relative"
-                        width="100%"
-                        onClick={() => {
+                <FormControl
+                  isRequired
+                  borderRadius="full"
+                  borderColor="gray.200"
+                  borderWidth="1px"
+                  fontSize="18px"
+                  p='4px 10px 4px 24px'
+                  position="relative"
+                  cursor="text"
+                  onClick={() => {
+                    const boaterEmailInput = document.getElementById('boater-email') as HTMLInputElement;
+                    if (boaterEmailInput) boaterEmailInput.focus();
+                  }}
+                >
+                  <Text fontSize="12px" color="gray.900" fontWeight="300">
+                    Boater email
+                  </Text>
+                  <Input
+                    id='boater-email'
+                    {...register("user_id", {
+                      required: "Boater email is required."
+                    })}
+                    fontSize="16px"
+                    fontWeight="300"
+                    variant="unstyled"
+                    placeholder="Boater email"
+                    _placeholder={{ fontSize: "16px", fontWeight: "300", color: "gray.400" }}
+                    maxLength={20}
+                  />
+                </FormControl>
+                {bookingType === 'hourly' && (
+                  <Flex gap="sm">
+                    <FormControl
+                      isRequired
+                      flex="1"
+                      height="50px"
+                      borderRadius="full"
+                      borderColor="gray.200"
+                      borderWidth="1px"
+                      fontSize="18px"
+                      p='4px 10px 4px 24px'
+                      position="relative"
+                      cursor="text"
+                    >
+                      <Text fontSize="12px" color="gray.900" fontWeight="300">Date</Text>
+                      <Flex alignItems="center" justifyContent="space-between">
+                        <Box
+                          position="relative"
+                          width="100%"
+                          onClick={() => {
+                            const startDateInput = document.getElementById('start_date') as HTMLInputElement;
+                            if (startDateInput && startDateInput.showPicker) {
+                              startDateInput.showPicker();
+                            } else if (startDateInput) {
+                              startDateInput.click();
+                            }
+                          }}
+                          cursor="pointer"
+                        >
+                          <Input
+                            id="start_date"
+                            {...register("start_date", {
+                              required: "Start date is required.",
+                              onChange: (e) => {
+                                // Update the display date when input changes manually
+                                const date = new Date(e.target.value);
+                                if (!isNaN(date.getTime())) {
+                                  const month = String(date.getMonth() + 1).padStart(2, '0');
+                                  const day = String(date.getDate()).padStart(2, '0');
+                                  setDisplayStartDate(`${month}/${day}/${date.getFullYear()}`);
+                                }
+                              }
+                            })}
+                            fontSize="16px"
+                            fontWeight="300"
+                            variant="unstyled"
+                            type="date"
+                            sx={{
+                              '&::-webkit-calendar-picker-indicator': {
+                                display: 'none',
+                              },
+                              opacity: 0,
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              width: '100%',
+                              height: '100%',
+                              pointerEvents: 'none'
+                            }}
+                          />
+                          <Text fontSize="16px" fontWeight="300">
+                            {displayStartDate}
+                          </Text>
+                        </Box>
+                        <Box position='absolute' right='10px' top='50%' p='10px' transform='translateY(-50%)' cursor="pointer" onClick={() => {
                           const startDateInput = document.getElementById('start_date') as HTMLInputElement;
                           if (startDateInput && startDateInput.showPicker) {
                             startDateInput.showPicker();
                           } else if (startDateInput) {
                             startDateInput.click();
                           }
+                        }}>
+                          <FiCalendar color='#B7B7B7' size={20} />
+                        </Box>
+                      </Flex>
+                    </FormControl>
+                    <Flex flex="2" gap="2">
+                      <TimeDropdown
+                        value={startTime}
+                        onChange={(value) => {
+                          setStartTime(value);
+                          setShowStartTimeDropdown(false);
                         }}
-                        cursor="pointer"
-                      >
-                        <Input
-                          id="start_date"
-                          {...register("start_date", {
-                            required: "Start date is required.",
-                            onChange: (e) => {
-                              // Update the display date when input changes manually
-                              const date = new Date(e.target.value);
-                              if (!isNaN(date.getTime())) {
-                                const month = String(date.getMonth() + 1).padStart(2, '0');
-                                const day = String(date.getDate()).padStart(2, '0');
-                                setDisplayStartDate(`${month}/${day}/${date.getFullYear()}`);
-                              }
-                            }
-                          })}
-                          fontSize="16px"
-                          fontWeight="300"
-                          variant="unstyled"
-                          type="date"
-                          sx={{
-                            '&::-webkit-calendar-picker-indicator': {
-                              display: 'none',
-                            },
-                            opacity: 0,
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '100%',
-                            pointerEvents: 'none'
-                          }}
-                        />
-                        <Text fontSize="16px" fontWeight="300">
-                          {displayStartDate}
-                        </Text>
-                      </Box>
-                      <Box position='absolute' right='10px' top='50%' p='10px' transform='translateY(-50%)' cursor="pointer" onClick={() => {
-                        const startDateInput = document.getElementById('start_date') as HTMLInputElement;
-                        if (startDateInput && startDateInput.showPicker) {
-                          startDateInput.showPicker();
-                        } else if (startDateInput) {
-                          startDateInput.click();
-                        }
-                      }}>
-                        <FiCalendar color='#B7B7B7' size={20} />
-                      </Box>
+                        placeholder="3:00pm"
+                        isOpen={showStartTimeDropdown}
+                        onToggle={() => {
+                          setShowStartTimeDropdown(!showStartTimeDropdown);
+                          // Close the other dropdown if opening this one
+                          if (!showStartTimeDropdown) {
+                            setShowEndTimeDropdown(false);
+                          }
+                        }}
+                      />
+                      <CustomIcon name="line" category="ui" size={20} />
+                      <TimeDropdown
+                        value={endTime}
+                        onChange={(value) => {
+                          setEndTime(value);
+                          setShowEndTimeDropdown(false);
+                        }}
+                        placeholder="4:00pm"
+                        isOpen={showEndTimeDropdown}
+                        onToggle={() => {
+                          setShowEndTimeDropdown(!showEndTimeDropdown);
+                          // Close the other dropdown if opening this one
+                          if (!showEndTimeDropdown) {
+                            setShowStartTimeDropdown(false);
+                          }
+                        }}
+                      />
                     </Flex>
-                  </FormControl>
-                  <FormControl
-                    flex="1"
-                    height="50px"
-                    borderRadius="full"
-                    borderColor="gray.200"
-                    borderWidth="1px"
-                    fontSize="18px"
-                    p='4px 10px 4px 24px'
-                    position="relative"
-                    cursor="text"
-                    isRequired
-                  >
-                    <Text fontSize="12px" color="gray.900" fontWeight="300">End Date</Text>
-                    <Flex alignItems="center" justifyContent="space-between">
-                      <Box
-                        position="relative"
-                        width="100%"
-                        onClick={() => {
+                  </Flex>
+                )}
+
+                {bookingType !== 'hourly' && (
+                  <Flex gap="sm">
+                    <FormControl
+                      isRequired
+                      flex="1"
+                      height="50px"
+                      borderRadius="full"
+                      borderColor="gray.200"
+                      borderWidth="1px"
+                      fontSize="18px"
+                      p='4px 10px 4px 24px'
+                      position="relative"
+                      cursor="text"
+                    >
+                      <Text fontSize="12px" color="gray.900" fontWeight="300">Start Date</Text>
+                      <Flex alignItems="center" justifyContent="space-between">
+                        <Box
+                          position="relative"
+                          width="100%"
+                          onClick={() => {
+                            const startDateInput = document.getElementById('start_date') as HTMLInputElement;
+                            if (startDateInput && startDateInput.showPicker) {
+                              startDateInput.showPicker();
+                            } else if (startDateInput) {
+                              startDateInput.click();
+                            }
+                          }}
+                          cursor="pointer"
+                        >
+                          <Input
+                            id="start_date"
+                            {...register("start_date", {
+                              required: "Start date is required.",
+                              onChange: (e) => {
+                                // Update the display date when input changes manually
+                                const date = new Date(e.target.value);
+                                if (!isNaN(date.getTime())) {
+                                  const month = String(date.getMonth() + 1).padStart(2, '0');
+                                  const day = String(date.getDate()).padStart(2, '0');
+                                  setDisplayStartDate(`${month}/${day}/${date.getFullYear()}`);
+                                }
+                              }
+                            })}
+                            fontSize="16px"
+                            fontWeight="300"
+                            variant="unstyled"
+                            type="date"
+                            sx={{
+                              '&::-webkit-calendar-picker-indicator': {
+                                display: 'none',
+                              },
+                              opacity: 0,
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              width: '100%',
+                              height: '100%',
+                              pointerEvents: 'none'
+                            }}
+                          />
+                          <Text fontSize="16px" fontWeight="300">
+                            {displayStartDate}
+                          </Text>
+                        </Box>
+                        <Box position='absolute' right='10px' top='50%' p='10px' transform='translateY(-50%)' cursor="pointer" onClick={() => {
+                          const startDateInput = document.getElementById('start_date') as HTMLInputElement;
+                          if (startDateInput && startDateInput.showPicker) {
+                            startDateInput.showPicker();
+                          } else if (startDateInput) {
+                            startDateInput.click();
+                          }
+                        }}>
+                          <FiCalendar color='#B7B7B7' size={20} />
+                        </Box>
+                      </Flex>
+                    </FormControl>
+                    <FormControl
+                      flex="1"
+                      height="50px"
+                      borderRadius="full"
+                      borderColor="gray.200"
+                      borderWidth="1px"
+                      fontSize="18px"
+                      p='4px 10px 4px 24px'
+                      position="relative"
+                      cursor="text"
+                      isRequired
+                    >
+                      <Text fontSize="12px" color="gray.900" fontWeight="300">End Date</Text>
+                      <Flex alignItems="center" justifyContent="space-between">
+                        <Box
+                          position="relative"
+                          width="100%"
+                          onClick={() => {
+                            const endDateInput = document.getElementById('end_date') as HTMLInputElement;
+                            if (endDateInput && endDateInput.showPicker) {
+                              endDateInput.showPicker();
+                            } else if (endDateInput) {
+                              endDateInput.click();
+                            }
+                          }}
+                          cursor="pointer"
+                        >
+                          <Input
+                            id="end_date"
+                            {...register("end_date", {
+                              required: "End date is required.",
+                              onChange: (e) => {
+                                // Update the display date when input changes manually
+                                const date = new Date(e.target.value);
+                                if (!isNaN(date.getTime())) {
+                                  const month = String(date.getMonth() + 1).padStart(2, '0');
+                                  const day = String(date.getDate()).padStart(2, '0');
+                                  setDisplayEndDate(`${month}/${day}/${date.getFullYear()}`);
+                                }
+                              }
+                            })}
+                            fontSize="16px"
+                            fontWeight="300"
+                            variant="unstyled"
+                            type="date"
+                            sx={{
+                              '&::-webkit-calendar-picker-indicator': {
+                                display: 'none',
+                              },
+                              opacity: 0,
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              width: '100%',
+                              height: '100%',
+                              pointerEvents: 'none'
+                            }}
+                          />
+                          <Text fontSize="16px" fontWeight="300">
+                            {displayEndDate}
+                          </Text>
+                        </Box>
+                        <Box position='absolute' right='10px' top='50%' p='10px' transform='translateY(-50%)' cursor="pointer" onClick={() => {
                           const endDateInput = document.getElementById('end_date') as HTMLInputElement;
                           if (endDateInput && endDateInput.showPicker) {
                             endDateInput.showPicker();
                           } else if (endDateInput) {
                             endDateInput.click();
                           }
-                        }}
-                        cursor="pointer"
-                      >
-                        <Input
-                          id="end_date"
-                          {...register("end_date", {
-                            required: "End date is required.",
-                            onChange: (e) => {
-                              // Update the display date when input changes manually
-                              const date = new Date(e.target.value);
-                              if (!isNaN(date.getTime())) {
-                                const month = String(date.getMonth() + 1).padStart(2, '0');
-                                const day = String(date.getDate()).padStart(2, '0');
-                                setDisplayEndDate(`${month}/${day}/${date.getFullYear()}`);
-                              }
-                            }
-                          })}
-                          fontSize="16px"
-                          fontWeight="300"
-                          variant="unstyled"
-                          type="date"
-                          sx={{
-                            '&::-webkit-calendar-picker-indicator': {
-                              display: 'none',
-                            },
-                            opacity: 0,
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '100%',
-                            pointerEvents: 'none'
-                          }}
-                        />
-                        <Text fontSize="16px" fontWeight="300">
-                          {displayEndDate}
-                        </Text>
-                      </Box>
-                      <Box position='absolute' right='10px' top='50%' p='10px' transform='translateY(-50%)' cursor="pointer" onClick={() => {
-                        const endDateInput = document.getElementById('end_date') as HTMLInputElement;
-                        if (endDateInput && endDateInput.showPicker) {
-                          endDateInput.showPicker();
-                        } else if (endDateInput) {
-                          endDateInput.click();
-                        }
-                      }}>
-                        <FiCalendar color='#B7B7B7' size={20} />
-                      </Box>
-                    </Flex>
-                  </FormControl>
-                </Flex>
-              )}
+                        }}>
+                          <FiCalendar color='#B7B7B7' size={20} />
+                        </Box>
+                      </Flex>
+                    </FormControl>
+                  </Flex>
+                )}
+                <Box
+                  borderRadius="full"
+                  borderColor="gray.200"
+                  borderWidth="1px"
+                  fontSize="18px"
+                  p='4px 10px 4px 24px'
+                  position="relative"
+                  cursor="text"
+                  onClick={() => {
+                    const bookingTitleInput = document.getElementById('booking-title') as HTMLInputElement;
+                    if (bookingTitleInput) bookingTitleInput.focus();
+                  }}
+                >
+                  <Text fontSize="12px" color="gray.900" fontWeight="300">
+                    Booking title (optional)
+                  </Text>
+                  <Input
+                    id='booking-title'
+                    value={bookingTitle}
+                    onChange={(e) => setBookingTitle(e.target.value)}
+                    fontSize="16px"
+                    fontWeight="300"
+                    variant="unstyled"
+                    placeholder="Enter your booking title here"
+                    _placeholder={{ fontSize: "16px", fontWeight: "300", color: "gray.400" }}
+                    maxLength={20}
+                  />
+                </Box>
+              </Flex>
               <Box
-                borderRadius="full"
+                borderRadius="24px"
                 borderColor="gray.200"
                 borderWidth="1px"
                 fontSize="18px"
@@ -802,54 +833,31 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
                 position="relative"
                 cursor="text"
                 onClick={() => {
-                  const bookingTitleInput = document.getElementById('booking-title') as HTMLInputElement;
-                  if (bookingTitleInput) bookingTitleInput.focus();
+                  const bookingDescriptionInput = document.getElementById('booking-description') as HTMLInputElement;
+                  if (bookingDescriptionInput) bookingDescriptionInput.focus();
                 }}
               >
                 <Text fontSize="12px" color="gray.900" fontWeight="300">
-                  Booking title (optional)
+                  Description (optional)
                 </Text>
-                <Input
-                  id='booking-title'
-                  value={bookingTitle}
-                  onChange={(e) => setBookingTitle(e.target.value)}
+                <Textarea
+                  id='booking-description'
+                  value={bookingDescription}
+                  onChange={(e) => setBookingDescription(e.target.value)}
                   fontSize="16px"
                   fontWeight="300"
                   variant="unstyled"
-                  placeholder="Enter your booking title here"
+                  placeholder="Any notes to remember this booking"
                   _placeholder={{ fontSize: "16px", fontWeight: "300", color: "gray.400" }}
-                  maxLength={20}
                 />
               </Box>
-            </Flex>
-            <Box
-              borderRadius="24px"
-              borderColor="gray.200"
-              borderWidth="1px"
-              fontSize="18px"
-              p='4px 10px 4px 24px'
-              position="relative"
-              cursor="text"
-              onClick={() => {
-                const bookingDescriptionInput = document.getElementById('booking-description') as HTMLInputElement;
-                if (bookingDescriptionInput) bookingDescriptionInput.focus();
-              }}
-            >
-              <Text fontSize="12px" color="gray.900" fontWeight="300">
-                Description (optional)
-              </Text>
-              <Textarea
-                id='booking-description'
-                value={bookingDescription}
-                onChange={(e) => setBookingDescription(e.target.value)}
-                fontSize="16px"
-                fontWeight="300"
-                variant="unstyled"
-                placeholder="Any notes to remember this booking"
-                _placeholder={{ fontSize: "16px", fontWeight: "300", color: "gray.400" }}
-              />
-            </Box>
-          </ModalBody>
+            </ModalBody>
+          )}
+          {showSecondModalBody && (
+            <ModalBody>
+              {/* Content for the second modal body */}
+            </ModalBody>
+          )}
 
           <ModalFooter borderTop="1px solid #E5E5E5" p="xl">
             <Button
@@ -869,10 +877,20 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
                   "#E55511" : "#B7B7B7"
               }}
               variant="unstyled"
+              onClick={(e) => {
+                // If form is valid, switch to second modal body instead of submitting
+                if (!errors.user_id && !errors.start_date && !errors.end_date &&
+                  !!watch("user_id") && !!watch("start_date") && !!watch("end_date")) {
+                  e.preventDefault();
+                  setShowSecondModalBody(true);
+                }
+              }}
               type="submit"
               isLoading={isSubmitting}
             >
-              Enter details to continue
+              {!errors.user_id && !errors.start_date && !errors.end_date &&
+                !!watch("user_id") && !!watch("start_date") && !!watch("end_date") ?
+                <Text display='flex' alignItems='center' gap='14px'>Continue to payment <CustomIcon name='arrow-right' category='ui' color='#B7B7B7' size={17} /></Text> : <Text>Enter details to continue</Text>}
             </Button>
           </ModalFooter>
         </ModalContent>

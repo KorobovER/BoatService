@@ -53,6 +53,11 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
   const [showStartTimeDropdown, setShowStartTimeDropdown] = useState<boolean>(false)
   const [showEndTimeDropdown, setShowEndTimeDropdown] = useState<boolean>(false)
   const [showSecondModalBody, setShowSecondModalBody] = useState<boolean>(false)
+  const [paymentCardTitle, setPaymentCardTitle] = useState<string>('')
+  const [paymentCardNumber, setPaymentCardNumber] = useState<string>('')
+  const [paymentCVV, setPaymentCVV] = useState<string>('')
+  const [paymentExpiration, setPaymentExpiration] = useState<string>('')
+  const [paymentZipCode, setPaymentZipCode] = useState<string>('')
 
   // Helper function to format time in AM/PM format
   const formatTimeAmPm = (timeString: string) => {
@@ -854,8 +859,203 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
             </ModalBody>
           )}
           {showSecondModalBody && (
-            <ModalBody>
-              {/* Content for the second modal body */}
+            <ModalBody
+              display='flex'
+              flexDirection='column'
+              gap='xl'
+              px='2xl'
+              py='0'>
+              <Flex direction="column">
+                <Flex pb='md' borderBottom="1px solid" borderColor="basic.grey200" direction="column" gap='md'>
+                  <Flex>
+                    <Text fontSize='16px' fontWeight='400' color='basic.grey700'>Booking details</Text>
+                  </Flex>
+                  <Flex justify="space-between">
+                    <Text fontSize='14px' fontWeight='300' color='basic.grey700'>Overnight mooring:</Text>
+                    <Text fontSize='14px' fontWeight='400' color='basic.grey700'>$67</Text>
+                  </Flex>
+                  <Flex justify="space-between">
+                    <Text fontSize='14px' fontWeight='300' color='basic.grey700'>Booking fee (7.5%)</Text>
+                    <Text fontSize='14px' fontWeight='400' color='basic.grey700'>$78</Text>
+                  </Flex>
+                  <Flex justify="space-between">
+                    <Text fontSize='14px' fontWeight='300' color='basic.grey700'>Taxes</Text>
+                    <Text fontSize='14px' fontWeight='400' color='basic.grey700'>$789</Text>
+                  </Flex>
+                </Flex>
+                <Flex pt='md' justify="space-between" fontWeight="bold">
+                  <Text fontSize='16px' fontWeight='500' color='basic.grey900'>Total</Text>
+                  <Text fontSize='16px' fontWeight='500' color='basic.grey900'>$89</Text>
+                </Flex>
+              </Flex>
+              <Flex direction='column' gap='lg'>
+                <Flex w='full' justify="space-between" alignItems='center'>
+                  <Text fontSize='16px' fontWeight='400' color='basic.grey700'>Payment details</Text>
+                  <Text fontSize='14px' fontWeight='300' color='basic.grey700' textDecoration='underline'>Other payment options</Text>
+                </Flex>
+                <Flex flexDirection='column' gap='12px'>
+                  <FormControl
+                    borderRadius="full"
+                    borderColor="gray.200"
+                    borderWidth="1px"
+                    fontSize="18px"
+                    p='4px 10px 4px 24px'
+                    position="relative"
+                    cursor="text"
+                    onClick={() => {
+                      const PaymentCardInput = document.getElementById('card-title') as HTMLInputElement;
+                      if (PaymentCardInput) PaymentCardInput.focus();
+                    }}
+                  >
+                    <Text fontSize="12px" color="gray.900" fontWeight="300">
+                      Name on card
+                    </Text>
+                    <Input
+                      id='card-title'
+                      value={paymentCardTitle}
+                      onChange={(e) => setPaymentCardTitle(e.target.value)}
+                      fontSize="16px"
+                      fontWeight="300"
+                      variant="unstyled"
+                      placeholder="Name and Last"
+                      _placeholder={{ fontSize: "16px", fontWeight: "300", color: "gray.400" }}
+                      maxLength={20}
+                    />
+                  </FormControl>
+                  <FormControl
+                    borderRadius="full"
+                    borderColor="gray.200"
+                    borderWidth="1px"
+                    fontSize="18px"
+                    p='4px 10px 4px 24px'
+                    position="relative"
+                    cursor="text"
+                    onClick={() => {
+                      const paymentCardNumberInput = document.getElementById('payment-card-number') as HTMLInputElement;
+                      if (paymentCardNumberInput) paymentCardNumberInput.focus();
+                    }}
+                  >
+                    <Text fontSize="12px" color="gray.900" fontWeight="300">
+                      Card number                </Text>
+                    <Input
+                      id='payment-card-number'
+                      value={paymentCardNumber}
+                      onChange={(e) => {
+                        const digits = e.target.value.replace(/\D/g, '');
+                        const formatted = digits.replace(/(.{4})/g, '$1 ').trim();
+                        setPaymentCardNumber(formatted.substring(0, 19));
+                      }}
+                      fontSize="16px"
+                      fontWeight="300"
+                      variant="unstyled"
+                      placeholder="xxxx-xxxx-xxxx-xxxx"
+                      _placeholder={{ fontSize: "16px", fontWeight: "300", color: "gray.400" }}
+                      maxLength={19}
+                    />
+                  </FormControl>
+                  <Flex gap='12px'>
+                    <FormControl
+                      borderRadius="full"
+                      borderColor="gray.200"
+                      borderWidth="1px"
+                      fontSize="18px"
+                      p='4px 10px 4px 24px'
+                      position="relative"
+                      cursor="text"
+                      onClick={() => {
+                        const PaymentExpirationInput = document.getElementById('expiration') as HTMLInputElement;
+                        if (PaymentExpirationInput) PaymentExpirationInput.focus();
+                      }}
+                    >
+                      <Text fontSize="12px" color="gray.900" fontWeight="300">
+                        Expiration
+                      </Text>
+                      <Input
+                        id='expiration'
+                        value={paymentExpiration}
+                        onChange={(e) => {
+                          const digits = e.target.value.replace(/\D/g, '');
+                          
+                          if (digits.length <= 4) {
+                            // Format as MM/YY
+                            let formatted = digits;
+                            if (digits.length > 2) {
+                              formatted = digits.substring(0, 2) + '/' + digits.substring(2);
+                            }
+                            setPaymentExpiration(formatted);
+                          }
+                        }}
+                        fontSize="16px"
+                        fontWeight="300"
+                        variant="unstyled"
+                        placeholder="MM/YY"
+                        _placeholder={{ fontSize: "16px", fontWeight: "300", color: "gray.400" }}
+                        maxLength={5}
+                      />
+                    </FormControl>
+                    <FormControl
+                      borderRadius="full"
+                      borderColor="gray.200"
+                      borderWidth="1px"
+                      fontSize="18px"
+                      p='4px 10px 4px 24px'
+                      position="relative"
+                      cursor="text"
+                      onClick={() => {
+                        const paymentCVVInput = document.getElementById('payment-cvv') as HTMLInputElement;
+                        if (paymentCVVInput) paymentCVVInput.focus();
+                      }}
+                    >
+                      <Text fontSize="12px" color="gray.900" fontWeight="300">
+                        CVV              </Text>
+                      <Input
+                        id='payment-cvv'
+                        value={paymentCVV}
+                        onChange={(e) => {
+                          const digits = e.target.value.replace(/\D/g, '');
+                          setPaymentCVV(digits.substring(0, 4));
+                        }}
+                        fontSize="16px"
+                        fontWeight="300"
+                        variant="unstyled"
+                        placeholder="3 or 4 digits"
+                        _placeholder={{ fontSize: "16px", fontWeight: "300", color: "gray.400" }}
+                        maxLength={4}
+                      />
+                    </FormControl>
+                  </Flex>
+                  <FormControl
+                    borderRadius="full"
+                    borderColor="gray.200"
+                    borderWidth="1px"
+                    fontSize="18px"
+                    p='4px 10px 4px 24px'
+                    position="relative"
+                    cursor="text"
+                    onClick={() => {
+                      const paymentZipCodeInput = document.getElementById('payment-zip-code') as HTMLInputElement;
+                      if (paymentZipCodeInput) paymentZipCodeInput.focus();
+                    }}
+                  >
+                    <Text fontSize="12px" color="gray.900" fontWeight="300">
+                      Zip code             </Text>
+                    <Input
+                      id='payment-zip-code'
+                      value={paymentZipCode}
+                      onChange={(e) => {
+                        const digits = e.target.value.replace(/\D/g, '');
+                        setPaymentZipCode(digits.substring(0, 10));
+                      }}
+                      fontSize="16px"
+                      fontWeight="300"
+                      variant="unstyled"
+                      placeholder="Billing address zip code"
+                      _placeholder={{ fontSize: "16px", fontWeight: "300", color: "gray.400" }}
+                      maxLength={10}
+                    />
+                  </FormControl>
+                </Flex>
+              </Flex>
             </ModalBody>
           )}
 
@@ -867,30 +1067,50 @@ const AddReservation = ({ isOpen, onClose, selectedCell }: AddReservationProps) 
               fontSize="16px"
               fontWeight="400"
               borderRadius="var(--chakra-space-full)"
-              bg={!errors.user_id && !errors.start_date && !errors.end_date &&
+              bg={showSecondModalBody ? 
+                (paymentCardTitle && paymentCardNumber && paymentExpiration && paymentCVV && paymentZipCode ? 
+                "gradient.orange" : "#B7B7B7") :
+                (!errors.user_id && !errors.start_date && !errors.end_date &&
                 !!watch("user_id") && !!watch("start_date") && !!watch("end_date") ?
-                "gradient.orange" : "#B7B7B7"}
+                "gradient.orange" : "#B7B7B7")}
               color="white"
               _hover={{
-                bg: !errors.user_id && !errors.start_date && !errors.end_date &&
-                  !!watch("user_id") && !!watch("start_date") && !!watch("end_date") ?
-                  "#E55511" : "#B7B7B7"
+                bg: showSecondModalBody ? 
+                (paymentCardTitle && paymentCardNumber && paymentExpiration && paymentCVV && paymentZipCode ? 
+                "#E55511" : "#B7B7B7") :
+                (!errors.user_id && !errors.start_date && !errors.end_date &&
+                !!watch("user_id") && !!watch("start_date") && !!watch("end_date") ?
+                "#E55511" : "#B7B7B7")
               }}
               variant="unstyled"
               onClick={(e) => {
-                // If form is valid, switch to second modal body instead of submitting
-                if (!errors.user_id && !errors.start_date && !errors.end_date &&
-                  !!watch("user_id") && !!watch("start_date") && !!watch("end_date")) {
-                  e.preventDefault();
-                  setShowSecondModalBody(true);
+                if (showSecondModalBody) {
+                  // Submit the form if all payment fields are filled
+                  if (paymentCardTitle && paymentCardNumber && paymentExpiration && paymentCVV && paymentZipCode) {
+                    // Form submission logic here
+                  }
+                } else {
+                  // If form is valid, switch to second modal body instead of submitting
+                  if (!errors.user_id && !errors.start_date && !errors.end_date &&
+                    !!watch("user_id") && !!watch("start_date") && !!watch("end_date")) {
+                    e.preventDefault();
+                    setShowSecondModalBody(true);
+                  }
                 }
               }}
               type="submit"
               isLoading={isSubmitting}
+              isDisabled={showSecondModalBody ? 
+                !(paymentCardTitle && paymentCardNumber && paymentExpiration && paymentCVV && paymentZipCode) :
+                (!!errors.user_id || !!errors.start_date || !!errors.end_date ||
+                !watch("user_id") || !watch("start_date") || !watch("end_date"))}
             >
-              {!errors.user_id && !errors.start_date && !errors.end_date &&
+              {showSecondModalBody ? 
+                <Text>Create & charge $86.00</Text> :
+                (!errors.user_id && !errors.start_date && !errors.end_date &&
                 !!watch("user_id") && !!watch("start_date") && !!watch("end_date") ?
-                <Text display='flex' alignItems='center' gap='14px'>Continue to payment <CustomIcon name='arrow-right' category='ui' color='#B7B7B7' size={17} /></Text> : <Text>Enter details to continue</Text>}
+                <Text display='flex' alignItems='center' gap='14px'>Continue to payment <CustomIcon name='arrow-right' category='ui' color='#B7B7B7' size={17} /></Text> : 
+                <Text>Enter details to continue</Text>)}
             </Button>
           </ModalFooter>
         </ModalContent>

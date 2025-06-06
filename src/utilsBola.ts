@@ -2,7 +2,7 @@ export const SERVICE_FEE_PERCENTAGE = 0.075; // 7.5% service fee
 
 import { ReservationPublic } from "./client";
 
-export type BookingStatus = 'Past booking' | 'Active booking' | 'Upcoming booking';
+export type BookingStatus = 'Past booking' | 'Active booking' | 'Upcoming booking' | 'Away from mooring';
 
 export const getBookingStatusText = (admin_status: string): BookingStatus => {
     switch (admin_status) {
@@ -10,6 +10,9 @@ export const getBookingStatusText = (admin_status: string): BookingStatus => {
             return 'Past booking';
         case 'require_action':
             return 'Active booking';
+        case 'checked_in_locked':
+        case 'checked_in_locked_require_action':
+            return 'Away from mooring';
         default:
             return 'Upcoming booking';
     }
@@ -30,6 +33,20 @@ export const getBookingStatusTextColor = (status: BookingStatus): string => {
 
 export const getCellColor = (reservation: ReservationPublic): { bg: string; textColor: string } => {
     const status = getBookingStatusText(reservation.admin_status);
+    
+    // Handle checked_in_locked statuses with actual admin_status for more precise control
+    if (reservation.admin_status === 'checked_in_locked_require_action') {
+        return { 
+            bg: `url('/assets/images/icons/reservations-bg/red-stripped.svg')`,
+            textColor: 'white' 
+        };
+    } else if (reservation.admin_status === 'checked_in_locked') {
+        return { 
+            bg: `url('/assets/images/icons/reservations-bg/green-stripped.svg')`,
+            textColor: 'basic.grey900' 
+        };
+    }
+
     switch (status) {
         case 'Active booking':
             return { bg: "#A85555", textColor: "white" };
@@ -37,6 +54,9 @@ export const getCellColor = (reservation: ReservationPublic): { bg: string; text
             return { bg: "#FEA02F", textColor: "basic.grey900" };
         case 'Past booking':
             return { bg: "#E5F2F2", textColor: "basic.grey700" };
+        case 'Away from mooring':
+            // Fallback in case we get here directly with 'Away from mooring' status
+            return { bg: "#A8E6A8", textColor: "basic.grey900" };
         default:
             return { bg: "#007A7B", textColor: "white" };
     }

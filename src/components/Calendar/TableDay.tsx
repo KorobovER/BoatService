@@ -17,7 +17,6 @@ import {
 } from '@chakra-ui/react';
 import BolaCell from "/assets/images/icons/ui/bola-cell.svg";
 import { useMarina } from '../../context/MarinaContext';
-import PopupFreeCell from './PopupFreeCell';
 import BoatCell from './BoatCell';
 import { getCellColor } from '../../utilsBola';
 import { ReservationExtenstion } from '../ReservationExtenstion';
@@ -42,7 +41,6 @@ const TableDay: React.FC<TableDayProps> = ({
     const { selectedMarina } = useMarina();
     const [reservations, setReservations] = useState<ReservationExtenstion[]>([]);
     const [allRows, setAllRows] = useState<Row[]>([]);
-    const { isOpen: isFreeCellOpen, onClose: onFreeCellClose } = useDisclosure();
     const { isOpen: isReservedOpen, onClose: onReservedClose } = useDisclosure();
     const [selectedCell, setSelectedCell] = useState<{
         rowId: string;
@@ -742,13 +740,6 @@ const TableDay: React.FC<TableDayProps> = ({
             </Box>
             {selectedCell && (
                 <>
-                    <PopupFreeCell
-                        isOpen={isFreeCellOpen}
-                        onClose={onFreeCellClose}
-                        rowId={selectedCell.rowId}
-                        day={currentDate}
-                        timeOfDay={selectedCell.hour.includes('am') ? 'AM' : 'PM'}
-                    />
                     <PopupReserved
                         isOpen={isReservedOpen}
                         onClose={onReservedClose}

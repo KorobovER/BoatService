@@ -3,7 +3,7 @@ import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter,
 import CustomIcon from '../../components/Icon';
 import { MarinaServicePublic, SubServiceRequest, ReservationPublic } from '../../client/models';
 import { ReservationsService } from '../../client/services';
-import { getServiceIconInfo } from './Services';
+import { getServiceIconInfo } from '../../utilsBola';
 import { useQueryClient } from '@tanstack/react-query';
 import useCustomToast from '../../hooks/useCustomToast';
 

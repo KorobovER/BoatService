@@ -1,5 +1,7 @@
 export const SERVICE_FEE_PERCENTAGE = 0.075; // 7.5% service fee
 
+
+
 import { ReservationPublic } from "./client";
 
 export type BookingStatus = 'Past booking' | 'Active booking' | 'Upcoming booking' | 'Away from mooring';
@@ -99,4 +101,53 @@ export const getBoatImageProps = (vesselType: string, boatName: string, textColo
         fontSize: "14px",
         fontWeight: "400"
     };
+};
+
+
+
+// Структура для иконок сервисов с указанием категории и имени
+export interface ServiceIconInfo {
+    name: string;
+    category: 'services' | 'ui' | 'alerts' | 'boats' | 'logos';
+}
+
+// Иконки для разных типов услуг
+export const SERVICE_ICONS: Record<string, ServiceIconInfo> = {
+    TRASH: { name: 'trash_service', category: 'services' },
+    LAUNCH: { name: 'launch_service', category: 'services' },
+    LAUNDRY: { name: 'laundry_service', category: 'services' },
+    ICE: { name: 'ice_service', category: 'services' },
+    FUEL: { name: 'fuel_service', category: 'services' },
+    PUMP_OUT: { name: 'pump_out_service', category: 'services' },
+    WATER: { name: 'water_service', category: 'services' },
+    DEFAULT: { name: 'all_services', category: 'services' }
+};
+
+// Функция для определения иконки по имени услуги
+export const getServiceIconInfo = (name: string): ServiceIconInfo => {
+    const nameLower = name.toLowerCase();
+
+    if (nameLower.includes('trash') || nameLower.includes('waste') || nameLower.includes('garbage')) {
+        return SERVICE_ICONS.TRASH;
+    } else if (nameLower.includes('launch') || nameLower.includes('boat')) {
+        return SERVICE_ICONS.LAUNCH;
+    } else if (nameLower.includes('laundry') || nameLower.includes('wash') || nameLower.includes('dry')) {
+        return SERVICE_ICONS.LAUNDRY;
+    } else if (nameLower.includes('ice')) {
+        return SERVICE_ICONS.ICE;
+    } else if (nameLower.includes('fuel') || nameLower.includes('gas') || nameLower.includes('diesel') || nameLower.includes('petrol')) {
+        return SERVICE_ICONS.FUEL;
+    } else if (nameLower.includes('pump') || nameLower.includes('sewage')) {
+        return SERVICE_ICONS.PUMP_OUT;
+    } else if (nameLower.includes('water')) {
+        return SERVICE_ICONS.WATER;
+    } else {
+        return SERVICE_ICONS.DEFAULT;
+    }
+};
+
+// Для обратной совместимости - возвращает путь к файлу иконки
+export const getServiceIcon = (name: string): string => {
+    const iconInfo = getServiceIconInfo(name);
+    return `/assets/images/icons/${iconInfo.category}/${iconInfo.name}.svg`;
 };

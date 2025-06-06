@@ -3,7 +3,7 @@ import { Box, Text, Image, Flex, Button, Menu, MenuButton, MenuItem, MenuList} f
 import NoService from './NoService';
 import { ReservationExtenstion } from '../ReservationExtenstion';
 import { ServiceOnReservationPublic, ServiceRequestStatus, PaymentReceiptPublic } from '../../client/models';
-import { getServiceIcon } from './Services';
+import { getServiceIcon } from '../../utilsBola';
 import { ReservationsService } from '../../client/services';
 import { useQueryClient } from '@tanstack/react-query';
 import QuantityInputModal from './QuantityInputModal';

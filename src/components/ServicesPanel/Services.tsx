@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { Box, Text, Image, Flex, Button, useDisclosure } from '@chakra-ui/react';
+import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
+import { Box, Text, Image, Flex, Button, useDisclosure} from '@chakra-ui/react';
 import { getBookingStatusText, getBookingStatusTextColor, getBoatImageProps } from '../../utilsBola';
 import ServiceAdd from './ServiceAdd';
 import { useMarina } from '../../context/MarinaContext';
@@ -113,6 +113,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     const { selectedMarina } = useMarina();
     const { isOpen: isServiceAddOpen, onOpen: onServiceAddOpen, onClose: onServiceAddClose } = useDisclosure();
     const [localReservation, setLocalReservation] = useState(reservation);
+    const { isOpen: isPaymentDetailsOpen, onToggle: togglePaymentDetails } = useDisclosure();
     const queryClient = useQueryClient();
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [isRetryChargeModalOpen, setIsRetryChargeModalOpen] = useState(false);
@@ -120,6 +121,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
     const [isMarkPaidModalOpen, setIsMarkPaidModalOpen] = useState(false);
     const showToast = useCustomToast();
     const [paymentError, setPaymentError] = useState(false);
+    const sentinelRef = useRef<HTMLDivElement>(null);
 
     // Add query to fetch reservation data
     const { data: reservationData } = useQuery({
@@ -261,7 +263,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
 
         return completedServices.reduce((total, service) => {
             return total + service.services.reduce((serviceTotal, item) => {
-                return serviceTotal + (item.price * item.quantity);
+                return serviceTotal + (item.price * item.quantity) + serviceFee;
             }, 0);
         }, 0).toFixed(2);
     };
@@ -502,7 +504,7 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                         >
                             <Flex gap="lg">
                                 <Flex align="center" gap="xs">
-                                     <CustomIcon name="bola-cell-white" category="ui" size={30} />
+                                    <CustomIcon name="bola-cell-white" category="ui" size={30} />
                                     <Text fontSize="20px" fontWeight="400" color="gray.900">{rowId}</Text>
                                 </Flex>
                                 <Flex justify="center" flexDirection="column">
@@ -575,6 +577,16 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                         />
                     </Flex>
                 </Flex>
+                {/* Sentinel element to detect when footer starts overlapping content */}
+                <div ref={sentinelRef} style={{ 
+                    position: 'absolute', 
+                    bottom: '100%', 
+                    left: 0, 
+                    right: 0,
+                    height: '1px',
+                    pointerEvents: 'none'
+                }} />
+                
                 {/* Payment details block (Footer) */}
                 {hasCompletedServices && (
                     <Flex
@@ -589,7 +601,6 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                         bottom="0"
                         bg="white"
                         zIndex="10"
-                        boxShadow="0 -2px 10px rgba(0,0,0,0.1)"
                     >
                         <Flex
                             w="100%"
@@ -597,11 +608,12 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                             justifyContent="center"
                             alignItems="center"
                             cursor="pointer"
+                            onClick={togglePaymentDetails}
                         >
                             <Text textDecoration="underline" fontSize="14px" fontWeight="400" color="gray.600">
                                 Payment details
                             </Text>
-                            <Box p='10px'>
+                            <Box p='10px' transform={isPaymentDetailsOpen ? 'rotate(180deg)' : 'none'} transition="transform 0.2s">
                                 <CustomIcon
                                     name="dropdown"
                                     category="ui"
@@ -609,6 +621,33 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                                 />
                             </Box>
                         </Flex>
+
+                        {/* Payment details dropdown */}
+                        {isPaymentDetailsOpen && (
+                            <Box display="flex" flexDirection="column" gap="12px" border="1px solid" borderColor="basic.grey200" p='md' borderRadius="md">
+                                <Flex borderBottom="1px solid" borderColor="basic.grey200" py='12px' justifyContent="space-between" fontWeight="bold">
+                                    <Text>Service payment details</Text>
+                                    <Text>€{completedServicesTotal.toFixed(2)}</Text>
+                                </Flex>
+                                {completedServices.map((service, index) => (
+                                    <Flex key={index} justifyContent="space-between">
+                                        <Text fontSize="sm">{service.quantity}x {service.name}</Text>
+                                        <Text fontSize="sm" fontWeight="medium">
+                                            €{(service.price * service.quantity).toFixed(2)}
+                                        </Text>
+                                    </Flex>
+                                ))}
+                                <Flex justifyContent="space-between" fontWeight="bold">
+                                    <Text fontSize='14px' fontWeight='300' color='basic.grey700'>Service fee (7.5%)</Text>
+                                    <Text fontSize='14px' fontWeight='400' color='basic.grey700'>${serviceFee.toFixed(2)}</Text>
+                                </Flex>
+                                <Flex justifyContent="space-between" fontWeight="bold">
+                                    <Text fontSize='14px' fontWeight='300' color='basic.grey700'>Taxes</Text>
+                                    <Text fontSize='14px' fontWeight='400' color='basic.grey700'>${taxes.toFixed(2)}</Text>
+                                </Flex>
+                            </Box>
+                        )}
+
                         {!paymentError && (
                             <Box>
                                 <Flex alignItems="center" flexDirection="column" justifyContent="center" w="100%">
@@ -631,37 +670,6 @@ const PopupReserved: React.FC<PopupReservedProps> = ({
                                         <Flex gap="4px" fontSize="16px" fontWeight="400" color="white">CHARGE<Text fontWeight="700">${calculateTotalForCompleted()}</Text> NOW <Flex align="end" fontSize="12px">(Completed services ONLY)</Flex></Flex>
                                     </Button>
                                 </Flex>
-
-                                {/* Тестовая кнопка для симуляции ошибки оплаты */}
-                                {/* <Button
-                                display="flex"
-                                w="100%"
-                                justifyContent="center"
-                                p='md'
-                                my="10px"
-                                leftIcon={<Box as="span" mr={2}>🚨</Box>}
-                                bg="red.400"
-                                color="white"
-                                size="lg"
-                                borderRadius="full"
-                                px='md'
-                                py='10px'
-                                fontWeight="500"
-                                _hover={{ bg: "red.500" }}
-                                onClick={() => {
-                                    // Симулируем ошибку оплаты
-                                    setPaymentError(true);
-                                    toast({
-                                        title: "Симуляция ошибки",
-                                        description: "Была симулирована ошибка оплаты для тестирования",
-                                        status: "error",
-                                        duration: 3000,
-                                        isClosable: true,
-                                    });
-                                }}
-                            >
-                                <Flex gap="4px" fontSize="16px" fontWeight="400" color="white">SIMULATE A PAYMENT ERROR (test)</Flex>
-                            </Button> */}
                             </Box>
                         )}
                         {paymentError && (
